@@ -72,6 +72,25 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
+
+        .save-button-container {
+            width: 100%; /* ให้กล่องปุ่มขยายเต็มความกว้างของกล่อง */
+            display: flex;
+            justify-content: flex-end; /* จัดปุ่มไปที่ด้านขวา */
+            margin-top: 20px;
+        }
+        #save-activity {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #save-activity:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -214,10 +233,10 @@
             </select>
         </div>
 
-        <div class="form-group" style="margin-top: 20px;">
+        <div class="save-button-container">
             <button id="save-activity">บันทึกกิจกรรม</button>
         </div>
-        
+
     </div>
 </body>
 </html>
