@@ -40,6 +40,10 @@
         .container .details {
             margin-right: 120px; /* ขยับ "รายละเอียดกิจกรรม" มาด้านหน้าเล็กน้อย */
         }
+        .container .applicant-qualities {
+            margin-right: 120px; /* ขยับ "คุณสมบัติของผู้รับสมัคร" มาด้านหน้าเล็กน้อย */
+            margin-top: 10px; /* เพิ่มระยะห่างด้านบน */
+        }
         .form-group {
             width: 100%; /* ให้ฟอร์มขยายเต็มความกว้างของกล่อง */
             max-width: 600px; /* กำหนดความกว้างสูงสุดของฟอร์ม */
@@ -53,12 +57,20 @@
             margin: 0;
             padding: 10px;
         }
-        .form-group input {
+        .form-group input,
+        .form-group select {
             flex: 1; /* ทำให้กล่องข้อความขยายเต็มที่ */
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
             box-sizing: border-box;
+        }
+        .form-group select {
+            /* ปรับขนาดของ select ให้เหมาะสม */
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     </style>
 </head>
@@ -81,7 +93,15 @@
         </div>
         <div class="form-group">
             <label for="event-day">วัน (จันทร์ - อาทิตย์)</label>
-            <input type="text" id="event-day" placeholder="กรอกวันจัดกิจกรรม">
+            <select id="event-day">
+                <option value="monday">จันทร์</option>
+                <option value="tuesday">อังคาร</option>
+                <option value="wednesday">พุธ</option>
+                <option value="thursday">พฤหัสบดี</option>
+                <option value="friday">ศุกร์</option>
+                <option value="saturday">เสาร์</option>
+                <option value="sunday">อาทิตย์</option>
+            </select>
         </div>
         <div class="form-group">
             <label for="start-time">เวลาเริ่มกิจกรรม</label>
@@ -105,11 +125,31 @@
         </div>
         <div class="form-group">
             <label for="category">หมวดหมู่กิจกรรม</label>
-            <input type="text" id="category" placeholder="กรอกหมวดหมู่กิจกรรม">
+            <select id="category">
+                <option value="competency-building">กิจกรรมเสริมสร้างสมรรถนะ</option>
+                <option value="interest-based">กิจกรรมเข้าร่วมตามความสนใจ</option>
+            </select>
         </div>
         <div class="form-group">
             <label for="type">ประเภทกิจกรรม</label>
-            <input type="text" id="type" placeholder="กรอกประเภทกิจกรรม">
+            <select id="type">
+                <option value="1">1.กิจกรรมเสริมสร้างการพัฒนาทักษะการใช้ชีวิตอย่างมีความสุข เป็นส่วนหนึ่งของ มหาวิทยาลัย ชุมชน สังคม และมีความเป็นพลเมืองโลก</option>
+                <option value="2">2.กิจกรรมเสริมสร้างการพัฒนาทักษะแห่งศตวรรษที่ 21 เช่น กิจกรรมเสริมสร้าง ทักษะการสื่อสาร ความฉลาดทางอารมณ์ ความคิดสร้างสรรค์ การคิดเชิงวิเคราะห์ การคิดเชิงวิพากษ์ การคิดอย่างมีวิจารณญาณ การบริหารเวลา การแก้ไขปัญหาที่มีความซับซ้อน และการเรียนรู้ตลอดชีวิต</option>
+                <option value="3">3.กิจกรรมเสริมสร้างการพัฒนาทักษะการมีส่วนร่วมทางสังคม มีจิตสำนึกสาธารณะ มุ่งเน้นประโยชน์ของเพื่อนมนุษย์ เรียนรู้สังคม เรียนรู้ชุมชน สามารถทำงานร่วมกับชุมชนได้</option>
+                <option value="4">4.กิจกรรมเสริมสร้างการพัฒนาทักษะภาวะผู้นำ การทำงานเป็นทีม การทำงานร่วมกับผู้อื่น</option>
+                <option value="5">5.กิจกรรมเสริมสร้างการพัฒนาทักษะภาษาต่างประเทศ สมรรถนะสากล มีความเข้าใจในสังคม และวัฒนธรรมต่างประเทศ</option>
+                <option value="6">6.กิจกรรมเสริมสร้างการพัฒนาทักษะการเป็นผู้ประกอบการ และทักษะที่จำเป็นในการเตรียมความพร้อมเพื่อการทำงาน</option>
+                <option value="7">7.กิจกรรมเสริมสร้างการพัฒนาทักษะวิชาชีพ</option>
+                <option value="8">8.กิจกรรมเสริมสร้างการพัฒนาทักษะดิจิทัลและเทคโนโลยี</option>
+                <option value="9">9.กิจกรรมเสริมสร้างคุณลักษณะความซื่อสัตย์มีวินัย คุณธรรมจริยธรรม</option>
+                <option value="10">10.กิจกรรมเสริมสร้างความรู้ทางวิชาการ</option>
+                <option value="11">11.กิจกรรมเสริมสร้างความเป็นประชาธิปไตย</option>
+                <option value="12">12.กิจกรรมเสริมสร้างความภูมิใจในมหาวิทยาลัย</option>
+                <option value="13">13.กิจกรรมส่งเสริมศิลปวัฒนธรรมและศาสนา</option>
+                <option value="14">14.กิจกรรมเสริมสร้างพัฒนาสุขภาพกายและใจ</option>
+                <option value="15">15.กิจกรรมเสริมสร้างความสุขและนันทนาการ</option>
+                <option value="16">16.กิจกรรมเสริมสร้างความเป็นสังคมพหุวัฒนธรรม</option>
+            </select>
         </div>
         <div class="form-group">
             <label for="participants">จำนวนที่รับสมัคร</label>
@@ -127,6 +167,57 @@
             <label for="description">คำอธิบายกิจกรรม</label>
             <input type="text" id="description" placeholder="กรอกคำอธิบายกิจกรรม">
         </div>
+        <div style="margin-top: 20px;">
+            <p class="details">คุณสมบัติของผู้รับสมัคร</p>
+        </div>
+
+        <!-- ชั้นปีการศึกษา -->
+        <div class="form-group">
+            <label for="academic-year">ชั้นปีการศึกษา</label>
+            <select id="academic-year">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+        </div>
+
+        <!-- ภาควิชา -->
+        <div class="form-group">
+            <label for="department">ภาควิชา</label>
+            <select id="department">
+                <option value="physical-sciences">วิทยาศาสตร์กายภาพ</option>
+                <option value="biological-sciences">วิทยาศาสตร์ชีวภาพ</option>
+                <option value="computational-sciences">วิทยาศาสตร์การคำนวณ</option>
+                <option value="health-sciences">วิทยาศาสตร์สุขภาพ</option>
+                <option value="applied-sciences">วิทยาศาสตร์ประยุกต์</option>
+            </select>
+        </div>
+
+        <!-- สาขาวิชา -->
+        <div class="form-group">
+            <label for="major">สาขาวิชา</label>
+            <select id="major">
+                <option value="chemistry">สาขาวิชาเคมี</option>
+                <option value="material-science">สาขาวิชาวัสดุศาสตร์</option>
+                <option value="physics">สาขาวิชาฟิสิกส์</option>
+                <option value="biology">สาขาวิชาชีววิทยา</option>
+                <option value="biotechnology">สาขาวิชาเทคโนโลยีชีวภาพ</option>
+                <option value="microbiology">สาขาวิชาจุลชีววิทยา</option>
+                <option value="mathematics">สาขาวิชาคณิตศาสตร์</option>
+                <option value="statistics">สาขาวิชาสถิติ</option>
+                <option value="computer-science">สาขาวิชาวิทยาการคอมพิวเตอร์</option>
+                <option value="information-technology">สาขาวิชาเทคโนโลยีสารสนเทศและการสื่อสาร</option>
+                <option value="it-continuous">สาขาวิชาเทคโนโลยีสารสนเทศ (ต่อเนื่อง)</option>
+                <option value="applied-chem-bio">สาขาวิชาเคมี-ชีววิทยาประยุกต์</option>
+                <option value="polymer-science">สาขาวิชาวิทยาศาสตร์พอลิเมอร์</option>
+            </select>
+        </div>
+
+        <div class="form-group" style="margin-top: 20px;">
+            <button id="save-activity">บันทึกกิจกรรม</button>
+        </div>
+        
     </div>
 </body>
 </html>
