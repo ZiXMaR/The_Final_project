@@ -4,9 +4,239 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Organizer Page</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+        h1 {
+            color: #007bff;
+            margin: 0;
+            padding: 20px 0;
+            text-align: center;
+        }
+        .container {
+            width: 90vw; /* ใช้ความกว้างเป็นเปอร์เซ็นต์ของหน้าจอ */
+            max-width: 800px; /* กำหนดความกว้างสูงสุด */
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 15px; /* ทำให้ขอบกล่องมน */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px; /* เพิ่มระยะห่างด้านบนเพื่อให้กล่องห่างจาก title */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* จัดตำแหน่งทั้งหมดให้ตรงกลางแนวนอน */
+        }
+        .container p {
+            margin: 0;
+            padding: 10px 0;
+            text-align: center; /* จัดข้อความกลาง */
+        }
+        .container .details {
+            margin-right: 120px; /* ขยับ "รายละเอียดกิจกรรม" มาด้านหน้าเล็กน้อย */
+        }
+        .container .applicant-qualities {
+            margin-right: 120px; /* ขยับ "คุณสมบัติของผู้รับสมัคร" มาด้านหน้าเล็กน้อย */
+            margin-top: 10px; /* เพิ่มระยะห่างด้านบน */
+        }
+        .form-group {
+            width: 100%; /* ให้ฟอร์มขยายเต็มความกว้างของกล่อง */
+            max-width: 600px; /* กำหนดความกว้างสูงสุดของฟอร์ม */
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+        .form-group label {
+            flex-basis: 200px; /* กำหนดความกว้างของ label */
+            text-align: right; /* จัดข้อความให้ชิดขวา */
+            margin: 0;
+            padding: 10px;
+        }
+        .form-group input,
+        .form-group select {
+            flex: 1; /* ทำให้กล่องข้อความขยายเต็มที่ */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .form-group select {
+            /* ปรับขนาดของ select ให้เหมาะสม */
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .save-button-container {
+            width: 100%; /* ให้กล่องปุ่มขยายเต็มความกว้างของกล่อง */
+            display: flex;
+            justify-content: flex-end; /* จัดปุ่มไปที่ด้านขวา */
+            margin-top: 20px;
+        }
+        #save-activity {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #save-activity:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <h1>Organizer Page</h1>
-    <p>You can add activities here.</p>
+    <div class="container">
+        <p>บันทึกกิจกรรม</p>
+        <p class="details">รายละเอียดกิจกรรม</p>
+        <div class="form-group">
+            <label for="activity-name">ชื่อกิจกรรม</label>
+            <input type="text" id="activity-name" placeholder="กรอกชื่อกิจกรรมที่นี่">
+        </div>
+        <div class="form-group">
+            <label for="department-name">ชื่อหน่วยงาน</label>
+            <input type="text" id="department-name" placeholder="กรอกชื่อหน่วยงานที่นี่">
+        </div>
+        <div class="form-group">
+            <label for="event-date">วันที่จัดกิจกรรม</label>
+            <input type="date" id="event-date">
+        </div>
+        <div class="form-group">
+            <label for="event-day">วัน (จันทร์ - อาทิตย์)</label>
+            <select id="event-day">
+                <option value="monday">จันทร์</option>
+                <option value="tuesday">อังคาร</option>
+                <option value="wednesday">พุธ</option>
+                <option value="thursday">พฤหัสบดี</option>
+                <option value="friday">ศุกร์</option>
+                <option value="saturday">เสาร์</option>
+                <option value="sunday">อาทิตย์</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="start-time">เวลาเริ่มกิจกรรม</label>
+            <input type="time" id="start-time">
+        </div>
+        <div class="form-group">
+            <label for="end-time">เวลาจบกิจกรรม</label>
+            <input type="time" id="end-time">
+        </div>
+        <div class="form-group">
+            <label for="semester">ภาคการศึกษา/ปีการศึกษา</label>
+            <input type="text" id="semester" placeholder="กรอกภาคการศึกษา/ปีการศึกษา">
+        </div>
+        <div class="form-group">
+            <label for="hours">ค่าชั่วโมง</label>
+            <input type="number" id="hours" placeholder="กรอกค่าชั่วโมง">
+        </div>
+        <div class="form-group">
+            <label for="location">สถานที่</label>
+            <input type="text" id="location" placeholder="กรอกสถานที่จัดกิจกรรม">
+        </div>
+        <div class="form-group">
+            <label for="category">หมวดหมู่กิจกรรม</label>
+            <select id="category">
+                <option value="competency-building">กิจกรรมเสริมสร้างสมรรถนะ</option>
+                <option value="interest-based">กิจกรรมเข้าร่วมตามความสนใจ</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="type">ประเภทกิจกรรม</label>
+            <select id="type">
+                <option value="1">1.กิจกรรมเสริมสร้างการพัฒนาทักษะการใช้ชีวิตอย่างมีความสุข เป็นส่วนหนึ่งของ มหาวิทยาลัย ชุมชน สังคม และมีความเป็นพลเมืองโลก</option>
+                <option value="2">2.กิจกรรมเสริมสร้างการพัฒนาทักษะแห่งศตวรรษที่ 21 เช่น กิจกรรมเสริมสร้าง ทักษะการสื่อสาร ความฉลาดทางอารมณ์ ความคิดสร้างสรรค์ การคิดเชิงวิเคราะห์ การคิดเชิงวิพากษ์ การคิดอย่างมีวิจารณญาณ การบริหารเวลา การแก้ไขปัญหาที่มีความซับซ้อน และการเรียนรู้ตลอดชีวิต</option>
+                <option value="3">3.กิจกรรมเสริมสร้างการพัฒนาทักษะการมีส่วนร่วมทางสังคม มีจิตสำนึกสาธารณะ มุ่งเน้นประโยชน์ของเพื่อนมนุษย์ เรียนรู้สังคม เรียนรู้ชุมชน สามารถทำงานร่วมกับชุมชนได้</option>
+                <option value="4">4.กิจกรรมเสริมสร้างการพัฒนาทักษะภาวะผู้นำ การทำงานเป็นทีม การทำงานร่วมกับผู้อื่น</option>
+                <option value="5">5.กิจกรรมเสริมสร้างการพัฒนาทักษะภาษาต่างประเทศ สมรรถนะสากล มีความเข้าใจในสังคม และวัฒนธรรมต่างประเทศ</option>
+                <option value="6">6.กิจกรรมเสริมสร้างการพัฒนาทักษะการเป็นผู้ประกอบการ และทักษะที่จำเป็นในการเตรียมความพร้อมเพื่อการทำงาน</option>
+                <option value="7">7.กิจกรรมเสริมสร้างการพัฒนาทักษะวิชาชีพ</option>
+                <option value="8">8.กิจกรรมเสริมสร้างการพัฒนาทักษะดิจิทัลและเทคโนโลยี</option>
+                <option value="9">9.กิจกรรมเสริมสร้างคุณลักษณะความซื่อสัตย์มีวินัย คุณธรรมจริยธรรม</option>
+                <option value="10">10.กิจกรรมเสริมสร้างความรู้ทางวิชาการ</option>
+                <option value="11">11.กิจกรรมเสริมสร้างความเป็นประชาธิปไตย</option>
+                <option value="12">12.กิจกรรมเสริมสร้างความภูมิใจในมหาวิทยาลัย</option>
+                <option value="13">13.กิจกรรมส่งเสริมศิลปวัฒนธรรมและศาสนา</option>
+                <option value="14">14.กิจกรรมเสริมสร้างพัฒนาสุขภาพกายและใจ</option>
+                <option value="15">15.กิจกรรมเสริมสร้างความสุขและนันทนาการ</option>
+                <option value="16">16.กิจกรรมเสริมสร้างความเป็นสังคมพหุวัฒนธรรม</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="participants">จำนวนที่รับสมัคร</label>
+            <input type="number" id="participants" placeholder="กรอกจำนวนที่รับสมัคร">
+        </div>
+        <div class="form-group">
+            <label for="registration-channel">ช่องทางรับสมัคร</label>
+            <input type="text" id="registration-channel" placeholder="กรอกช่องทางรับสมัคร">
+        </div>
+        <div class="form-group">
+            <label for="registration-deadline">วันสิ้นสุดการรับสมัคร</label>
+            <input type="date" id="registration-deadline">
+        </div>
+        <div class="form-group">
+            <label for="description">คำอธิบายกิจกรรม</label>
+            <input type="text" id="description" placeholder="กรอกคำอธิบายกิจกรรม">
+        </div>
+        <div style="margin-top: 20px;">
+            <p class="details">คุณสมบัติของผู้รับสมัคร</p>
+        </div>
+
+        <!-- ชั้นปีการศึกษา -->
+        <div class="form-group">
+            <label for="academic-year">ชั้นปีการศึกษา</label>
+            <select id="academic-year">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+        </div>
+
+        <!-- ภาควิชา -->
+        <div class="form-group">
+            <label for="department">ภาควิชา</label>
+            <select id="department">
+                <option value="physical-sciences">วิทยาศาสตร์กายภาพ</option>
+                <option value="biological-sciences">วิทยาศาสตร์ชีวภาพ</option>
+                <option value="computational-sciences">วิทยาศาสตร์การคำนวณ</option>
+                <option value="health-sciences">วิทยาศาสตร์สุขภาพ</option>
+                <option value="applied-sciences">วิทยาศาสตร์ประยุกต์</option>
+            </select>
+        </div>
+
+        <!-- สาขาวิชา -->
+        <div class="form-group">
+            <label for="major">สาขาวิชา</label>
+            <select id="major">
+                <option value="chemistry">สาขาวิชาเคมี</option>
+                <option value="material-science">สาขาวิชาวัสดุศาสตร์</option>
+                <option value="physics">สาขาวิชาฟิสิกส์</option>
+                <option value="biology">สาขาวิชาชีววิทยา</option>
+                <option value="biotechnology">สาขาวิชาเทคโนโลยีชีวภาพ</option>
+                <option value="microbiology">สาขาวิชาจุลชีววิทยา</option>
+                <option value="mathematics">สาขาวิชาคณิตศาสตร์</option>
+                <option value="statistics">สาขาวิชาสถิติ</option>
+                <option value="computer-science">สาขาวิชาวิทยาการคอมพิวเตอร์</option>
+                <option value="information-technology">สาขาวิชาเทคโนโลยีสารสนเทศและการสื่อสาร</option>
+                <option value="it-continuous">สาขาวิชาเทคโนโลยีสารสนเทศ (ต่อเนื่อง)</option>
+                <option value="applied-chem-bio">สาขาวิชาเคมี-ชีววิทยาประยุกต์</option>
+                <option value="polymer-science">สาขาวิชาวิทยาศาสตร์พอลิเมอร์</option>
+            </select>
+        </div>
+
+        <div class="save-button-container">
+            <button id="save-activity">บันทึกกิจกรรม</button>
+        </div>
+
+    </div>
 </body>
 </html>
