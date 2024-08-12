@@ -28,27 +28,37 @@
             border-radius: 15px; /* ทำให้ขอบกล่องมน */
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
             margin-top: 20px; /* เพิ่มระยะห่างด้านบนเพื่อให้กล่องห่างจาก title */
-            text-align: left; /* จัดข้อความภายในกล่องให้อยู่ทางซ้าย */
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* จัดตำแหน่งทั้งหมดให้ตรงกลางแนวนอน */
+        }
+        .container p {
+            margin: 0;
+            padding: 10px 0;
+            text-align: center; /* จัดข้อความกลาง */
+        }
+        .container .details {
+            margin-right: 120px; /* ขยับ "รายละเอียดกิจกรรม" มาด้านหน้าเล็กน้อย */
         }
         .form-group {
+            width: 100%; /* ให้ฟอร์มขยายเต็มความกว้างของกล่อง */
+            max-width: 600px; /* กำหนดความกว้างสูงสุดของฟอร์ม */
             margin-top: 20px;
             display: flex;
             align-items: center;
         }
         .form-group label {
-            margin-right: 10px;
-            white-space: nowrap; /* ป้องกันการห่อของข้อความ */
+            flex-basis: 200px; /* กำหนดความกว้างของ label */
+            text-align: right; /* จัดข้อความให้ชิดขวา */
+            margin: 0;
+            padding: 10px;
         }
         .form-group input {
             flex: 1; /* ทำให้กล่องข้อความขยายเต็มที่ */
-            max-width: 300px; /* กำหนดความกว้างสูงสุดของกล่องข้อความ */
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
             box-sizing: border-box;
-        }
-        .form-group p {
-            margin: 0;
         }
     </style>
 </head>
