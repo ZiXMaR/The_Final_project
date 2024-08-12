@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participant Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .checkbox-group {
+            display: none;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .checkbox-item {
+            display: inline-block;
+            padding: 10px 20px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            background-color: #f0f8ff;
+            cursor: pointer;
+            text-align: center;
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .checkbox-item:hover {
+            background-color: #e0f0ff;
+            border-color: #0056b3;
+        }
+
+        .checkbox-item.selected {
+            background-color: #007bff;
+            color: #fff;
+            border-color: #0056b3;
+        }
+
+        .checkbox-item input {
+            display: none;
+        }
+
+        .burger-menu {
+            display: inline-block;
+            cursor: pointer;
+            padding: 10px;
+            border: 2px solid #007bff;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            margin-bottom: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .burger-menu:hover {
+            background-color: #0056b3;
+        }
+
+        .burger-menu:after {
+            content: '☰';
+            font-size: 20px;
+        }
+
+        .burger-menu.active:after {
+            content: '✕';
+        }
+
+        button[type="submit"] {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        #activityRecommendations {
+            margin-top: 20px;
+        }
+
+        #activityRecommendations div {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        #activityRecommendations h3 {
+            margin: 0 0 10px;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <h1>Participant Page</h1>
+    <div class="form-container">
+        <form id="filterForm">
+            <div class="burger-menu" data-target="dateGroup">เลือกวันที่</div>
+            <div class="checkbox-group" id="dateGroup">
+                <!-- วันที่จะถูกเพิ่มที่นี่ -->
+            </div>
+
+            <div class="burger-menu" data-target="typeGroup">เลือกประเภทกิจกรรม</div>
+            <div class="checkbox-group" id="typeGroup">
+                <!-- ประเภทกิจกรรมจะถูกเพิ่มที่นี่ -->
+            </div>
+
+            <div class="burger-menu" data-target="categoryGroup">เลือกหมวดหมู่กิจกรรม</div>
+            <div class="checkbox-group" id="categoryGroup">
+                <!-- หมวดหมู่กิจกรรมจะถูกเพิ่มที่นี่ -->
+            </div>
+
+            <button type="submit">แนะนำกิจกรรม</button>
+        </form>
+
+        <div id="activityRecommendations">
+            <!-- กิจกรรมแนะนำจะแสดงที่นี่ -->
+        </div>
+    </div>
+
+    <script>
+// Toggle the display of checkbox groups
+document.querySelectorAll('.burger-menu').forEach(menu => {
+    menu.addEventListener('click', function() {
+        const targetId = this.getAttribute('data-target');
+        const targetGroup = document.getElementById(targetId);
+        targetGroup.style.display = targetGroup.style.display === 'flex' ? 'none' : 'flex';
+        this.classList.toggle('active');
+    });
+});
+
+// Map จากชื่อวันในภาษาอังกฤษไปเป็น DailyID ในภาษาไทย
+const dayMap = {
+    'Monday': 'วันจันทร์',
+    'Tuesday': 'วันอังคาร',
+    'Wednesday': 'วันพุธ',
+    'Thursday': 'วันพฤหัส',
+    'Friday': 'วันศุกร์',
+    'Saturday': 'วันเสาร์',
+    'Sunday': 'วันอาทิตย์'
+};
+
+// Function to create day checkboxes
+function createDayCheckboxes() {
+    const dateGroup = document.getElementById('dateGroup');
+    Object.keys(dayMap).forEach(day => {
+        const thaiDay = dayMap[day];
+        const div = document.createElement('div');
+        div.className = 'checkbox-item';
+        div.innerHTML = `
+            <input type="checkbox" id="day-${thaiDay}" name="activityDay" value="${thaiDay}">
+            <label for="day-${thaiDay}">${thaiDay}</label>
+        `;
+        div.addEventListener('click', function() {
+            const checkbox = this.querySelector('input');
+            checkbox.checked = !checkbox.checked;
+            this.classList.toggle('selected', checkbox.checked);
+        });
+        dateGroup.appendChild(div);
+    });
+}
+
+// Populate days and other checkboxes
+window.onload = function() {
+    createDayCheckboxes();
+
+    // ประเภทกิจกรรม
+    fetch('/get-types')
+        .then(response => response.json())
+        .then(data => {
+            const typeGroup = document.getElementById('typeGroup');
+            data.forEach(type => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-item';
+                div.innerHTML = `
+                    <input type="checkbox" id="type-${type.ActivityTypeID}" name="activityType" value="${type.ActivityTypeID}">
+                    <label for="type-${type.ActivityTypeID}">${type.ActivityTypeName}</label>
+                `;
+                div.addEventListener('click', function() {
+                    const checkbox = this.querySelector('input');
+                    checkbox.checked = !checkbox.checked;
+                    this.classList.toggle('selected', checkbox.checked);
+                });
+                typeGroup.appendChild(div);
+            });
+        });
+
+    // หมวดหมู่กิจกรรม
+    fetch('/get-categories')
+        .then(response => response.json())
+        .then(data => {
+            const categoryGroup = document.getElementById('categoryGroup');
+            data.forEach(category => {
+                const div = document.createElement('div');
+                div.className = 'checkbox-item';
+                div.innerHTML = `
+                    <input type="checkbox" id="category-${category.ActivityCategoryID}" name="activityCategory" value="${category.ActivityCategoryID}">
+                    <label for="category-${category.ActivityCategoryID}">${category.ActivityCategoryName}</label>
+                `;
+                div.addEventListener('click', function() {
+                    const checkbox = this.querySelector('input');
+                    checkbox.checked = !checkbox.checked;
+                    this.classList.toggle('selected', checkbox.checked);
+                });
+                categoryGroup.appendChild(div);
+            });
+        });
+};
+
+// Handle form submission to fetch and display recommended activities
+document.getElementById('filterForm').onsubmit = function(event) {
+    event.preventDefault();
+
+    const days = Array.from(document.querySelectorAll('input[name="activityDay"]:checked')).map(cb => cb.value);
+    const types = Array.from(document.querySelectorAll('input[name="activityType"]:checked')).map(cb => cb.value);
+    const categories = Array.from(document.querySelectorAll('input[name="activityCategory"]:checked')).map(cb => cb.value);
+
+    const queryParams = new URLSearchParams();
+    if (days.length > 0) queryParams.append('day', days.join(','));
+    if (types.length > 0) queryParams.append('type', types.join(','));
+    if (categories.length > 0) queryParams.append('category', categories.join(','));
+
+    fetch(`/recommend-activities?${queryParams.toString()}`)
+        .then(response => response.json())
+        .then(data => {
+            const recommendationsDiv = document.getElementById('activityRecommendations');
+            recommendationsDiv.innerHTML = '';
+            if (data.length > 0) {
+                data.forEach(activity => {
+                    const activityDiv = document.createElement('div');
+                    activityDiv.innerHTML = `<h3>${activity.ActivityName}</h3><p>${activity.ActivityDescription || ''}</p>`;
+                    recommendationsDiv.appendChild(activityDiv);
+                });
+            } else {
+                recommendationsDiv.innerHTML = '<p>ไม่พบกิจกรรมที่ตรงกับความสนใจของคุณ</p>';
+            }
+        });
+};
+    </script>
+</body>
+</html>

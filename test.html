@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Activity Recommendation</title>
+</head>
+<body>
+    <h1>Welcome to the Student Activity Platform</h1>
+
+    <!-- ส่วนผู้จัดกิจกรรม -->
+    <h2>Add a New Activity</h2>
+    <form id="add-activity-form">
+        <input type="text" id="title" placeholder="Title" required>
+        <textarea id="description" placeholder="Description" required></textarea>
+        <input type="text" id="category" placeholder="Category" required>
+        <button type="submit">Add Activity</button>
+    </form>
+
+    <!-- ส่วนผู้เข้าร่วมกิจกรรม -->
+    <h2>Get Recommended Activities</h2>
+    <form id="recommend-form">
+        <input type="text" id="categories" placeholder="Categories (comma separated)" required>
+        <button type="submit">Get Recommendations</button>
+    </form>
+
+    <ul id="activity-list"></ul>
+
+    <script>
+        document.getElementById('add-activity-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const title = document.getElementById('title').value;
+            const description = document.getElementById('description').value;
+            const category = document.getElementById('category').value;
+
+            fetch('/add-activity', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ title, description, category, organizer_id: 1 })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message));
+        });
+
+        document.getElementById('recommend-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const categories = document.getElementById('categories').value;
+
+            fetch(`/recommend-activities?categories=${categories}`)
+            .then(response => response.json())
+            .then(data => {
+                const activityList = document.getElementById('activity-list');
+                activityList.innerHTML = '';
+                data.forEach(activity => {
+                    const li = document.createElement('li');
+                    li.textContent = `${activity.title} - ${activity.description}`;
+                    activityList.appendChild(li);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
