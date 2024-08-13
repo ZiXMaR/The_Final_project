@@ -251,21 +251,40 @@ document.getElementById('filterForm').onsubmit = function(event) {
     if (categories.length > 0) queryParams.append('category', categories.join(','));
 
     fetch(`/recommend-activities?${queryParams.toString()}`)
-        .then(response => response.json())
-        .then(data => {
-            const recommendationsDiv = document.getElementById('activityRecommendations');
-            recommendationsDiv.innerHTML = '';
-            if (data.length > 0) {
-                data.forEach(activity => {
-                    const activityDiv = document.createElement('div');
-                    activityDiv.innerHTML = `<h3>${activity.ActivityName}</h3><p>${activity.ActivityDescription || ''}</p>`;
-                    recommendationsDiv.appendChild(activityDiv);
-                });
-            } else {
-                recommendationsDiv.innerHTML = '<p>ไม่พบกิจกรรมที่ตรงกับความสนใจของคุณ</p>';
-            }
-        });
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        const recommendationsDiv = document.getElementById('activityRecommendations');
+        recommendationsDiv.innerHTML = '';
+        if (data.length > 0) {
+            data.forEach(activity => {
+                const activityDiv = document.createElement('div');
+                activityDiv.innerHTML = `
+                    <h3>${activity.ActivityName}</h3>
+                    <p><strong>Description:</strong> ${activity.ActivityDescription || 'No description available'}</p>
+                    <p><strong>Date:</strong> ${activity.ActivityDate}</p>
+                    <p><strong>Time:</strong> ${activity.StartTime} - ${activity.EndTime}</p>
+                    <p><strong>Location:</strong> ${activity.EventLocation}</p>
+                    <p><strong>Organized by:</strong> ${activity.OrganizationName}</p>
+                `;
+                recommendationsDiv.appendChild(activityDiv);
+            });
+        } else {
+            recommendationsDiv.innerHTML = '<p>ไม่พบกิจกรรมที่ตรงกับความสนใจของคุณ</p>';
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+        const recommendationsDiv = document.getElementById('activityRecommendations');
+        recommendationsDiv.innerHTML = '<p>เกิดข้อผิดพลาดในการดึงข้อมูลกิจกรรม</p>';
+    });
+
 };
+
     </script>
 </body>
 </html>
