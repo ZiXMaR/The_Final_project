@@ -10,7 +10,7 @@ const pool = mysql.createPool({
     connectionLimit: 10,
     host: 'localhost',
     user: 'root',
-    password: '', // ลบรหัสผ่านออกหรือเว้นว่าง
+    password: 'root',
     database: 'project'
 });
 
@@ -43,14 +43,14 @@ app.post('/add-activity', (req, res) => {
 
     const sql = `INSERT INTO activity (
         Activityid, ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime, 
-        OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline, Semester/AcademicYear, AcademicYear, 
+        OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline, SemesterAcademicYear, AcademicYear, 
         Department, Major, ActivityDescription, ApproveActivity
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
     const values = [
         activity.Activityid, activity.ActivityCategoryID, activity.ActivityTypeID, activity.ActivityName, activity.ActivityDate, 
         activity.DailyID, activity.ActivityHours, activity.StartTime, activity.EndTime, activity.OrganizationName, activity.EventLocation, 
-        activity.NumberOfApplications, activity.ApplicationChannel, activity.ApplicationDeadline, activity.Semester_AcademicYear, 
+        activity.NumberOfApplications, activity.ApplicationChannel, activity.ApplicationDeadline, activity.SemesterAcademicYear, 
         activity.AcademicYear, activity.Department, activity.Major, activity.ActivityDescription, activity.ApproveActivity
     ];
 
