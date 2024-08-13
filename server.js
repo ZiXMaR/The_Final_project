@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const mysql = require('mysql'); // ประกาศเพียงครั้งเดียว
+const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const app = express();
 const port = 3000;
@@ -10,11 +10,12 @@ const pool = mysql.createPool({
     connectionLimit: 10,
     host: 'localhost',
     user: 'root',
-    password: '',
+    password: '', // ลบรหัสผ่านออกหรือเว้นว่าง
     database: 'project'
 });
 
-app.use(bodyParser.json());
+
+app.use(bodyParser.urlencoded({ extended: true })); // ใช้สำหรับรับข้อมูลจากฟอร์ม HTML
 
 // Serve the main page
 app.get('/', (req, res) => {
@@ -38,9 +39,33 @@ app.get('/admin', (req, res) => {
 
 // Route for adding activities (Organizer)
 app.post('/add-activity', (req, res) => {
-    // Insert activity logic here...
+    const activity = req.body;
+
+    const sql = `INSERT INTO activity (
+        Activityid, ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime, 
+        OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline, Semester/AcademicYear, AcademicYear, 
+        Department, Major, ActivityDescription, ApproveActivity
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    const values = [
+        activity.Activityid, activity.ActivityCategoryID, activity.ActivityTypeID, activity.ActivityName, activity.ActivityDate, 
+        activity.DailyID, activity.ActivityHours, activity.StartTime, activity.EndTime, activity.OrganizationName, activity.EventLocation, 
+        activity.NumberOfApplications, activity.ApplicationChannel, activity.ApplicationDeadline, activity.Semester_AcademicYear, 
+        activity.AcademicYear, activity.Department, activity.Major, activity.ActivityDescription, activity.ApproveActivity
+    ];
+
+    pool.query(sql, values, (error, results) => {
+        if (error) {
+            console.error('Error inserting activity:', error);
+            res.status(500).send('Error inserting activity: ' + error.message); // แสดงรายละเอียดข้อผิดพลาด
+            return;
+        }
+        res.status(200).send('Activity added successfully');
+    });
 });
 
+
+// Route for getting recommended activities
 app.get('/recommend-activities', (req, res) => {
     const { day, type, category } = req.query;
 
@@ -75,8 +100,7 @@ app.get('/recommend-activities', (req, res) => {
     });
 });
 
-
-// Route สำหรับดึงวันที่ของกิจกรรมที่มีอยู่
+// Route to get dates of activities
 app.get('/get-dates', (req, res) => {
     const sql = 'SELECT DISTINCT ActivityDate FROM activity';
     pool.query(sql, (error, results) => {
@@ -90,7 +114,7 @@ app.get('/get-dates', (req, res) => {
     });
 });
 
-// Route สำหรับดึงประเภทกิจกรรม
+// Route to get activity types
 app.get('/get-types', (req, res) => {
     const sql = 'SELECT * FROM activitytype';
     pool.query(sql, (error, results) => {
@@ -103,7 +127,7 @@ app.get('/get-types', (req, res) => {
     });
 });
 
-// Route สำหรับดึงหมวดหมู่กิจกรรม
+// Route to get activity categories
 app.get('/get-categories', (req, res) => {
     const sql = 'SELECT * FROM activitycategory';
     pool.query(sql, (error, results) => {
@@ -116,11 +140,7 @@ app.get('/get-categories', (req, res) => {
     });
 });
 
-app.listen(port, () => {
-    console.log(`App running on port ${port}`);
-});
-
-// Route สำหรับดึงวันของกิจกรรมที่มีอยู่
+// Route to get days of activities
 app.get('/get-activity-days', (req, res) => {
     const sql = 'SELECT DISTINCT DAYNAME(ActivityDate) as dayName FROM activity WHERE ApproveActivity = "Y"';
     pool.query(sql, (error, results) => {
@@ -132,4 +152,8 @@ app.get('/get-activity-days', (req, res) => {
         const days = results.map(row => row.dayName);
         res.json(days);
     });
+});
+
+app.listen(port, () => {
+    console.log(`App running on port ${port}`);
 });
