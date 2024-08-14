@@ -238,17 +238,17 @@ window.onload = function() {
 };
 
 // Handle form submission to fetch and display recommended activities
-document.getElementById('filterForm').onsubmit = function(event) {
+    document.getElementById('filterForm').onsubmit = function(event) {
     event.preventDefault();
 
-    const days = Array.from(document.querySelectorAll('input[name="activityDay"]:checked')).map(cb => cb.value);
-    const types = Array.from(document.querySelectorAll('input[name="activityType"]:checked')).map(cb => cb.value);
-    const categories = Array.from(document.querySelectorAll('input[name="activityCategory"]:checked')).map(cb => cb.value);
+        const days = Array.from(document.querySelectorAll('input[name="activityDay"]:checked')).map(cb => cb.value);
+        const types = Array.from(document.querySelectorAll('input[name="activityType"]:checked')).map(cb => cb.value);
+        const categories = Array.from(document.querySelectorAll('input[name="activityCategory"]:checked')).map(cb => cb.value);
 
-    const queryParams = new URLSearchParams();
-    if (days.length > 0) queryParams.append('day', days.join(','));
-    if (types.length > 0) queryParams.append('type', types.join(','));
-    if (categories.length > 0) queryParams.append('category', categories.join(','));
+        const queryParams = new URLSearchParams();
+            if (days.length > 0) queryParams.append('day', days.join(','));
+            if (types.length > 0) queryParams.append('type', types.join(','));
+            if (categories.length > 0) queryParams.append('category', categories.join(','));
 
     fetch(`/recommend-activities?${queryParams.toString()}`)
     .then(response => {
