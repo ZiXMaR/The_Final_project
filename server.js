@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const mysql = require('mysql'); // ประกาศเพียงครั้งเดียว
+const mysql = require('mysql2'); // ประกาศเพียงครั้งเดียว
 const bodyParser = require('body-parser');
 const app = express();
 const port = 3000;
@@ -15,6 +15,7 @@ const pool = mysql.createPool({
 });
 
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true })); // ใช้สำหรับรับข้อมูลจากฟอร์ม HTML
 
 // Serve the main page
 app.get('/', (req, res) => {
@@ -38,8 +39,31 @@ app.get('/admin', (req, res) => {
 
 // Route for adding activities (Organizer)
 app.post('/add-activity', (req, res) => {
-    // Insert activity logic here...
+    const activity = req.body;
+
+    const sql = `INSERT INTO activity (
+        Activityid, ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime, 
+        OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline, SemesterAcademicYear, AcademicYear, 
+        Department, Major, ActivityDescription, ApproveActivity
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+    const values = [
+        activity.Activityid, activity.ActivityCategoryID, activity.ActivityTypeID, activity.ActivityName, activity.ActivityDate, 
+        activity.DailyID, activity.ActivityHours, activity.StartTime, activity.EndTime, activity.OrganizationName, activity.EventLocation, 
+        activity.NumberOfApplications, activity.ApplicationChannel, activity.ApplicationDeadline, activity.SemesterAcademicYear, 
+        activity.AcademicYear, activity.Department, activity.Major, activity.ActivityDescription, activity.ApproveActivity
+    ];
+
+    pool.query(sql, values, (error, results) => {
+        if (error) {
+            console.error('Error inserting activity:', error);
+            res.status(500).send('Error inserting activity: ' + error.message); // แสดงรายละเอียดข้อผิดพลาด
+            return;
+        }
+        res.status(200).send('Activity added successfully');
+    });
 });
+
 app.get('/recommend-activities', (req, res) => {
     const { day, type, category } = req.query;
 
