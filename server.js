@@ -40,43 +40,31 @@ app.get('/admin', (req, res) => {
 app.post('/add-activity', (req, res) => {
     // Insert activity logic here...
 });
-
 app.get('/recommend-activities', (req, res) => {
     const { day, type, category } = req.query;
 
     let sql = 'SELECT * FROM activity WHERE ApproveActivity = "Y"';
-    let conditions = [];
     let params = [];
 
     if (day) {
         const dayArray = day.split(',');
-        console.log("Day Array:", dayArray);
-        // ใช้ backticks เพื่อครอบชื่อคอลัมน์ที่มีช่องว่าง
-        conditions.push('DailyID IN (SELECT DailyID FROM dailyid WHERE `Daily Name` IN (?))');
+        sql += ' AND DailyID IN (SELECT DailyID FROM dailyid WHERE `Daily Name` IN (?))';
         params.push(dayArray);
     }
 
     if (type) {
         const typeArray = type.split(',');
-        conditions.push('ActivityTypeID IN (?)');
+        sql += ' AND ActivityTypeID IN (?)';
         params.push(typeArray);
     }
 
     if (category) {
         const categoryArray = category.split(',');
-        console.log("Category Array:", categoryArray);
-        conditions.push('ActivityCategoryID IN (?)');
+        sql += ' AND ActivityCategoryID IN (?)';
         params.push(categoryArray);
     }
 
-    if (conditions.length > 0) {
-        sql += ' AND ' + conditions.join(' AND ');
-    }
-
-    console.log('SQL Query:', sql);
-    console.log('Params:', params.flat());
-
-    pool.query(sql, params.flat(), (error, results) => {
+    pool.query(sql, params, (error, results) => {
         if (error) {
             console.error('Error fetching activities:', error);
             res.status(500).send('Server error');
@@ -85,6 +73,7 @@ app.get('/recommend-activities', (req, res) => {
         res.json(results);
     });
 });
+
 
 
 
