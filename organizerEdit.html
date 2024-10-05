@@ -15,7 +15,7 @@
             text-align: center;
         }
 
-        .edit-button {
+        .app-button {
             position: absolute;
             top: 20px;
             left: 20px;
@@ -26,8 +26,23 @@
             text-decoration: none;
             font-size: 14px;
         }
-        .edit-button:hover {
+        .app-button:hover {
             background-color: #00ccff;
+        }
+
+        .delete-button {
+            position: absolute; /* จัดให้มีตำแหน่งเหมือนปุ่มแก้ไข */
+            top: 20px; /* ให้สูงเท่ากับปุ่มแก้ไข */
+            left: 150px; /* ขยับให้ห่างจากปุ่มแก้ไข */
+            background-color: #dc3545; /* สีแดงสำหรับปุ่มลบ */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .delete-button:hover {
+            background-color: #c82333; /* สีเมื่อโฮเวอร์ */
         }
 
         h1 {
@@ -110,7 +125,8 @@
     </style>
 </head>
 <body>
-    <a href="/organizer" class="edit-button">เพิ่มกิจกรรม</a>
+    <a href="/organizer" class="app-button">เพิ่มกิจกรรม</a>
+    <a href="/organizerDelet" class="delete-button">ลบกิจกรรม</a>
 
     <h1>Organizer Page</h1>
     <div class="container">

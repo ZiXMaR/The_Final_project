@@ -28,10 +28,16 @@ app.get('/organizer', (req, res) => {
     res.sendFile(path.join(__dirname, 'organizer.html'));
 });
 
-// Serve the Organizer page
+// Serve the OrganizerEdit page
 app.get('/organizerEdit', (req, res) => {
     res.sendFile(path.join(__dirname, 'organizerEdit.html'));
 });
+
+// Serve the OrganizerDelet page
+app.get('/organizerDelet', (req, res) => {
+    res.sendFile(path.join(__dirname, 'organizerDelet.html'));
+});
+
 
 // Serve the Participant page
 app.get('/participant', (req, res) => {
@@ -99,6 +105,37 @@ app.post('/edit-activity', (req, res) => {
     });
 });
 
+// API สำหรับดึงข้อมูลกิจกรรม
+app.get('/activities', (req, res) => {
+    const sql = 'SELECT * FROM activity';
+    pool.query(sql, (error, results) => {
+        if (error) {
+            console.error('Error fetching activities:', error);
+            res.status(500).send('Error fetching activities: ' + error.message);
+            return;
+        }
+        res.json(results);
+    });
+});
+
+// API สำหรับลบกิจกรรม
+app.post('/delete-activity', (req, res) => {
+    const { Activityid } = req.body;
+    const sql = 'DELETE FROM activity WHERE Activityid = ?';
+    
+    pool.query(sql, [Activityid], (error, results) => {
+        if (error) {
+            console.error('Error deleting activity:', error);
+            res.status(500).send('Error deleting activity: ' + error.message);
+            return;
+        }
+        res.status(200).send('Activity deleted successfully');
+    });
+});
+
+//---------------------------------------------------------------------------------------
+
+
 app.get('/recommend-activities', (req, res) => {
     const { day, type, category } = req.query;
 
@@ -132,8 +169,6 @@ app.get('/recommend-activities', (req, res) => {
         res.json(results);
     });
 });
-
-
 
 
 // Route สำหรับดึงวันที่ของกิจกรรมที่มีอยู่
