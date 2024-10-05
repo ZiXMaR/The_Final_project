@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organizer Page</title>
+    <title>แก้ไขกิจกรรม</title>
     <style>
         body {
             margin: 0;
@@ -14,6 +14,22 @@
             background-color: #f8f9fa;
             text-align: center;
         }
+
+        .edit-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #00ccff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .edit-button:hover {
+            background-color: #00ccff;
+        }
+
         h1 {
             color: #007bff;
             margin: 0;
@@ -93,55 +109,171 @@
         }
     </style>
 </head>
-
 <body>
-    <h1>Edit Activity</h1>
+    <a href="/organizer" class="edit-button">เพิ่มกิจกรรม</a>
+
+    <h1>Organizer Page</h1>
     <div class="container">
+
         <p>แก้ไขกิจกรรม</p>
         <p class="details">รายละเอียดกิจกรรม</p>
-
-        <!-- เปลี่ยน action เป็นเส้นทางสำหรับการแก้ไข -->
-        <form action="/edit-activity/{{ activity_id }}" method="POST">
+        <form action="/edit-activity" method="POST">
             <div class="form-group">
                 <label for="Activityid">รหัสกิจกรรม</label>
-                <input type="text" id="Activityid" name="Activityid" value="{{ activity_id }}" readonly>
+                <input type="text" id="Activityid" name="Activityid" placeholder="Activity ID" required>
             </div>
             <div class="form-group">
                 <label for="ActivityName">ชื่อกิจกรรม</label>
-                <!-- เติมค่าจากฐานข้อมูล -->
-                <input type="text" id="ActivityName" name="ActivityName" value="{{ activity_name }}" required>
+                <input type="text" id="ActivityName" name="ActivityName" placeholder="เลือกวันที่จัดกิจกรรม" required>
             </div>
             <div class="form-group">
                 <label for="OrganizationName">ชื่อหน่วยงาน</label>
-                <input type="text" id="OrganizationName" name="OrganizationName" value="{{ organization_name }}" required>
+                <input type="text" id="OrganizationName" name="OrganizationName" placeholder="กรอกชื่อหน่วยงาน" required>
             </div>
             <div class="form-group">
                 <label for="ActivityDate">วันที่จัดกิจกรรม</label>
-                <input type="date" id="ActivityDate" name="ActivityDate" value="{{ activity_date }}" required>
+                <input type="date" id="ActivityDate" name="ActivityDate" placeholder="กรอกชื่อกิจกรรมที่นี่" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="ActivityEndDate">วันสิ้นสุดกิจกรรม</label>
+                <input type="date" id="ActivityEndDate" name="ActivityEndDate" placeholder="กรอกวันสิ้นสุดกิจกรรม" required>
             </div>
 
             <div class="form-group">
                 <label for="DailyID">วันจัดกิจกรรม (จันทร์ - อาทิตย์)</label>
                 <select id="DailyID" name="DailyID" required>
-                    <option value="DID01" {{ 'selected' if daily_id == 'DID01' }}>จันทร์</option>
-                    <option value="DID02" {{ 'selected' if daily_id == 'DID02' }}>อังคาร</option>
-                    <!-- เพิ่มตัวเลือกอื่น ๆ พร้อมกับการเช็คค่า -->
+                    <option value="DID01">จันทร์</option>
+                    <option value="DID02">อังคาร</option>
+                    <option value="DID03">พุธ</option>
+                    <option value="DID04">พฤหัสบดี</option>
+                    <option value="DID05">ศุกร์</option>
+                    <option value="DID06">เสาร์</option>
+                    <option value="DID07">อาทิตย์</option>
                 </select>
             </div>
-
+            
             <div class="form-group">
                 <label for="StartTime">เวลาเริ่มกิจกรรม</label>
-                <input type="time" id="StartTime" name="StartTime" value="{{ start_time }}" required>
+                <input type="time" id="StartTime" name="StartTime" placeholder="กรอกเวลาเริ่มกิจกรรม" required>
             </div>
             <div class="form-group">
                 <label for="EndTime">เวลาจบกิจกรรม</label>
-                <input type="time" id="EndTime" name="EndTime" value="{{ end_time }}" required>
+                <input type="time" id="EndTime" name="EndTime" placeholder="กรอกเวลาจบกิจกรรม" required>
+            </div>
+            <div class="form-group">
+                <label for="SemesterAcademicYear">ภาคการศึกษา/ปีการศึกษา</label>
+                <input type="text" id="SemesterAcademicYear" name="SemesterAcademicYear" placeholder="ภาคการศึกษา/ปีการศึกษา" required>
+            </div>
+            <div class="form-group">
+                <label for="ActivityHours">จำนวนชั่วโมงกิจกรรม</label>
+                <input type="number" id="ActivityHours" name="ActivityHours" placeholder="กรอกจำนวนชั่วโมงกิจกรรม" required>
+            </div>
+            <div class="form-group">
+                <label for="EventLocation">สถานที่จัดกิจกรรม</label>
+                <input type="text" id="EventLocation" name="EventLocation" placeholder="กรอกสถานที่จัดกิจกรรม" required>
+            </div>
+            <div class="form-group">
+                <label for="ActivityCategoryID">หมวดหมู่กิจกรรม</label>
+                <select id="ActivityCategoryID" name="ActivityCategoryID" required>
+                    <option value="ACID01">กิจกรรมเสริมสร้างสมรรถนะ</option>
+                    <option value="ACID02">กิจกรรมเข้าร่วมตามความสนใจ</option>
+                </select>
+    
+            </div>
+            <div class="form-group">
+                <label for="ActivityTypeID">ประเภทกิจกรรม</label>
+                <select id="ActivityTypeID" name="ActivityTypeID" required>
+                    <option value="ATID01">1.กิจกรรมเสริมสร้างการพัฒนาทักษะการใช้ชีวิตอย่างมีความสุข เป็นส่วนหนึ่งของ มหาวิทยาลัย ชุมชน สังคม และมีความเป็นพลเมืองโลก</option>
+                    <option value="ATID02">2.กิจกรรมเสริมสร้างการพัฒนาทักษะแห่งศตวรรษที่ 21 เช่น กิจกรรมเสริมสร้าง ทักษะการสื่อสาร ความฉลาดทางอารมณ์ ความคิดสร้างสรรค์ การคิดเชิงวิเคราะห์ การคิดเชิงวิพากษ์ การคิดอย่างมีวิจารณญาณ การบริหารเวลา การแก้ไขปัญหาที่มีความซับซ้อน และการเรียนรู้ตลอดชีวิต</option>
+                    <option value="ATID03">3.กิจกรรมเสริมสร้างการพัฒนาทักษะการมีส่วนร่วมทางสังคม มีจิตสำนึกสาธารณะ มุ่งเน้นประโยชน์ของเพื่อนมนุษย์ เรียนรู้สังคม เรียนรู้ชุมชน สามารถทำงานร่วมกับชุมชนได้</option>
+                    <option value="ATID04">4.กิจกรรมเสริมสร้างการพัฒนาทักษะภาวะผู้นำ การทำงานเป็นทีม การทำงานร่วมกับผู้อื่น</option>
+                    <option value="ATID05">5.กิจกรรมเสริมสร้างการพัฒนาทักษะภาษาต่างประเทศ สมรรถนะสากล มีความเข้าใจในสังคม และวัฒนธรรมต่างประเทศ</option>
+                    <option value="ATID06">6.กิจกรรมเสริมสร้างการพัฒนาทักษะการเป็นผู้ประกอบการ และทักษะที่จำเป็นในการเตรียมความพร้อมเพื่อการทำงาน</option>
+                    <option value="ATID07">7.กิจกรรมเสริมสร้างการพัฒนาทักษะวิชาชีพ</option>
+                    <option value="ATID08">8.กิจกรรมเสริมสร้างการพัฒนาทักษะดิจิทัลและเทคโนโลยี</option>
+                    <option value="ATID09">9.กิจกรรมเสริมสร้างคุณลักษณะความซื่อสัตย์มีวินัย คุณธรรมจริยธรรม</option>
+                    <option value="ATID10">10.กิจกรรมเสริมสร้างความรู้ทางวิชาการ</option>
+                    <option value="ATID11">11.กิจกรรมเสริมสร้างความเป็นประชาธิปไตย</option>
+                    <option value="ATID12">12.กิจกรรมเสริมสร้างความภูมิใจในมหาวิทยาลัย</option>
+                    <option value="ATID13">13.กิจกรรมส่งเสริมศิลปวัฒนธรรมและศาสนา</option>
+                    <option value="ATID14">14.กิจกรรมเสริมสร้างพัฒนาสุขภาพกายและใจ</option>
+                    <option value="ATID15">15.กิจกรรมเสริมสร้างความสุขและนันทนาการ</option>
+                    <option value="ATID16">16.กิจกรรมเสริมสร้างความเป็นสังคมพหุวัฒนธรรม</option>
+                </select>
+    
             </div>
 
-            <!-- ส่วนอื่นๆ ยังคงเดิม แต่เติมค่าจากฐานข้อมูลลงไปใน input fields หรือ select options -->
+            <div class="form-group">
+                <label for="NumberOfApplications">จำนวนที่รับสมัคร</label>
+                <input type="number" id="NumberOfApplications" name="NumberOfApplications" placeholder="กรอกจำนวนที่รับสมัคร">
+            </div>
+            <div class="form-group">
+                <label for="ApplicationChannel">ช่องทางรับสมัคร</label>
+                <input type="text" id="ApplicationChannel" name="ApplicationChannel" placeholder="กรอกช่องทางรับสมัคร">
+            </div>
+            <div class="form-group">
+                <label for="ApplicationDeadline">วันสิ้นสุดการรับสมัคร</label>
+                <input type="date" id="ApplicationDeadline" name="ApplicationDeadline" placeholder="วันสิ้นสุดการรับสมัคร">
+            </div>
+            <div class="form-group">
+                <label for="ActivityDescription">คำอธิบายกิจกรรม</label>
+                <textarea id="ActivityDescription" name="ActivityDescription" placeholder="กรอกคำอธิบายกิจกรรม"></textarea>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <p class="details">คุณสมบัติของผู้รับสมัคร</p>
+            </div>
+
+            <div class="form-group">
+                <label for="AcademicYear">ชั้นปีการศึกษา</label>
+                <select id="AcademicYear" name="AcademicYear" required>
+                    <option value="all">ทั้งหมด</option>
+                    <option value="1">ชั้นปี 1</option>
+                    <option value="2">ชั้นปี 2</option>
+                    <option value="3">ชั้นปี 3</option>
+                    <option value="4">ชั้นปี 4</option>
+                </select>
+    
+            </div>
+            <div class="form-group">
+                <label for="Department">ภาควิชา</label>
+                <select id="Department" name="Department" required>
+                    <option value="all">ทั้งหมด</option>
+                    <option value="วิทยาศาสตร์กายภาพ">วิทยาศาสตร์กายภาพ</option>
+                    <option value="วิทยาศาสตร์ชีวภาพ">วิทยาศาสตร์ชีวภาพ</option>
+                    <option value="วิทยาศาสตร์การคำนวณ">วิทยาศาสตร์การคำนวณ</option>
+                    <option value="วิทยาศาสตร์สุขภาพ">วิทยาศาสตร์สุขภาพ</option>
+                    <option value="วิทยาศาสตร์ประยุกต์">วิทยาศาสตร์ประยุกต์</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="Major">สาขาวิชา</label>
+                <select id="Major" name="Major" required>
+                    <option value="all">ทั้งหมด</option>
+                    <option value="สาขาวิชาเคมี">สาขาวิชาเคมี</option>
+                    <option value="สาขาวิชาวัสดุศาสตร์">สาขาวิชาวัสดุศาสตร์</option>
+                    <option value="สาขาวิชาฟิสิกส์">สาขาวิชาฟิสิกส์</option>
+                    <option value="สาขาวิชาชีววิทยา">สาขาวิชาชีววิทยา</option>
+                    <option value="สาขาวิชาเทคโนโลยีชีวภาพ">สาขาวิชาเทคโนโลยีชีวภาพ</option>
+                    <option value="สาขาวิชาจุลชีววิทยา">สาขาวิชาจุลชีววิทยา</option>
+                    <option value="สาขาวิชาคณิตศาสตร์">สาขาวิชาคณิตศาสตร์</option>
+                    <option value="สาขาวิชาสถิติ">สาขาวิชาสถิติ</option>
+                    <option value="สาขาวิชาวิทยาการคอมพิวเตอร์">สาขาวิชาวิทยาการคอมพิวเตอร์</option>
+                    <option value="สาขาวิชาเทคโนโลยีสารสนเทศและการสื่อสาร">สาขาวิชาเทคโนโลยีสารสนเทศและการสื่อสาร</option>
+                    <option value="สาขาวิชาเทคโนโลยีสารสนเทศ(ต่อเนื่อง)">สาขาวิชาเทคโนโลยีสารสนเทศ (ต่อเนื่อง)</option>
+                    <option value="สาขาวิชาเคมี-ชีววิทยาประยุกต์">สาขาวิชาเคมี-ชีววิทยาประยุกต์</option>
+                    <option value="สาขาวิชาวิทยาศาสตร์พอลิเมอร์">สาขาวิชาวิทยาศาสตร์พอลิเมอร์</option>
+                </select>
+            </div>
+            
+            <div class="form-group" style="display:none;">
+                <label for="ApproveActivity">คำอนุมัติ</label>
+                <input type="hidden" id="ApproveActivity" name="ApproveActivity" value="Y">
+            </div>            
 
             <div class="save-button-container">
-                <button type="submit">บันทึกการแก้ไข</button>
+                <button type="submit">บันทึกกิจกรรม</button>
             </div>
         </form>
     </div>
