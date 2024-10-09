@@ -11,8 +11,163 @@ const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: 'root',
-    database: 'project',
+    database: 'demo_project',
     port: 8889
+});
+
+pool.getConnection((err, connection) => {
+    if (err) {
+        console.error('Error connecting to the database:', err);
+    } else {
+        console.log('Connected to MySQL database');
+        connection.release(); // ปล่อยการเชื่อมต่อ
+    }
+});
+
+// Add session middleware
+app.use(session({
+    secret: secretKey,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false } // set to true when using https
+}));
+
+// Serve static files
+app.use(express.static('public')); // public folder สำหรับไฟล์ static เช่น CSS
+
+// Route for root path (localhost:3000/)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'login.html')); // เปิด login.html เป็นหน้าแรก
+});
+
+app.post('/register', async (req, res) => {
+    const { username, password, role } = req.body; // รับข้อมูลจากฟอร์มสมัคร
+    const hashedPassword = await bcrypt.hash(password, 10); // Hash password ด้วย bcrypt
+
+    const query = 'INSERT INTO users (username, password, role) VALUES (?, ?, ?)';
+    pool.query(query, [username, hashedPassword, role], (err, result) => {
+        if (err) {
+            console.error('Error registering user:', err);
+            return res.status(500).send('Error registering user');
+        }
+        
+        // สร้าง session ใหม่หลังการสมัครสำเร็จ
+        req.session.user = username; // หรือข้อมูลที่คุณต้องการเก็บใน session
+
+        // เมื่อสมัครเสร็จ ให้ redirect ไปยังหน้าลงชื่อเข้าใช้
+        res.redirect('/'); // เปลี่ยนเป็น '/'
+    });
+});
+
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'login.html')); // หรือใช้ res.render() หากใช้ template engine
+});
+
+// app.post('/login', (req, res) => {
+//     const { username, password } = req.body;
+//     const query = 'SELECT * FROM users WHERE username = ?';
+//     db.query(query, [username], async (err, results) => {
+//         if (err) return res.status(500).send('Error fetching user');
+//         if (results.length === 0) return res.status(400).send('User not found');
+        
+//         const user = results[0];
+//         const match = await bcrypt.compare(password, user.password);
+        
+//         if (match) {
+//             req.session.userId = user.id;
+//             req.session.role = user.role;
+//             res.send('Login successful');
+//         } else {
+//             res.status(400).send('Invalid password');
+//         }
+//     });
+// });
+
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    const query = 'SELECT * FROM users WHERE username = ?';
+
+    pool.query(query, [username], async (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).send('Internal server error');
+        }
+
+        if (results.length > 0) {
+            const user = results[0];
+            const match = await bcrypt.compare(password, user.password);
+            if (match) {
+                req.session.user = user.username;
+                req.session.role = user.role; // บันทึก role ลงใน session
+                // นำไปยังหน้าเฉพาะตาม role
+                if (user.role === 'admin') {
+                    res.redirect('/admin');
+                } else if (user.role === 'organizer') {
+                    res.redirect('/organizer');
+                } else if (user.role === 'participant') {
+                    res.redirect('/participant');
+                } else {
+                    res.redirect('/dashboard'); // หรือหน้าอื่นๆ ที่ต้องการ
+                }
+            } else {
+                res.send('Invalid password');
+            }
+        } else {
+            res.send('Invalid username or password');
+        }
+    });
+});
+
+
+// Authentication middleware
+function isAuthenticated(req, res, next) {
+    if (req.session.user) {
+        return next();
+    } else {
+        res.status(401).send('You need to log in first');
+    }
+}
+
+// app.post('/logout', (req, res) => {
+//     req.session.destroy((err) => {
+//         if (err) return res.status(500).send('Error logging out');
+//         res.send('Logged out successfully');
+//     });
+// });
+
+// Logout route
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.send('Error logging out');
+        }
+        res.redirect('/');
+    });
+});
+
+app.get('/check-login', (req, res) => {
+    if (req.session.userId) {
+        res.status(200).send('Logged in');
+    } else {
+        res.status(401).send('Not logged in');
+    }
+});
+
+
+// Route สำหรับแสดงหน้า signup
+app.get('/signup', (req, res) => {
+    res.sendFile(path.join(__dirname, 'signup.html')); // เส้นทางไปยังไฟล์ signup.html
+});
+
+
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.get('/protected-route', isAuthenticated, (req, res) => {
+    res.send('You are authorized to access this page');
 });
 
 app.use(bodyParser.json());
