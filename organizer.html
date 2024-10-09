@@ -168,10 +168,7 @@
         <p class="details">รายละเอียดกิจกรรม</p>
 
         <form id="activityForm" action="/add-activity" method="POST">
-            <div class="form-group">
-                <label for="Activityid">รหัสกิจกรรม</label>
-                <input type="text" id="Activityid" name="Activityid" placeholder="Activity ID" required>
-            </div>
+            
             <div class="form-group">
                 <label for="ActivityName">ชื่อกิจกรรม</label>
                 <input type="text" id="ActivityName" name="ActivityName" placeholder="เลือกวันที่จัดกิจกรรม" required>
@@ -332,7 +329,7 @@
 
     <script>
         const form = document.querySelector('form'); // เปลี่ยนเป็นค้นหาฟอร์มตามแท็ก
-        // const resultMessage = document.getElementById('resultMessage'); // ลบตัวแปรนี้ออก
+        const resultMessage = document.getElementById('resultMessage'); // ลบตัวแปรนี้ออก
     
         form.addEventListener('submit', async (event) => {
             event.preventDefault(); // ป้องกันการส่งฟอร์มโดยปกติ

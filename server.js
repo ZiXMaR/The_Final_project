@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 3000;
 
+
 // Set up database connection
 const pool = mysql.createPool({
     connectionLimit: 10,
@@ -54,31 +55,59 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
-//  Route สำหรับเพิ่มกิจกรรม (Organizer)
-app.post('/add-activity', (req, res) => {
-    const activity = req.body;
 
-    const sql = `INSERT INTO activity (
-        Activityid, ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime, 
-        OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline, SemesterAcademicYear, AcademicYear, 
-        Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+// ฟังก์ชันสร้าง ActivityID อัตโนมัติ
+async function generateActivityId() {
+    return new Promise((resolve, reject) => {
+        const sql = 'SELECT Activityid FROM activity ORDER BY Activityid DESC LIMIT 1';
+        pool.query(sql, (error, results) => {
+            if (error) return reject(error);
 
-    const values = [
-        activity.Activityid, activity.ActivityCategoryID, activity.ActivityTypeID, activity.ActivityName, activity.ActivityDate, 
-        activity.DailyID, activity.ActivityHours, activity.StartTime, activity.EndTime, activity.OrganizationName, activity.EventLocation, 
-        activity.NumberOfApplications, activity.ApplicationChannel, activity.ApplicationDeadline, activity.SemesterAcademicYear, 
-        activity.AcademicYear, activity.Department, activity.Major, activity.ActivityDescription, activity.ApproveActivity, activity.ActivityEndDate
-    ];
-
-    pool.query(sql, values, (error, results) => {
-        if (error) {
-            console.error('Error inserting activity:', error);
-            res.status(500).send('Error inserting activity: ' + error.message); // แสดงรายละเอียดข้อผิดพลาด
-            return;
-        }
-        res.status(200).send('Activity added successfully');
+            let newId = 'AID001'; // ค่าเริ่มต้น
+            if (results.length > 0) {
+                const lastId = results[0].Activityid;
+                const lastNumber = parseInt(lastId.replace('AID', ''));
+                const newNumber = lastNumber + 1;
+                newId = `AID${String(newNumber).padStart(3, '0')}`;
+            }
+            resolve(newId);
+        });
     });
+}
+
+//  Route สำหรับเพิ่มกิจกรรม (Organizer)
+app.post('/add-activity', async (req, res) => {
+    try {
+        const activity = req.body;
+
+        // เรียกใช้ฟังก์ชันเพื่อสร้าง ActivityID ใหม่
+        activity.Activityid = await generateActivityId();
+
+        const sql = `INSERT INTO activity (
+            Activityid, ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime, 
+            OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline, SemesterAcademicYear, AcademicYear, 
+            Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+        const values = [
+            activity.Activityid, activity.ActivityCategoryID, activity.ActivityTypeID, activity.ActivityName, activity.ActivityDate,
+            activity.DailyID, activity.ActivityHours, activity.StartTime, activity.EndTime, activity.OrganizationName, activity.EventLocation,
+            activity.NumberOfApplications, activity.ApplicationChannel, activity.ApplicationDeadline, activity.SemesterAcademicYear,
+            activity.AcademicYear, activity.Department, activity.Major, activity.ActivityDescription, activity.ApproveActivity, activity.ActivityEndDate
+        ];
+
+        pool.query(sql, values, (error, results) => {
+            if (error) {
+                console.error('Error inserting activity:', error);
+                res.status(500).send('Error inserting activity: ' + error.message);
+                return;
+            }
+            res.status(200).send('Activity added successfully with ID: ' + activity.Activityid);
+        });
+    } catch (error) {
+        console.error('Error generating Activity ID:', error);
+        res.status(500).send('Error generating Activity ID: ' + error.message);
+    }
 });
 
 // Route สำหรับแก้ไขกิจกรรม (Organizer)
