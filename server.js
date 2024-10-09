@@ -38,6 +38,11 @@ app.get('/organizerDelet', (req, res) => {
     res.sendFile(path.join(__dirname, 'organizerDelet.html'));
 });
 
+// Serve the OrganizerHome page
+app.get('/organizerHome', (req, res) => {
+    res.sendFile(path.join(__dirname, 'organizerHome.html'));
+});
+
 
 // Serve the Participant page
 app.get('/participant', (req, res) => {
@@ -49,7 +54,7 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
-// Route for adding activities (Organizer)
+//  Route สำหรับเพิ่มกิจกรรม (Organizer)
 app.post('/add-activity', (req, res) => {
     const activity = req.body;
 

@@ -15,11 +15,25 @@
             text-align: center;
         }
 
-        .edit-button {
+        .app-button {
             position: absolute;
             top: 20px;
             left: 20px;
-            background-color: #28a745;
+            background-color: #00ccff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .app-button:hover {
+            background-color: #00ccff;
+        }
+        .edit-button {
+            position: absolute; /* จัดให้มีตำแหน่งเหมือนปุ่มแก้ไข */
+            top: 20px; /* ให้สูงเท่ากับปุ่มแก้ไข */
+            left: 150px; /* ขยับให้ห่างจากปุ่มแก้ไข */
+            background-color: #28a745; /* สีแดงสำหรับปุ่มลบ */
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
@@ -31,10 +45,10 @@
         }
 
         .delete-button {
-            position: absolute; /* จัดให้มีตำแหน่งเหมือนปุ่มแก้ไข */
-            top: 20px; /* ให้สูงเท่ากับปุ่มแก้ไข */
-            left: 150px; /* ขยับให้ห่างจากปุ่มแก้ไข */
-            background-color: #dc3545; /* สีแดงสำหรับปุ่มลบ */
+            position: absolute;
+            top: 20px;
+            left: 280px;
+            background-color: #dc3545;
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
@@ -42,8 +56,24 @@
             font-size: 14px;
         }
         .delete-button:hover {
-            background-color: #c82333; /* สีเมื่อโฮเวอร์ */
+            background-color: #c82333;
         }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+
 
         h1 {
             color: #007bff;
@@ -126,15 +156,18 @@
 </head>
 
 <body>
+    <a href="/organizer" class="app-button">เพิ่มกิจกรรม</a>
     <a href="/organizerEdit" class="edit-button">แก้ไขกิจกรรม</a>
     <a href="/organizerDelet" class="delete-button">ลบกิจกรรม</a>
+    <a href="/organizerHome" class="home-button">หน้าหลัก</a>
+
 
     <h1>Organizer Page</h1>
     <div class="container">
         <p>บันทึกกิจกรรม</p>
         <p class="details">รายละเอียดกิจกรรม</p>
 
-        <form action="/add-activity" method="POST">
+        <form id="activityForm" action="/add-activity" method="POST">
             <div class="form-group">
                 <label for="Activityid">รหัสกิจกรรม</label>
                 <input type="text" id="Activityid" name="Activityid" placeholder="Activity ID" required>
@@ -294,6 +327,43 @@
             </div>
         </form>
     </div>
+
+    <div id="resultMessage"></div> <!-- ส่วนแสดงข้อความผลลัพธ์ -->
+
+    <script>
+        const form = document.querySelector('form'); // เปลี่ยนเป็นค้นหาฟอร์มตามแท็ก
+        // const resultMessage = document.getElementById('resultMessage'); // ลบตัวแปรนี้ออก
+    
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // ป้องกันการส่งฟอร์มโดยปกติ
+    
+            const formData = new FormData(form);
+            const activityData = Object.fromEntries(formData.entries());
+    
+            try {
+                const response = await fetch('/add-activity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(activityData),
+                });
+    
+                if (response.ok) {
+                    // ใช้ alert แทนการแสดงข้อความใน div
+                    alert('บันทึกกิจกรรมเสร็จสิ้น');
+                } else {
+                    // แสดงข้อความว่ามีข้อผิดพลาด
+                    const errorText = await response.text();
+                    alert('มีข้อผิดพลาด: ' + errorText); // ใช้ alert แทน
+                }
+            } catch (error) {
+                alert('เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + error.message); // ใช้ alert แทน
+            }
+        });
+    </script>
+
+    
 </body>
 </html>
 
