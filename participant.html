@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Participant Page</title>
+    
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css" rel="stylesheet">
+    
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -119,6 +126,17 @@
             margin: 0 0 10px;
             color: #007bff;
         }
+
+        /* FullCalendar */
+        #calendar {
+            margin-top: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -146,145 +164,155 @@
         <div id="activityRecommendations">
             <!-- กิจกรรมแนะนำจะแสดงที่นี่ -->
         </div>
+
+        <!-- ปฏิทินแสดงกิจกรรม -->
+        <div id="calendar"></div>
     </div>
 
     <script>
-// Toggle the display of checkbox groups
-document.querySelectorAll('.burger-menu').forEach(menu => {
-    menu.addEventListener('click', function() {
-        const targetId = this.getAttribute('data-target');
-        const targetGroup = document.getElementById(targetId);
-        targetGroup.style.display = targetGroup.style.display === 'flex' ? 'none' : 'flex';
-        this.classList.toggle('active');
-    });
-});
-
-// Map จากชื่อวันในภาษาอังกฤษไปเป็น DailyID ในภาษาไทย
-const dayMap = {
-    'Monday': 'วันจันทร์',
-    'Tuesday': 'วันอังคาร',
-    'Wednesday': 'วันพุธ',
-    'Thursday': 'วันพฤหัส',
-    'Friday': 'วันศุกร์',
-    'Saturday': 'วันเสาร์',
-    'Sunday': 'วันอาทิตย์'
-};
-
-// Function to create day checkboxes
-function createDayCheckboxes() {
-    const dateGroup = document.getElementById('dateGroup');
-    Object.keys(dayMap).forEach(day => {
-        const thaiDay = dayMap[day];
-        const div = document.createElement('div');
-        div.className = 'checkbox-item';
-        div.innerHTML = `
-            <input type="checkbox" id="day-${thaiDay}" name="activityDay" value="${thaiDay}">
-            <label for="day-${thaiDay}">${thaiDay}</label>
-        `;
-        div.addEventListener('click', function() {
-            const checkbox = this.querySelector('input');
-            checkbox.checked = !checkbox.checked;
-            this.classList.toggle('selected', checkbox.checked);
+        // Toggle the display of checkbox groups
+        document.querySelectorAll('.burger-menu').forEach(menu => {
+            menu.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const targetGroup = document.getElementById(targetId);
+                targetGroup.style.display = targetGroup.style.display === 'flex' ? 'none' : 'flex';
+                this.classList.toggle('active');
+            });
         });
-        dateGroup.appendChild(div);
-    });
-}
 
-// Populate days and other checkboxes
-window.onload = function() {
-    createDayCheckboxes();
+        // Map from English day names to Thai DailyID
+        const dayMap = {
+            'Monday': 'วันจันทร์',
+            'Tuesday': 'วันอังคาร',
+            'Wednesday': 'วันพุธ',
+            'Thursday': 'วันพฤหัส',
+            'Friday': 'วันศุกร์',
+            'Saturday': 'วันเสาร์',
+            'Sunday': 'วันอาทิตย์'
+        };
 
-    // ประเภทกิจกรรม
-    fetch('/get-types')
-        .then(response => response.json())
-        .then(data => {
-            const typeGroup = document.getElementById('typeGroup');
-            data.forEach(type => {
+        // Function to create day checkboxes
+        function createDayCheckboxes() {
+            const dateGroup = document.getElementById('dateGroup');
+            Object.keys(dayMap).forEach(day => {
+                const thaiDay = dayMap[day];
                 const div = document.createElement('div');
                 div.className = 'checkbox-item';
                 div.innerHTML = `
-                    <input type="checkbox" id="type-${type.ActivityTypeID}" name="activityType" value="${type.ActivityTypeID}">
-                    <label for="type-${type.ActivityTypeID}">${type.ActivityTypeName}</label>
+                    <input type="checkbox" id="day-${thaiDay}" name="activityDay" value="${thaiDay}">
+                    <label for="day-${thaiDay}">${thaiDay}</label>
                 `;
                 div.addEventListener('click', function() {
                     const checkbox = this.querySelector('input');
                     checkbox.checked = !checkbox.checked;
                     this.classList.toggle('selected', checkbox.checked);
                 });
-                typeGroup.appendChild(div);
+                dateGroup.appendChild(div);
             });
-        });
+        }
 
-    // หมวดหมู่กิจกรรม
-    fetch('/get-categories')
-        .then(response => response.json())
-        .then(data => {
-            const categoryGroup = document.getElementById('categoryGroup');
-            data.forEach(category => {
-                const div = document.createElement('div');
-                div.className = 'checkbox-item';
-                div.innerHTML = `
-                    <input type="checkbox" id="category-${category.ActivityCategoryID}" name="activityCategory" value="${category.ActivityCategoryID}">
-                    <label for="category-${category.ActivityCategoryID}">${category.ActivityCategoryName}</label>
-                `;
-                div.addEventListener('click', function() {
-                    const checkbox = this.querySelector('input');
-                    checkbox.checked = !checkbox.checked;
-                    this.classList.toggle('selected', checkbox.checked);
+        // Populate days and other checkboxes
+        document.addEventListener('DOMContentLoaded', function() {
+            createDayCheckboxes();
+
+            // Fetch activity types
+            fetch('/get-types')
+                .then(response => response.json())
+                .then(data => {
+                    const typeGroup = document.getElementById('typeGroup');
+                    data.forEach(type => {
+                        const div = document.createElement('div');
+                        div.className = 'checkbox-item';
+                        div.innerHTML = `
+                            <input type="checkbox" id="type-${type.ActivityTypeID}" name="activityType" value="${type.ActivityTypeID}">
+                            <label for="type-${type.ActivityTypeID}">${type.ActivityTypeName}</label>
+                        `;
+                        div.addEventListener('click', function() {
+                            const checkbox = this.querySelector('input');
+                            checkbox.checked = !checkbox.checked;
+                            this.classList.toggle('selected', checkbox.checked);
+                        });
+                        typeGroup.appendChild(div);
+                    });
                 });
-                categoryGroup.appendChild(div);
+
+            // Fetch activity categories
+            fetch('/get-categories')
+                .then(response => response.json())
+                .then(data => {
+                    const categoryGroup = document.getElementById('categoryGroup');
+                    data.forEach(category => {
+                        const div = document.createElement('div');
+                        div.className = 'checkbox-item';
+                        div.innerHTML = `
+                            <input type="checkbox" id="category-${category.ActivityCategoryID}" name="activityCategory" value="${category.ActivityCategoryID}">
+                            <label for="category-${category.ActivityCategoryID}">${category.ActivityCategoryName}</label>
+                        `;
+                        div.addEventListener('click', function() {
+                            const checkbox = this.querySelector('input');
+                            checkbox.checked = !checkbox.checked;
+                            this.classList.toggle('selected', checkbox.checked);
+                        });
+                        categoryGroup.appendChild(div);
+                    });
+                });
+            
+            // Initialize FullCalendar
+            var calendarEl = document.getElementById('calendar');
+            if (calendarEl) {
+                var calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    locale: 'th',
+                    events: []  // เริ่มต้นด้วยปฏิทินที่ว่างเปล่า
+                });
+                calendar.render();
+            }
+        });
+
+        // Handle form submission for activity recommendations
+        document.getElementById('filterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const selectedDays = Array.from(document.querySelectorAll('input[name="activityDay"]:checked')).map(cb => cb.value);
+            const selectedTypes = Array.from(document.querySelectorAll('input[name="activityType"]:checked')).map(cb => cb.value);
+            const selectedCategories = Array.from(document.querySelectorAll('input[name="activityCategory"]:checked')).map(cb => cb.value);
+
+            const filterData = {
+                days: selectedDays,
+                types: selectedTypes,
+                categories: selectedCategories
+            };
+
+            // Fetch filtered activity recommendations
+            fetch('/activity-recommendations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(filterData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                const recommendationsDiv = document.getElementById('activityRecommendations');
+                recommendationsDiv.innerHTML = '';
+
+                if (data.length === 0) {
+                    recommendationsDiv.innerHTML = '<p>No activities found for the selected filters.</p>';
+                    return;
+                }
+
+                data.forEach(activity => {
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <h3>${activity.ActivityName}</h3>
+                        <p>Location: ${activity.EventLocation}</p>
+                        <p>Date: ${activity.ActivityDate} | Time: ${activity.StartTime} - ${activity.EndTime}</p>
+                        <p>Organizer: ${activity.OrganizationName}</p>
+                    `;
+                    recommendationsDiv.appendChild(div);
+                });
             });
         });
-};
-
-// Handle form submission to fetch and display recommended activities
-    document.getElementById('filterForm').onsubmit = function(event) {
-    event.preventDefault();
-
-        const days = Array.from(document.querySelectorAll('input[name="activityDay"]:checked')).map(cb => cb.value);
-        const types = Array.from(document.querySelectorAll('input[name="activityType"]:checked')).map(cb => cb.value);
-        const categories = Array.from(document.querySelectorAll('input[name="activityCategory"]:checked')).map(cb => cb.value);
-
-        const queryParams = new URLSearchParams();
-            if (days.length > 0) queryParams.append('day', days.join(','));
-            if (types.length > 0) queryParams.append('type', types.join(','));
-            if (categories.length > 0) queryParams.append('category', categories.join(','));
-
-    fetch(`/recommend-activities?${queryParams.toString()}`)
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        const recommendationsDiv = document.getElementById('activityRecommendations');
-        recommendationsDiv.innerHTML = '';
-        if (data.length > 0) {
-            data.forEach(activity => {
-                const activityDiv = document.createElement('div');
-                activityDiv.innerHTML = `
-                    <h3>${activity.ActivityName}</h3>
-                    <p><strong>Description:</strong> ${activity.ActivityDescription || 'No description available'}</p>
-                    <p><strong>Date:</strong> ${activity.ActivityDate}</p>
-                    <p><strong>Time:</strong> ${activity.StartTime} - ${activity.EndTime}</p>
-                    <p><strong>Location:</strong> ${activity.EventLocation}</p>
-                    <p><strong>Organized by:</strong> ${activity.OrganizationName}</p>
-                `;
-                recommendationsDiv.appendChild(activityDiv);
-            });
-        } else {
-            recommendationsDiv.innerHTML = '<p>ไม่พบกิจกรรมที่ตรงกับความสนใจของคุณ</p>';
-        }
-    })
-    .catch(error => {
-        console.error('Fetch error:', error);
-        const recommendationsDiv = document.getElementById('activityRecommendations');
-        recommendationsDiv.innerHTML = '<p>เกิดข้อผิดพลาดในการดึงข้อมูลกิจกรรม</p>';
-    });
-
-};
-
     </script>
 </body>
 </html>

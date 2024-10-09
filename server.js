@@ -1,22 +1,183 @@
 const express = require('express');
 const path = require('path');
-const mysql = require('mysql2'); // ประกาศเพียงครั้งเดียว
+const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const app = express();
 const port = 3000;
+const session = require('express-session');
+const bcrypt = require('bcrypt'); // ใช้สำหรับการ hash password
+const crypto = require('crypto');
+const secretKey = crypto.randomBytes(64).toString('hex');
+console.log(secretKey);
+
+app.use(express.urlencoded({ extended: true }));
 
 // Set up database connection
 const pool = mysql.createPool({
     connectionLimit: 10,
     host: 'localhost',
     user: 'root',
-    password: 'root',
-    database: 'project',
-    port: 8889
+    password: '',
+    database: 'demo_project'
+});
+
+pool.getConnection((err, connection) => {
+    if (err) {
+        console.error('Error connecting to the database:', err);
+    } else {
+        console.log('Connected to MySQL database');
+        connection.release(); // ปล่อยการเชื่อมต่อ
+    }
+});
+
+// Add session middleware
+app.use(session({
+    secret: secretKey,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false } // set to true when using https
+}));
+
+// Serve static files
+app.use(express.static('public')); // public folder สำหรับไฟล์ static เช่น CSS
+
+// Route for root path (localhost:3000/)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'login.html')); // เปิด login.html เป็นหน้าแรก
+});
+
+app.post('/register', async (req, res) => {
+    const { username, password, role } = req.body; // รับข้อมูลจากฟอร์มสมัคร
+    const hashedPassword = await bcrypt.hash(password, 10); // Hash password ด้วย bcrypt
+
+    const query = 'INSERT INTO users (username, password, role) VALUES (?, ?, ?)';
+    pool.query(query, [username, hashedPassword, role], (err, result) => {
+        if (err) {
+            console.error('Error registering user:', err);
+            return res.status(500).send('Error registering user');
+        }
+        
+        // สร้าง session ใหม่หลังการสมัครสำเร็จ
+        req.session.user = username; // หรือข้อมูลที่คุณต้องการเก็บใน session
+
+        // เมื่อสมัครเสร็จ ให้ redirect ไปยังหน้าลงชื่อเข้าใช้
+        res.redirect('/'); // เปลี่ยนเป็น '/'
+    });
+});
+
+
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'login.html')); // หรือใช้ res.render() หากใช้ template engine
+});
+
+// app.post('/login', (req, res) => {
+//     const { username, password } = req.body;
+//     const query = 'SELECT * FROM users WHERE username = ?';
+//     db.query(query, [username], async (err, results) => {
+//         if (err) return res.status(500).send('Error fetching user');
+//         if (results.length === 0) return res.status(400).send('User not found');
+        
+//         const user = results[0];
+//         const match = await bcrypt.compare(password, user.password);
+        
+//         if (match) {
+//             req.session.userId = user.id;
+//             req.session.role = user.role;
+//             res.send('Login successful');
+//         } else {
+//             res.status(400).send('Invalid password');
+//         }
+//     });
+// });
+
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    const query = 'SELECT * FROM users WHERE username = ?';
+
+    pool.query(query, [username], async (err, results) => {
+        if (err) {
+            console.error('Database error:', err);
+            return res.status(500).send('Internal server error');
+        }
+
+        if (results.length > 0) {
+            const user = results[0];
+            const match = await bcrypt.compare(password, user.password);
+            if (match) {
+                req.session.user = user.username;
+                req.session.role = user.role; // บันทึก role ลงใน session
+                // นำไปยังหน้าเฉพาะตาม role
+                if (user.role === 'admin') {
+                    res.redirect('/admin');
+                } else if (user.role === 'organizer') {
+                    res.redirect('/organizer');
+                } else if (user.role === 'participant') {
+                    res.redirect('/participant');
+                } else {
+                    res.redirect('/dashboard'); // หรือหน้าอื่นๆ ที่ต้องการ
+                }
+            } else {
+                res.send('Invalid password');
+            }
+        } else {
+            res.send('Invalid username or password');
+        }
+    });
+});
+
+
+// Authentication middleware
+function isAuthenticated(req, res, next) {
+    if (req.session.user) {
+        return next();
+    } else {
+        res.status(401).send('You need to log in first');
+    }
+}
+
+// app.post('/logout', (req, res) => {
+//     req.session.destroy((err) => {
+//         if (err) return res.status(500).send('Error logging out');
+//         res.send('Logged out successfully');
+//     });
+// });
+
+// Logout route
+app.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.send('Error logging out');
+        }
+        res.redirect('/');
+    });
+});
+
+app.get('/check-login', (req, res) => {
+    if (req.session.userId) {
+        res.status(200).send('Logged in');
+    } else {
+        res.status(401).send('Not logged in');
+    }
+});
+
+
+// Route สำหรับแสดงหน้า signup
+app.get('/signup', (req, res) => {
+    res.sendFile(path.join(__dirname, 'signup.html')); // เส้นทางไปยังไฟล์ signup.html
+});
+
+
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.get('/protected-route', isAuthenticated, (req, res) => {
+    res.send('You are authorized to access this page');
 });
 
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true })); // ใช้สำหรับรับข้อมูลจากฟอร์ม HTML
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve the main page
 app.get('/', (req, res) => {
@@ -63,48 +224,77 @@ app.post('/add-activity', (req, res) => {
     pool.query(sql, values, (error, results) => {
         if (error) {
             console.error('Error inserting activity:', error);
-            res.status(500).send('Error inserting activity: ' + error.message); // แสดงรายละเอียดข้อผิดพลาด
+            res.status(500).send('Error inserting activity: ' + error.message);
             return;
         }
         res.status(200).send('Activity added successfully');
     });
 });
 
-app.get('/recommend-activities', (req, res) => {
-    const { day, type, category } = req.query;
+// // Route for recommending activities
+// app.post('/get-recommendations', (req, res) => {
+//     const { days, types, categories } = req.body;
+
+//     let sql = 'SELECT * FROM activity WHERE ApproveActivity = "Y"';
+//     let params = [];
+
+//     if (days && days.length > 0) {
+//         sql += ' AND DailyID IN (SELECT DailyID FROM dailyid WHERE `Daily Name` IN (?))';
+//         params.push(days);
+//     }
+
+//     if (types && types.length > 0) {
+//         sql += ' AND ActivityTypeID IN (?)';
+//         params.push(types);
+//     }
+
+//     if (categories && categories.length > 0) {
+//         sql += ' AND ActivityCategoryID IN (?)';
+//         params.push(categories);
+//     }
+
+//     pool.query(sql, params, (error, results) => {
+//         if (error) {
+//             console.error('Error fetching recommended activities:', error);
+//             res.status(500).send('Server error');
+//             return;
+//         }
+
+//         res.json(results);
+//     });
+// });
+
+app.post('/activity-recommendations', (req, res) => {
+    const { days, types, categories } = req.body;
 
     let sql = 'SELECT * FROM activity WHERE ApproveActivity = "Y"';
     let params = [];
 
-    if (day) {
-        const dayArray = day.split(',');
+    if (days && days.length > 0) {
         sql += ' AND DailyID IN (SELECT DailyID FROM dailyid WHERE `Daily Name` IN (?))';
-        params.push(dayArray);
+        params.push(days);
     }
 
-    if (type) {
-        const typeArray = type.split(',');
+    if (types && types.length > 0) {
         sql += ' AND ActivityTypeID IN (?)';
-        params.push(typeArray);
+        params.push(types);
     }
 
-    if (category) {
-        const categoryArray = category.split(',');
+    if (categories && categories.length > 0) {
         sql += ' AND ActivityCategoryID IN (?)';
-        params.push(categoryArray);
+        params.push(categories);
     }
 
     pool.query(sql, params, (error, results) => {
         if (error) {
-            console.error('Error fetching activities:', error);
+            console.error('Error fetching recommended activities:', error);
             res.status(500).send('Server error');
             return;
         }
+
         res.json(results);
     });
 });
-
-
 
 
 // Route สำหรับดึงวันที่ของกิจกรรมที่มีอยู่
@@ -161,6 +351,27 @@ app.get('/get-activity-days', (req, res) => {
     });
 });
 
-app.listen(port, () => {
-    console.log(`App running on port ${port}`);
+// Route สำหรับดึงกิจกรรมที่ได้รับการอนุมัติ
+app.get('/get-events', (req, res) => {
+    const sqlQuery = 'SELECT ActivityName, ActivityDate, EndTime FROM activity WHERE ApproveActivity = "Y"';
+    pool.query(sqlQuery, (err, results) => {
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            const events = results.map(activity => ({
+                title: activity.ActivityName,
+                start: activity.ActivityDate,
+                end: activity.EndTime || activity.ActivityDate  // ถ้าไม่มี EndTime ให้ใช้ ActivityDate แทน
+            }));
+            res.json(events);
+        }
+    });
+});
+
+// app.listen(port, () => {
+//     console.log(`App running on port ${port}`);
+// });
+
+app.listen(3000, () => {
+    console.log('Server is running on http://localhost:3000');
 });
