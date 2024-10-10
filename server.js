@@ -75,6 +75,94 @@ async function generateActivityId() {
     });
 }
 
+
+// ฟังก์ชันเพื่อคำนวณวันในช่วงวันที่
+function getDaysInRange(start, end) {
+    const days = [];
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    endDate.setDate(endDate.getDate() + 1); // รวมวันสิ้นสุดด้วย
+
+    while (startDate < endDate) {
+        days.push(startDate.getDay()); // 'getDay()' คืนค่า 0 (อาทิตย์) ถึง 6 (เสาร์)
+        startDate.setDate(startDate.getDate() + 1);
+    }
+    return days;
+}
+
+// ฟังก์ชันเพื่อแมพวันไปยัง DailyID
+function mapDaysToDailyID(days) {
+    const mapping = {
+        'DID1': [1],
+        'DID2': [2],
+        'DID3': [3],
+        'DID4': [4],
+        'DID5': [5],
+        'DID6': [6],
+        'DID7': [0],
+        'DID8': [1, 2],
+        'DID9': [2, 3],
+        'DID10': [3, 4],
+        'DID11': [4, 5],
+        'DID12': [5, 6],
+        'DID13': [6, 0],
+        'DID14': [0, 1],
+        'DID15': [1, 2, 3],
+        'DID16': [2, 3, 4],
+        'DID17': [3, 4, 5],
+        'DID18': [4, 5, 6],
+        'DID19': [5, 6, 0],
+        'DID20': [6, 0, 1],
+        'DID21': [0, 1, 2],
+        'DID22': [1, 2, 3, 4],
+        'DID23': [2, 3, 4, 5],
+        'DID24': [3, 4, 5, 6],
+        'DID25': [4, 5, 6, 0],
+        'DID26': [5, 6, 0, 1],
+        'DID27': [6, 0, 1, 2],
+        'DID28': [0, 1, 2, 3],
+        'DID29': [1, 2, 3, 4, 5],
+        'DID30': [2, 3, 4, 5, 6],
+        'DID31': [3, 4, 5, 6, 0],
+        'DID32': [4, 5, 6, 0, 1],
+        'DID33': [5, 6, 0, 1, 2],
+        'DID34': [6, 0, 1, 2, 3],
+        'DID35': [0, 1, 2, 3, 4],
+        'DID36': [1, 2, 3, 4, 5, 6],
+        'DID37': [2, 3, 4, 5, 6, 0],
+        'DID38': [3, 4, 5, 6, 0, 1],
+        'DID39': [4, 5, 6, 0, 1, 2],
+        'DID40': [5, 6, 0, 1, 2, 3],
+        'DID41': [6, 0, 1, 2, 3, 4],
+        'DID42': [0, 1, 2, 3, 4, 5],
+        'DID43': [0, 1, 2, 3, 4, 5, 6],
+    };
+
+    const resultIDs = [];
+    for (const [id, daysArray] of Object.entries(mapping)) {
+        if (daysArray.every(day => days.includes(day))) {
+            resultIDs.push(id);
+        }
+    }
+
+    return resultIDs;
+}
+
+// Route ใหม่สำหรับคำนวณ DailyID
+app.post('/calculate-daily-ids', (req, res) => {
+    const { ActivityDate, ActivityEndDate } = req.body;
+
+    // คำนวณวันในช่วงวันที่
+    const daysInRange = getDaysInRange(ActivityDate, ActivityEndDate);
+
+    // แมพวันไปยัง DailyID
+    const dailyIDs = mapDaysToDailyID(daysInRange);
+
+    // ส่ง DailyID กลับเป็น JSON
+    res.json({ dailyIDs });
+});
+
+
 //  Route สำหรับเพิ่มกิจกรรม (Organizer)
 app.post('/add-activity', async (req, res) => {
     try {
