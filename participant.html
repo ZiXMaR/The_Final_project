@@ -15,25 +15,81 @@
 
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2b49, #243b63);
+            color: #fff;
             margin: 0;
             padding: 20px;
         }
 
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #243b63;
+            padding: 15px 30px;
+            border-bottom: 2px solid #ffd700;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #ffd700;
+        }
+
+        .navbar .logout-btn {
+            padding: 10px 20px;
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            background-color: transparent;
+            color: #ffd700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .navbar .logout-btn:hover {
+            background-color: #ffd700;
+            color: #1a2b49;
+        }
+
         h1 {
             text-align: center;
-            color: #007bff;
+            color: #ffd700;
         }
 
         .form-container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            background-color: #1a2b49;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            border: 1px solid #ffd700;
+        }
+
+        .burger-menu {
+            display: inline-block;
+            cursor: pointer;
+            padding: 12px 15px;
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            background-color: transparent;
+            color: #ffd700;
+            margin-bottom: 20px;
+            transition: background-color 0.3s, color 0.3s;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .burger-menu:hover {
+            background-color: #ffd700;
+            color: #1a2b49;
+        }
+
+        .burger-menu.active:after {
+            content: '✕';
         }
 
         .checkbox-group {
@@ -45,103 +101,86 @@
 
         .checkbox-item {
             display: inline-block;
-            padding: 10px 20px;
-            border: 2px solid #007bff;
-            border-radius: 5px;
-            background-color: #f0f8ff;
+            padding: 12px 15px;
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            background-color: #1a2b49;
+            color: #ffd700;
             cursor: pointer;
             text-align: center;
-            transition: background-color 0.3s, border-color 0.3s;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         .checkbox-item:hover {
-            background-color: #e0f0ff;
-            border-color: #0056b3;
+            background-color: #ffd700;
+            color: #1a2b49;
         }
 
         .checkbox-item.selected {
-            background-color: #007bff;
-            color: #fff;
-            border-color: #0056b3;
+            background-color: #ffd700;
+            color: #1a2b49;
         }
 
         .checkbox-item input {
             display: none;
         }
 
-        .burger-menu {
-            display: inline-block;
-            cursor: pointer;
-            padding: 10px;
-            border: 2px solid #007bff;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: #fff;
-            margin-bottom: 20px;
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        .burger-menu:hover {
-            background-color: #0056b3;
-        }
-
-        .burger-menu:after {
-            content: '☰';
-            font-size: 20px;
-        }
-
-        .burger-menu.active:after {
-            content: '✕';
-        }
-
         button[type="submit"] {
             display: block;
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             border: none;
-            border-radius: 5px;
-            background-color: #007bff;
-            color: #fff;
-            font-size: 16px;
+            border-radius: 10px;
+            background-color: #ffd700;
+            color: #1a2b49;
+            font-size: 18px;
             cursor: pointer;
             transition: background-color 0.3s;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-
-        #activityRecommendations {
             margin-top: 20px;
         }
 
+        button[type="submit"]:hover {
+            background-color: #e6c300;
+        }
+
+        #activityRecommendations {
+            margin-top: 30px;
+            color: #fff;
+        }
+
         #activityRecommendations div {
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #fff;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border: 1px solid #ffd700;
+            border-radius: 10px;
+            background-color: #243b63;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
         #activityRecommendations h3 {
             margin: 0 0 10px;
-            color: #007bff;
+            color: #ffd700;
         }
 
         /* FullCalendar */
         #calendar {
-            margin-top: 20px;
-            max-width: 800px;
+            margin-top: 30px;
+            max-width: 900px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            background-color: #1a2b49;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            border: 1px solid #ffd700;
         }
     </style>
 </head>
 <body>
+    <div class="navbar">
+        <h2>Participant Page</h2>
+        <button class="logout-btn" onclick="handleLogout()">Logout</button>
+    </div>
+    
     <h1>Participant Page</h1>
     <div class="form-container">
         <form id="filterForm">
@@ -315,6 +354,12 @@
                 });
             });
         });
+        
+        function handleLogout() {
+        // เปลี่ยนเส้นทางหรือจัดการ logout ที่นี่
+        window.location.href = '/logout'; // ตัวอย่างการเปลี่ยนเส้นทางไปหน้า logout
+}
+
     </script>
 </body>
 </html>

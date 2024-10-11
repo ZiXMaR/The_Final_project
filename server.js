@@ -67,8 +67,9 @@ app.post('/register', async (req, res) => {
 
 
 app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'login.html')); // หรือใช้ res.render() หากใช้ template engine
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
+
 
 // app.post('/login', (req, res) => {
 //     const { username, password } = req.body;
@@ -167,8 +168,6 @@ app.get('/signup', (req, res) => {
     res.sendFile(path.join(__dirname, 'signup.html')); // เส้นทางไปยังไฟล์ signup.html
 });
 
-
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -197,6 +196,35 @@ app.get('/participant', (req, res) => {
 // Serve the Admin page
 app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+app.post('/add-student', (req, res) => {
+    const { studentID, name, year, department, program } = req.body;
+    const query = `INSERT INTO students (studentID, name, year, department, program) VALUES (?, ?, ?, ?, ?)`;
+    
+    db.query(query, [studentID, name, year, department, program], (err, result) => {
+        if (err) throw err;
+        res.json({ message: 'Student added successfully' });
+    });
+});
+
+app.put('/update-student/:id', (req, res) => {
+    const { studentID, name, year, department, program } = req.body;
+    const query = `UPDATE students SET studentID = ?, name = ?, year = ?, department = ?, program = ? WHERE id = ?`;
+    
+    db.query(query, [studentID, name, year, department, program, req.params.id], (err, result) => {
+        if (err) throw err;
+        res.json({ message: 'Student updated successfully' });
+    });
+});
+
+app.delete('/delete-student/:id', (req, res) => {
+    const query = `DELETE FROM students WHERE id = ?`;
+    
+    db.query(query, [req.params.id], (err, result) => {
+        if (err) throw err;
+        res.json({ message: 'Student deleted successfully' });
+    });
 });
 
 // Route for adding activities (Organizer)
