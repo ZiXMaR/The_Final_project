@@ -167,7 +167,8 @@
 
         <p>แก้ไขกิจกรรม</p>
         <p class="details">รายละเอียดกิจกรรม</p>
-        <form action="/edit-activity" method="POST">
+        <form id="activityForm" action="/edit-activity" method="POST">
+
             <div class="form-group">
                 <label for="Activityid">รหัสกิจกรรม</label>
                 <input type="text" id="Activityid" name="Activityid" placeholder="Activity ID" required>
@@ -190,7 +191,7 @@
                 <input type="date" id="ActivityEndDate" name="ActivityEndDate" placeholder="กรอกวันสิ้นสุดกิจกรรม" required>
             </div>
 
-            <div class="form-group">
+            <!-- <div class="form-group">
                 <label for="DailyID">วันจัดกิจกรรม (จันทร์ - อาทิตย์)</label>
                 <select id="DailyID" name="DailyID" required>
                     <option value="DID01">จันทร์</option>
@@ -201,7 +202,7 @@
                     <option value="DID06">เสาร์</option>
                     <option value="DID07">อาทิตย์</option>
                 </select>
-            </div>
+            </div> -->
             
             <div class="form-group">
                 <label for="StartTime">เวลาเริ่มกิจกรรม</label>
@@ -327,5 +328,63 @@
             </div>
         </form>
     </div>
+
+
+    <script>
+        const form = document.querySelector('form');
+
+        document.getElementById('activityForm').addEventListener('submit', async (event) => {
+            event.preventDefault(); // ป้องกันไม่ให้ฟอร์มส่งข้อมูลแบบปกติ
+
+            const formData = new FormData(event.target);
+            const activityData = Object.fromEntries(formData.entries());
+
+            // ส่งวันที่ไปยังเซิร์ฟเวอร์เพื่อคำนวณ DailyID
+            const response = await fetch('/calculate-daily-ids', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ActivityDate: activityData.ActivityDate,
+                    ActivityEndDate: activityData.ActivityEndDate
+                }),
+            });
+
+            if (response.ok) {
+                const { dailyIDs } = await response.json();
+
+                // ค้นหาค่าที่มากที่สุดจาก dailyIDs
+                const maxDailyID = dailyIDs.length > 0 ? dailyIDs[dailyIDs.length - 1] : null; // สมมติว่า dailyIDs เรียงตามลำดับ
+
+                // นำ DailyID ที่มากที่สุดไปใส่ใน activityData
+                if (maxDailyID) {
+                    activityData.DailyID = maxDailyID; // ส่งเฉพาะ DailyID ที่มากที่สุด
+                }
+
+                // เรียกใช้ API เพื่อแก้ไขกิจกรรม
+                const addActivityResponse = await fetch('/edit-activity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(activityData),
+                });
+
+                if (addActivityResponse.ok) {
+                    alert('Activity edit successfully!');
+                } else {
+                    alert('Error edit activity: ' + await addActivityResponse.text());
+                }
+            } else {
+                alert('Error calculating DailyID: ' + await response.text());
+            }
+        });
+
+
+    </script>
+
+
+
 </body>
 </html>

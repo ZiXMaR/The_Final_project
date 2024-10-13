@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Activities</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+
+        .app-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #00ccff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .app-button:hover {
+            background-color: #00ccff;
+        }
+
+        .edit-button {
+            position: absolute;
+            /* จัดให้มีตำแหน่งเหมือนปุ่มแก้ไข */
+            top: 20px;
+            /* ให้สูงเท่ากับปุ่มแก้ไข */
+            left: 150px;
+            /* ขยับให้ห่างจากปุ่มแก้ไข */
+            background-color: #28a745;
+            /* สีแดงสำหรับปุ่มลบ */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .edit-button:hover {
+            background-color: #218838;
+        }
+
+        .deletePage-button {
+            position: absolute;
+            top: 20px;
+            left: 280px;
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .deletePage-button:hover {
+            background-color: #c82333;
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+
+
+        h1 {
+            color: #007bff;
+            margin: 20px 0;
+        }
+
+        .container {
+            width: 90vw;
+            max-width: 800px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container p {
+            margin: 0;
+            padding: 10px 0;
+            text-align: center;
+            /* จัดข้อความกลาง */
+        }
+
+        .container .details {
+            margin-right: 120px;
+            /* ขยับ "รายละเอียดกิจกรรม" มาด้านหน้าเล็กน้อย */
+        }
+
+        .activity-card {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 95%;
+            /* กำหนดให้กล่องกิจกรรมกว้างเต็ม */
+        }
+
+        .editATV-button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .editATV-button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/organizer" class="app-button">เพิ่มกิจกรรม</a>
+    <a href="/organizerEdit" class="edit-button">แก้ไขกิจกรรม</a>
+    <a href="/organizerDelet" class="deletePage-button">ลบกิจกรรม</a>
+    <a href="/organizerHome" class="home-button">หน้าหลัก</a>
+
+
+    <h1>Organizer Page</h1>
+    <div class="container">
+        <p>แก้ไขกิจกรรม</p>
+        <p class="details">กิจกรรมที่มีอยู่</p>
+    </div>
+    <div class="container" id="activities-container"></div>
+
+    <script>
+        // ฟังก์ชันเพื่อดึงข้อมูลกิจกรรม
+        async function fetchActivities() {
+            const response = await fetch('/activities');
+            const activities = await response.json();
+
+            const container = document.getElementById('activities-container');
+            container.innerHTML = ''; // ล้างข้อมูลเก่า
+
+            activities.forEach(activity => {
+                const activityCard = document.createElement('div');
+                activityCard.classList.add('activity-card');
+                activityCard.innerHTML = `
+                    <h3>${activity.ActivityName}</h3>
+                    <p><strong>วันที่จัดกิจกรรม:</strong> ${activity.ActivityDate}</p>
+                    <p><strong>สถานที่:</strong> ${activity.EventLocation}</p>
+                    <p><strong>คำอธิบาย:</strong> ${activity.ActivityDescription}</p>
+                    <button class="editATV-button" onclick="editActivity(${activity.Activityid})">แก้ไข</button>
+                `;
+                container.appendChild(activityCard);
+            });
+        }
+
+        // ฟังก์ชันเพื่อไปยังหน้าแก้ไขพร้อม Activityid
+        function editActivity(activityId) {
+            // ไปยังหน้าแก้ไข โดยส่ง activityId ผ่าน URL
+            window.location.href = `/editActivity?Activityid=${activityId}`;
+        }
+
+
+
+        // เรียกใช้งานฟังก์ชันเพื่อดึงกิจกรรม
+        fetchActivities();
+    </script>
+</body>
+
+</html>

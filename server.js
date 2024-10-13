@@ -44,6 +44,14 @@ app.get('/organizerHome', (req, res) => {
     res.sendFile(path.join(__dirname, 'organizerHome.html'));
 });
 
+// Serve the OrganizerEditHome page
+app.get('/organizerEditHome', (req, res) => {
+    res.sendFile(path.join(__dirname, 'organizerEditHome.html'));
+});
+
+
+
+//------------------------------------------------------------------------------------------
 
 // Serve the Participant page
 app.get('/participant', (req, res) => {
