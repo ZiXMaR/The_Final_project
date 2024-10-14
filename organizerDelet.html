@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +15,7 @@
             background-color: #f8f9fa;
             text-align: center;
         }
-        
+
         .app-button {
             position: absolute;
             top: 20px;
@@ -26,20 +27,27 @@
             text-decoration: none;
             font-size: 14px;
         }
+
         .app-button:hover {
-            background-color: #00ccff;
+            background-color: #00b8e6;
         }
+
         .edit-button {
-            position: absolute; /* จัดให้มีตำแหน่งเหมือนปุ่มแก้ไข */
-            top: 20px; /* ให้สูงเท่ากับปุ่มแก้ไข */
-            left: 150px; /* ขยับให้ห่างจากปุ่มแก้ไข */
-            background-color: #28a745; /* สีแดงสำหรับปุ่มลบ */
+            position: absolute;
+            /* จัดให้มีตำแหน่งเหมือนปุ่มแก้ไข */
+            top: 20px;
+            /* ให้สูงเท่ากับปุ่มแก้ไข */
+            left: 150px;
+            /* ขยับให้ห่างจากปุ่มแก้ไข */
+            background-color: #28a745;
+            /* สีแดงสำหรับปุ่มลบ */
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
             text-decoration: none;
             font-size: 14px;
         }
+
         .edit-button:hover {
             background-color: #218838;
         }
@@ -55,6 +63,7 @@
             text-decoration: none;
             font-size: 14px;
         }
+
         .deletePage-button:hover {
             background-color: #c82333;
         }
@@ -70,6 +79,7 @@
             text-decoration: none;
             font-size: 14px;
         }
+
         .home-button:hover {
             background-color: #0056b3;
         }
@@ -82,7 +92,7 @@
 
         .container {
             width: 90vw;
-            max-width: 800px;
+            max-width: 620px;
             background-color: #ffffff;
             padding: 20px;
             border-radius: 15px;
@@ -93,13 +103,25 @@
             align-items: center;
         }
 
+        .container-c {
+            width: 90vw;
+            max-width: 650px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
         .container p {
             margin: 0;
             padding: 10px 0;
-            text-align: center; /* จัดข้อความกลาง */
+            text-align: center;
+            /* จัดข้อความกลาง */
         }
+
         .container .details {
-            margin-right: 120px; /* ขยับ "รายละเอียดกิจกรรม" มาด้านหน้าเล็กน้อย */
+            margin-right: 120px;
+            /* ขยับ "รายละเอียดกิจกรรม" มาด้านหน้าเล็กน้อย */
         }
 
         .activity-card {
@@ -109,7 +131,19 @@
             padding: 20px;
             margin: 10px 0;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            width: 95%; /* กำหนดให้กล่องกิจกรรมกว้างเต็ม */
+            width: 95%;
+            /* กำหนดให้กล่องกิจกรรมกว้างเต็ม */
+        }
+
+        .activity-details {
+            text-align: left;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .activity-details strong {
+            color: #007bff;
         }
 
         .delete-button {
@@ -126,19 +160,20 @@
         }
     </style>
 </head>
+
 <body>
     <a href="/organizer" class="app-button">เพิ่มกิจกรรม</a>
-    <a href="/organizerEdit" class="edit-button">แก้ไขกิจกรรม</a>
+    <a href="/organizerEditHome.html" class="edit-button">แก้ไขกิจกรรม</a>
     <a href="/organizerDelet" class="deletePage-button">ลบกิจกรรม</a>
     <a href="/organizerHome" class="home-button">หน้าหลัก</a>
 
 
-    <h1>Organizer Page</h1>
+    <h1>ผู้จัดกิจกรรม</h1>
     <div class="container">
-        <p>ลบกิจกรรม</p>
-        <p class="details">กิจกรรมที่มีอยู่</p>
+        <h3>ลบกิจกรรม</h3>
+        <p>กิจกรรมที่มีอยู่</p>
     </div>
-    <div class="container" id="activities-container"></div>
+    <div class="container-c" id="activities-container"></div>
 
     <script>
         // ฟังก์ชันเพื่อดึงข้อมูลกิจกรรม
@@ -153,10 +188,13 @@
                 const activityCard = document.createElement('div');
                 activityCard.classList.add('activity-card');
                 activityCard.innerHTML = `
-                    <h3>${activity.ActivityName}</h3>
-                    <p><strong>วันที่จัดกิจกรรม:</strong> ${activity.ActivityDate}</p>
-                    <p><strong>สถานที่:</strong> ${activity.EventLocation}</p>
-                    <p><strong>คำอธิบาย:</strong> ${activity.ActivityDescription}</p>
+                    <p><strong>ชื่อกิจกรรม:</strong> ${activity.ActivityName}</p>
+                    <div class="activity-details">
+                        <p><strong>หน่วยงาน:</strong> ${activity.OrganizationName}</p>
+                        <p><strong>วันที่จัด:</strong> ${new Date(activity.ActivityDate).toLocaleDateString()}</p>
+                        <p><strong>วันสิ้นสุด:</strong> ${new Date(activity.ActivityEndDate).toLocaleDateString()}</p>
+                        <p><strong>ภาค/ปีการศึกษา:</strong> ${activity.SemesterAcademicYear}</p>
+                    </div>
                     <button class="delete-button" onclick="deleteActivity('${activity.Activityid}')">ลบกิจกรรม</button>
                 `;
                 container.appendChild(activityCard);
@@ -187,4 +225,5 @@
         fetchActivities();
     </script>
 </body>
+
 </html>

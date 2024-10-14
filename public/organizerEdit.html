@@ -1,10 +1,11 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แก้ไขกิจกรรม</title>
+
     <style>
         body {
             margin: 0;
@@ -29,7 +30,7 @@
         }
 
         .app-button:hover {
-            background-color: #00ccff;
+            background-color: #00b8e6;
         }
 
         .edit-button {
@@ -177,21 +178,22 @@
             background-color: #0056b3;
         }
     </style>
+
+
 </head>
 
 
 <body>
+
     <a href="/organizer" class="app-button">เพิ่มกิจกรรม</a>
-    <a href="/organizerEdit" class="edit-button">แก้ไขกิจกรรม</a>
+    <a href="/organizerEditHome.html" class="edit-button">แก้ไขกิจกรรม</a>
     <a href="/organizerDelet" class="delete-button">ลบกิจกรรม</a>
     <a href="/organizerHome" class="home-button">หน้าหลัก</a>
 
-
-
-    <h1>Organizer Page</h1>
+    <h1>ผู้จัดกิจกรรม</h1>
     <div class="container">
 
-        <p>แก้ไขกิจกรรม</p>
+        <h3>แก้ไขกิจกรรม</h3>
         <p class="details">รายละเอียดกิจกรรม</p>
         <form id="editForm">
 
@@ -216,6 +218,8 @@
                     required>
             </div>
 
+            <!-- เก็บไว้ -->
+            <input type="hidden" id="DailyID" name="DailyID">
 
             <div class="form-group">
                 <label for="StartTime">เวลาเริ่มกิจกรรม</label>
@@ -281,11 +285,11 @@
             <div class="form-group">
                 <label for="NumberOfApplications">จำนวนที่รับสมัคร</label>
                 <input type="number" id="NumberOfApplications" name="NumberOfApplications"
-                    placeholder="กรอกจำนวนที่รับสมัคร">
+                    placeholder="กรอกจำนวนที่รับสมัคร" required>
             </div>
             <div class="form-group">
                 <label for="ApplicationChannel">ช่องทางรับสมัคร</label>
-                <input type="text" id="ApplicationChannel" name="ApplicationChannel" placeholder="กรอกช่องทางรับสมัคร">
+                <input type="text" id="ApplicationChannel" name="ApplicationChannel" placeholder="กรอกช่องทางรับสมัคร" required>
             </div>
             <div class="form-group">
                 <label for="ApplicationDeadline">วันสิ้นสุดการรับสมัคร</label>
@@ -345,10 +349,10 @@
                 </select>
             </div>
 
-            <div class="form-group" style="display:none;">
-                <label for="ApproveActivity">คำอนุมัติ</label>
-                <input type="hidden" id="ApproveActivity" name="ApproveActivity" value="Y">
-            </div>
+            <!-- เก็บไว้ -->
+            <label for="ApproveActivity">อนุมัติกิจกรรม:</label>
+            <input type="checkbox" id="ApproveActivity" name="ApproveActivity"><br>
+
 
             <div class="save-button-container">
                 <button type="submit">บันทึกการแก้ไข</button>
@@ -356,21 +360,54 @@
         </form>
     </div>
 
-
     <script>
+        // ดึง Activityid จาก URL
         const params = new URLSearchParams(window.location.search);
         const Activityid = params.get('Activityid');
 
+        // เมื่อโหลดหน้าเสร็จ ดึงข้อมูลกิจกรรมจากเซิร์ฟเวอร์
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch(`/api/activities/${Activityid}`)
+                .then(response => response.json())
+                .then(activity => {
 
-        const form = document.querySelector('form');
+                    // ฟังก์ชันสำหรับแปลงวันที่จาก ISO 8601 ให้เป็นรูปแบบ yyyy-MM-dd
+                    const formatDate = (isoString) => {
+                        const date = new Date(isoString);
+                        const year = date.getFullYear();
+                        const month = String(date.getMonth() + 1).padStart(2, '0'); // เพิ่ม 0 ถ้าเดือนเป็นตัวเลขหลักเดียว
+                        const day = String(date.getDate()).padStart(2, '0'); // เพิ่ม 0 ถ้าวันเป็นตัวเลขหลักเดียว
+                        return `${year}-${month}-${day}`;
+                    };
 
-        document.getElementById('editForm').addEventListener('submit', async (event) => {
-            event.preventDefault(); // ป้องกันไม่ให้ฟอร์มส่งข้อมูลแบบปกติ
 
-            const formData = new FormData(event.target);
-            const activityData = Object.fromEntries(formData.entries());
+                    document.getElementById('ActivityCategoryID').value = activity.ActivityCategoryID;
+                    document.getElementById('ActivityTypeID').value = activity.ActivityTypeID;
+                    document.getElementById('ActivityName').value = activity.ActivityName;
+                    document.getElementById('ActivityDate').value = formatDate(activity.ActivityDate);
+                    document.getElementById('DailyID').value = activity.DailyID;
+                    document.getElementById('ActivityHours').value = activity.ActivityHours;
+                    document.getElementById('StartTime').value = activity.StartTime;
+                    document.getElementById('EndTime').value = activity.EndTime;
+                    document.getElementById('OrganizationName').value = activity.OrganizationName;
+                    document.getElementById('EventLocation').value = activity.EventLocation;
+                    document.getElementById('NumberOfApplications').value = activity.NumberOfApplications;
+                    document.getElementById('ApplicationChannel').value = activity.ApplicationChannel;
+                    document.getElementById('ApplicationDeadline').value = formatDate(activity.ApplicationDeadline);
+                    document.getElementById('SemesterAcademicYear').value = activity.SemesterAcademicYear;
+                    document.getElementById('AcademicYear').value = activity.AcademicYear;
+                    document.getElementById('Department').value = activity.Department;
+                    document.getElementById('Major').value = activity.Major;
+                    document.getElementById('ActivityDescription').value = activity.ActivityDescription;
+                    document.getElementById('ApproveActivity').checked = activity.ApproveActivity;
+                    document.getElementById('ActivityEndDate').value = formatDate(activity.ActivityEndDate);
+                })
+                .catch(error => console.error('Error fetching activity:', error));
+        });
 
-            // ส่งวันที่ไปยังเซิร์ฟเวอร์เพื่อคำนวณ DailyID
+
+        // ฟังก์ชันสำหรับคำนวณ DailyID จาก ActivityDate และ ActivityEndDate
+        async function calculateDailyID(activityData) {
             const response = await fetch('/calculate-daily-ids', {
                 method: 'POST',
                 headers: {
@@ -388,307 +425,94 @@
                 // ค้นหาค่าที่มากที่สุดจาก dailyIDs
                 const maxDailyID = dailyIDs.length > 0 ? dailyIDs[dailyIDs.length - 1] : null; // สมมติว่า dailyIDs เรียงตามลำดับ
 
-                // นำ DailyID ที่มากที่สุดไปใส่ใน activityData
+                return maxDailyID; // คืนค่า DailyID ที่มากที่สุด
+            } else {
+                throw new Error('Error calculating DailyID: ' + await response.text());
+            }
+        }
+
+
+
+        // จัดการเมื่อส่งฟอร์ม
+        document.getElementById('editForm').addEventListener('submit', async function (event) {
+            event.preventDefault(); // ป้องกันการรีเฟรชหน้า
+
+            // ดึงข้อมูลจากฟอร์ม
+            const formData = {
+                ActivityCategoryID: document.getElementById('ActivityCategoryID').value,
+                ActivityTypeID: document.getElementById('ActivityTypeID').value,
+                ActivityName: document.getElementById('ActivityName').value,
+                ActivityDate: document.getElementById('ActivityDate').value,
+                DailyID: document.getElementById('DailyID').value,
+                ActivityHours: document.getElementById('ActivityHours').value,
+                StartTime: document.getElementById('StartTime').value,
+                EndTime: document.getElementById('EndTime').value,
+                OrganizationName: document.getElementById('OrganizationName').value,
+                EventLocation: document.getElementById('EventLocation').value,
+                NumberOfApplications: document.getElementById('NumberOfApplications').value,
+                ApplicationChannel: document.getElementById('ApplicationChannel').value,
+                ApplicationDeadline: document.getElementById('ApplicationDeadline').value,
+                SemesterAcademicYear: document.getElementById('SemesterAcademicYear').value,
+                AcademicYear: document.getElementById('AcademicYear').value,
+                Department: document.getElementById('Department').value,
+                Major: document.getElementById('Major').value,
+                ActivityDescription: document.getElementById('ActivityDescription').value,
+                ApproveActivity: document.getElementById('ApproveActivity').checked ? 'Y' : 'N', // ส่งค่า Y ถ้า checked, N ถ้าไม่
+                ActivityEndDate: document.getElementById('ActivityEndDate').value
+            };
+
+            console.log(formData);
+
+
+            // คำนวณ DailyID
+            try {
+                const maxDailyID = await calculateDailyID(formData);
+
                 if (maxDailyID) {
-                    activityData.DailyID = maxDailyID; // ส่งเฉพาะ DailyID ที่มากที่สุด
+                    formData.DailyID = maxDailyID; // ใส่ค่า DailyID ที่มากที่สุดใน formData
                 }
 
-                // // เรียกใช้ API เพื่อแก้ไขกิจกรรม
-                // const addActivityResponse = await fetch('/edit-activity', {
-                //     method: 'POST',
-                //     headers: {
-                //         'Content-Type': 'application/json',
-                //     },
-                //     body: JSON.stringify(activityData),
-                // });
+                // ส่งข้อมูลไปอัปเดตที่เซิร์ฟเวอร์
+                const updateResponse = await fetch(`/api/activities/${Activityid}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
 
-
-
-                // if (addActivityResponse.ok) {
-                //     alert('Activity edit successfully!');
-                // } else {
-                //     alert('Error edit activity: ' + await addActivityResponse.text());
-                // }
+                if (updateResponse.ok) {
+                    alert('บันทึกการแก้ไขสำเร็จ!');
+                    console.log(formData); // ตรวจสอบว่าข้อมูลถูกต้องก่อนส่งไปยัง backend
+                    window.location.href = '/organizerEditHome.html'; // ย้อนกลับไปยังหน้าแรกหลังอัปเดตเสร็จ
+                } else {
+                    alert('Error updating activity: ' + await updateResponse.text());
+                }
+            } catch (error) {
+                console.error('Error calculating DailyID:', error);
+                alert(error.message);
             }
 
-            else {
-                alert('Error calculating DailyID: ' + await response.text());
-            }
-        });
-
-        // เมื่อโหลดหน้าเสร็จ ดึงข้อมูลกิจกรรมจากเซิร์ฟเวอร์
-        document.addEventListener("DOMContentLoaded", function () {
-            fetch(`/api/activities/${Activityid}`)
-                .then(response => response.json())
-                .then(activity => {
-                    document.getElementById('ActivityCategoryID').value = activity.ActivityCategoryID;
-                    document.getElementById('ActivityTypeID').value = activity.ActivityTypeID;
-                    document.getElementById('ActivityName').value = activity.ActivityName;
-                    document.getElementById('ActivityDate').value = activity.ActivityDate;
-                    document.getElementById('DailyID').value = activity.DailyID;
-                    document.getElementById('ActivityHours').value = activity.ActivityHours;
-                    document.getElementById('StartTime').value = activity.StartTime;
-                    document.getElementById('EndTime').value = activity.EndTime;
-                    document.getElementById('OrganizationName').value = activity.OrganizationName;
-                    document.getElementById('EventLocation').value = activity.EventLocation;
-                    document.getElementById('NumberOfApplications').value = activity.NumberOfApplications;
-                    document.getElementById('ApplicationChannel').value = activity.ApplicationChannel;
-                    document.getElementById('ApplicationDeadline').value = activity.ApplicationDeadline;
-                    document.getElementById('SemesterAcademicYear').value = activity.SemesterAcademicYear;
-                    document.getElementById('AcademicYear').value = activity.AcademicYear;
-                    document.getElementById('Department').value = activity.Department;
-                    document.getElementById('Major').value = activity.Major;
-                    document.getElementById('ActivityDescription').value = activity.ActivityDescription;
-                    document.getElementById('ApproveActivity').value = activity.ApproveActivity;
-                    document.getElementById('ActivityEndDate').value = activity.ActivityEndDate;
-                })
-                .catch(error => console.error('Error fetching activity:', error));
-        });
-
-        // จัดการเมื่อส่งฟอร์ม
-        document.getElementById('editForm').addEventListener('submit', function (event) {
-            event.preventDefault(); // ป้องกันการรีเฟรชหน้า
-
-            // ดึงข้อมูลจากฟอร์ม
-            const formData = {
-                ActivityCategoryID: document.getElementById('ActivityCategoryID').value,
-                ActivityTypeID: document.getElementById('ActivityTypeID').value,
-                ActivityName: document.getElementById('ActivityName').value,
-                ActivityDate: document.getElementById('ActivityDate').value,
-                DailyID: document.getElementById('DailyID').value,
-                ActivityHours: document.getElementById('ActivityHours').value,
-                StartTime: document.getElementById('StartTime').value,
-                EndTime: document.getElementById('EndTime').value,
-                OrganizationName: document.getElementById('OrganizationName').value,
-                EventLocation: document.getElementById('EventLocation').value,
-                NumberOfApplications: document.getElementById('NumberOfApplications').value,
-                ApplicationChannel: document.getElementById('ApplicationChannel').value,
-                ApplicationDeadline: document.getElementById('ApplicationDeadline').value,
-                SemesterAcademicYear: document.getElementById('SemesterAcademicYear').value,
-                AcademicYear: document.getElementById('AcademicYear').value,
-                Department: document.getElementById('Department').value,
-                Major: document.getElementById('Major').value,
-                ActivityDescription: document.getElementById('ActivityDescription').value,
-                ApproveActivity: document.getElementById('ApproveActivity').value,
-                ActivityEndDate: document.getElementById('ActivityEndDate').value
-            };
-
-            // ส่งข้อมูลไปอัปเดตที่เซิร์ฟเวอร์
-            fetch(`/api/activities/${Activityid}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    alert('บันทึกการแก้ไขสำเร็จ!');
-                    console.log(formData);  // ตรวจสอบว่าข้อมูลถูกต้องก่อนส่งไปยัง backend
-                    window.location.href = '/organizerEditHome.html'; // ย้อนกลับไปยังหน้าแรกหลังอัปเดตเสร็จ
-                })
-                .catch(error => console.error('Error updating activity:', error));
-            console.log(formData);  // ตรวจสอบว่าข้อมูลถูกต้องก่อนส่งไปยัง backend
-        });
 
 
-    </script>
+            // // ส่งข้อมูลไปอัปเดตที่เซิร์ฟเวอร์
+            // fetch(`/api/activities/${Activityid}`, {
+            //     method: 'PUT',
+            //     headers: {
+            //         'Content-Type': 'application/json'
+            //     },
+            //     body: JSON.stringify(formData)
+            // })
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         alert('บันทึกการแก้ไขสำเร็จ!');
+            //         console.log(formData);  // ตรวจสอบว่าข้อมูลถูกต้องก่อนส่งไปยัง backend
+            //         window.location.href = '/organizerEditHome.html'; // ย้อนกลับไปยังหน้าแรกหลังอัปเดตเสร็จ
+            //     })
+            //     .catch(error => console.error('Error updating activity:', error));
+            // console.log(formData);  // ตรวจสอบว่าข้อมูลถูกต้องก่อนส่งไปยัง backend
 
-
-
-</body>
-
-</html> -->
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แก้ไขกิจกรรม</title>
-</head>
-
-<body>
-    <h1>แก้ไขกิจกรรม</h1>
-
-    <form id="editForm">
-
-
-        <div class="form-group">
-            <label for="ActivityCategoryID">หมวดหมู่กิจกรรม</label>
-            <select id="ActivityCategoryID" name="ActivityCategoryID" required>
-                <option value="ACID01">กิจกรรมเสริมสร้างสมรรถนะ</option>
-                <option value="ACID02">กิจกรรมเข้าร่วมตามความสนใจ</option>
-            </select>
-
-        </div>
-        <div class="form-group">
-            <label for="ActivityTypeID">ประเภทกิจกรรม</label>
-            <select id="ActivityTypeID" name="ActivityTypeID" required>
-                <option value="ATID01">1.กิจกรรมเสริมสร้างการพัฒนาทักษะการใช้ชีวิตอย่างมีความสุข เป็นส่วนหนึ่งของ
-                    มหาวิทยาลัย ชุมชน สังคม และมีความเป็นพลเมืองโลก</option>
-                <option value="ATID02">2.กิจกรรมเสริมสร้างการพัฒนาทักษะแห่งศตวรรษที่ 21 เช่น กิจกรรมเสริมสร้าง
-                    ทักษะการสื่อสาร ความฉลาดทางอารมณ์ ความคิดสร้างสรรค์ การคิดเชิงวิเคราะห์ การคิดเชิงวิพากษ์
-                    การคิดอย่างมีวิจารณญาณ การบริหารเวลา การแก้ไขปัญหาที่มีความซับซ้อน และการเรียนรู้ตลอดชีวิต
-                </option>
-                <option value="ATID03">3.กิจกรรมเสริมสร้างการพัฒนาทักษะการมีส่วนร่วมทางสังคม มีจิตสำนึกสาธารณะ
-                    มุ่งเน้นประโยชน์ของเพื่อนมนุษย์ เรียนรู้สังคม เรียนรู้ชุมชน สามารถทำงานร่วมกับชุมชนได้</option>
-                <option value="ATID04">4.กิจกรรมเสริมสร้างการพัฒนาทักษะภาวะผู้นำ การทำงานเป็นทีม
-                    การทำงานร่วมกับผู้อื่น</option>
-                <option value="ATID05">5.กิจกรรมเสริมสร้างการพัฒนาทักษะภาษาต่างประเทศ สมรรถนะสากล
-                    มีความเข้าใจในสังคม และวัฒนธรรมต่างประเทศ</option>
-                <option value="ATID06">6.กิจกรรมเสริมสร้างการพัฒนาทักษะการเป็นผู้ประกอบการ
-                    และทักษะที่จำเป็นในการเตรียมความพร้อมเพื่อการทำงาน</option>
-                <option value="ATID07">7.กิจกรรมเสริมสร้างการพัฒนาทักษะวิชาชีพ</option>
-                <option value="ATID08">8.กิจกรรมเสริมสร้างการพัฒนาทักษะดิจิทัลและเทคโนโลยี</option>
-                <option value="ATID09">9.กิจกรรมเสริมสร้างคุณลักษณะความซื่อสัตย์มีวินัย คุณธรรมจริยธรรม</option>
-                <option value="ATID10">10.กิจกรรมเสริมสร้างความรู้ทางวิชาการ</option>
-                <option value="ATID11">11.กิจกรรมเสริมสร้างความเป็นประชาธิปไตย</option>
-                <option value="ATID12">12.กิจกรรมเสริมสร้างความภูมิใจในมหาวิทยาลัย</option>
-                <option value="ATID13">13.กิจกรรมส่งเสริมศิลปวัฒนธรรมและศาสนา</option>
-                <option value="ATID14">14.กิจกรรมเสริมสร้างพัฒนาสุขภาพกายและใจ</option>
-                <option value="ATID15">15.กิจกรรมเสริมสร้างความสุขและนันทนาการ</option>
-                <option value="ATID16">16.กิจกรรมเสริมสร้างความเป็นสังคมพหุวัฒนธรรม</option>
-            </select>
-
-        </div>
-
-        <label for="ActivityName">ชื่อกิจกรรม:</label>
-        <input type="text" id="ActivityName" name="ActivityName" required><br>
-
-        <label for="ActivityDate">วันที่จัดกิจกรรม:</label>
-        <input type="date" id="ActivityDate" name="ActivityDate" required><br>
-
-        <label for="DailyID">รหัสประจำวัน:</label>
-        <input type="text" id="DailyID" name="DailyID" required><br>
-
-        <label for="ActivityHours">ชั่วโมงกิจกรรม:</label>
-        <input type="number" id="ActivityHours" name="ActivityHours" required><br>
-
-        <label for="StartTime">เวลาเริ่มกิจกรรม:</label>
-        <input type="time" id="StartTime" name="StartTime" required><br>
-
-        <label for="EndTime">เวลาจบกิจกรรม:</label>
-        <input type="time" id="EndTime" name="EndTime" required><br>
-
-        <label for="OrganizationName">ชื่อหน่วยงาน:</label>
-        <input type="text" id="OrganizationName" name="OrganizationName" required><br>
-
-        <label for="EventLocation">สถานที่จัดกิจกรรม:</label>
-        <input type="text" id="EventLocation" name="EventLocation" required><br>
-
-        <label for="NumberOfApplications">จำนวนผู้สมัคร:</label>
-        <input type="number" id="NumberOfApplications" name="NumberOfApplications" required><br>
-
-        <label for="ApplicationChannel">ช่องทางการสมัคร:</label>
-        <input type="text" id="ApplicationChannel" name="ApplicationChannel" required><br>
-
-        <label for="ApplicationDeadline">กำหนดการสมัคร:</label>
-        <input type="date" id="ApplicationDeadline" name="ApplicationDeadline" required><br>
-
-        <label for="SemesterAcademicYear">ภาคการศึกษา/ปีการศึกษา:</label>
-        <input type="text" id="SemesterAcademicYear" name="SemesterAcademicYear" required><br>
-
-        <label for="AcademicYear">ปีการศึกษา:</label>
-        <input type="text" id="AcademicYear" name="AcademicYear" required><br>
-
-        <label for="Department">แผนก:</label>
-        <input type="text" id="Department" name="Department" required><br>
-
-        <label for="Major">สาขาวิชา:</label>
-        <input type="text" id="Major" name="Major" required><br>
-
-        <label for="ActivityDescription">รายละเอียดกิจกรรม:</label>
-        <textarea id="ActivityDescription" name="ActivityDescription" required></textarea><br>
-
-        <label for="ApproveActivity">อนุมัติกิจกรรม:</label>
-        <input type="checkbox" id="ApproveActivity" name="ApproveActivity"><br>
-
-        <label for="ActivityEndDate">วันสิ้นสุดกิจกรรม:</label>
-        <input type="date" id="ActivityEndDate" name="ActivityEndDate" required><br>
-
-        <button type="submit">บันทึกการแก้ไข</button>
-    </form>
-
-    <script>
-        // ดึง Activityid จาก URL
-        const params = new URLSearchParams(window.location.search);
-        const Activityid = params.get('Activityid');
-
-        // เมื่อโหลดหน้าเสร็จ ดึงข้อมูลกิจกรรมจากเซิร์ฟเวอร์
-        document.addEventListener("DOMContentLoaded", function () {
-            fetch(`/api/activities/${Activityid}`)
-                .then(response => response.json())
-                .then(activity => {
-                    document.getElementById('ActivityCategoryID').value = activity.ActivityCategoryID;
-                    document.getElementById('ActivityTypeID').value = activity.ActivityTypeID;
-                    document.getElementById('ActivityName').value = activity.ActivityName;
-                    document.getElementById('ActivityDate').value = activity.ActivityDate;
-                    document.getElementById('DailyID').value = activity.DailyID;
-                    document.getElementById('ActivityHours').value = activity.ActivityHours;
-                    document.getElementById('StartTime').value = activity.StartTime;
-                    document.getElementById('EndTime').value = activity.EndTime;
-                    document.getElementById('OrganizationName').value = activity.OrganizationName;
-                    document.getElementById('EventLocation').value = activity.EventLocation;
-                    document.getElementById('NumberOfApplications').value = activity.NumberOfApplications;
-                    document.getElementById('ApplicationChannel').value = activity.ApplicationChannel;
-                    document.getElementById('ApplicationDeadline').value = activity.ApplicationDeadline;
-                    document.getElementById('SemesterAcademicYear').value = activity.SemesterAcademicYear;
-                    document.getElementById('AcademicYear').value = activity.AcademicYear;
-                    document.getElementById('Department').value = activity.Department;
-                    document.getElementById('Major').value = activity.Major;
-                    document.getElementById('ActivityDescription').value = activity.ActivityDescription;
-                    document.getElementById('ApproveActivity').checked = activity.ApproveActivity;
-                    document.getElementById('ActivityEndDate').value = activity.ActivityEndDate;
-                })
-                .catch(error => console.error('Error fetching activity:', error));
-        });
-
-        // จัดการเมื่อส่งฟอร์ม
-        document.getElementById('editForm').addEventListener('submit', function (event) {
-            event.preventDefault(); // ป้องกันการรีเฟรชหน้า
-
-            // ดึงข้อมูลจากฟอร์ม
-            const formData = {
-                ActivityCategoryID: document.getElementById('ActivityCategoryID').value,
-                ActivityTypeID: document.getElementById('ActivityTypeID').value,
-                ActivityName: document.getElementById('ActivityName').value,
-                ActivityDate: document.getElementById('ActivityDate').value,
-                DailyID: document.getElementById('DailyID').value,
-                ActivityHours: document.getElementById('ActivityHours').value,
-                StartTime: document.getElementById('StartTime').value,
-                EndTime: document.getElementById('EndTime').value,
-                OrganizationName: document.getElementById('OrganizationName').value,
-                EventLocation: document.getElementById('EventLocation').value,
-                NumberOfApplications: document.getElementById('NumberOfApplications').value,
-                ApplicationChannel: document.getElementById('ApplicationChannel').value,
-                ApplicationDeadline: document.getElementById('ApplicationDeadline').value,
-                SemesterAcademicYear: document.getElementById('SemesterAcademicYear').value,
-                AcademicYear: document.getElementById('AcademicYear').value,
-                Department: document.getElementById('Department').value,
-                Major: document.getElementById('Major').value,
-                ActivityDescription: document.getElementById('ActivityDescription').value,
-                ApproveActivity: document.getElementById('ApproveActivity').checked,
-                ActivityEndDate: document.getElementById('ActivityEndDate').value
-            };
-
-            // ส่งข้อมูลไปอัปเดตที่เซิร์ฟเวอร์
-            fetch(`/api/activities/${Activityid}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(formData)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    alert('บันทึกการแก้ไขสำเร็จ!');
-                    console.log(formData);  // ตรวจสอบว่าข้อมูลถูกต้องก่อนส่งไปยัง backend
-                    window.location.href = '/organizerEditHome.html'; // ย้อนกลับไปยังหน้าแรกหลังอัปเดตเสร็จ
-                })
-                .catch(error => console.error('Error updating activity:', error));
-            console.log(formData);  // ตรวจสอบว่าข้อมูลถูกต้องก่อนส่งไปยัง backend
+            
         });
     </script>
 </body>

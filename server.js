@@ -257,13 +257,29 @@ app.get('/api/activities/:Activityid', (req, res) => {
 // อัปเดตข้อมูลกิจกรรม
 app.put('/api/activities/:Activityid', (req, res) => {
     const activityId = req.params.Activityid;
-    const { ActivityName, OrganizationName, ActivityDate, ActivityEndDate, StartTime, EndTime } = req.body;
+    const {ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime, 
+        OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline, 
+        SemesterAcademicYear, AcademicYear, Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate
+    } = req.body;
 
     // ตัวอย่าง SQL query เพื่ออัปเดตข้อมูล
-    const sqlUpdate = `UPDATE activity SET ActivityName = ?, OrganizationName = ?, ActivityDate = ?, ActivityEndDate = ?, StartTime = ?, EndTime = ? WHERE Activityid = ?`;
-    const values = [ActivityName, OrganizationName, ActivityDate, ActivityEndDate, StartTime, EndTime, activityId];
+    const sql = `
+        UPDATE activity SET 
+            ActivityCategoryID = ?, ActivityTypeID = ?, ActivityName = ?, ActivityDate = ?, DailyID = ?, ActivityHours = ?, 
+            StartTime = ?, EndTime = ?, OrganizationName = ?, EventLocation = ?, NumberOfApplications = ?, 
+            ApplicationChannel = ?, ApplicationDeadline = ?, SemesterAcademicYear = ?, AcademicYear = ?, 
+            Department = ?, Major = ?, ActivityDescription = ?, ApproveActivity = ?, ActivityEndDate = ?
+        WHERE Activityid = ?`;
 
-    pool.query(sqlUpdate, values, (err, result) => {
+    // const values = [ActivityName, OrganizationName, ActivityDate, ActivityEndDate, StartTime, EndTime, activityId];
+
+    pool.query(sql, [
+        ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime, 
+        OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline, 
+        SemesterAcademicYear, AcademicYear, Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate,
+        activityId
+    ],
+        (err, result) => {
         if (err) {
             console.error(err);
             if (!res.headersSent) {

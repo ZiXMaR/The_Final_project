@@ -1,10 +1,10 @@
-<!-- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete Activities</title>
+    <title>เลือกกิจกรรม</title>
     <style>
         body {
             margin: 0;
@@ -29,18 +29,38 @@
         }
 
         .app-button:hover {
-            background-color: #00ccff;
+            background-color: #00b8e6;
         }
 
         .edit-button {
+            position: relative;
+            /* แก้ไขเป็น relative เพื่อไม่ให้ชนกับปุ่มอื่น */
+            background-color: #ffc107;
+            /* สีเหลืองสำหรับปุ่มแก้ไข */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 10px;
+            /* เพิ่มระยะห่างจากชื่อกิจกรรม */
+            cursor: pointer;
+            /* เปลี่ยนรูปแบบของเมาส์ */
+            border: none;
+            /* ลบขอบของปุ่ม */
+
+        }
+
+        .edit-button:hover {
+            background-color: #e0a800;
+            /* สีที่เข้มขึ้นเมื่อเอาเมาส์ไปวาง */
+        }
+
+        .editPage-button {
             position: absolute;
-            /* จัดให้มีตำแหน่งเหมือนปุ่มแก้ไข */
             top: 20px;
-            /* ให้สูงเท่ากับปุ่มแก้ไข */
             left: 150px;
-            /* ขยับให้ห่างจากปุ่มแก้ไข */
             background-color: #28a745;
-            /* สีแดงสำหรับปุ่มลบ */
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
@@ -48,11 +68,11 @@
             font-size: 14px;
         }
 
-        .edit-button:hover {
+        .editPage-button:hover {
             background-color: #218838;
         }
 
-        .deletePage-button {
+        .delete-button {
             position: absolute;
             top: 20px;
             left: 280px;
@@ -64,7 +84,7 @@
             font-size: 14px;
         }
 
-        .deletePage-button:hover {
+        .delete-button:hover {
             background-color: #c82333;
         }
 
@@ -84,35 +104,9 @@
             background-color: #0056b3;
         }
 
-
         h1 {
             color: #007bff;
             margin: 20px 0;
-        }
-
-        .container {
-            width: 90vw;
-            max-width: 800px;
-            background-color: #ffffff;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .container p {
-            margin: 0;
-            padding: 10px 0;
-            text-align: center;
-            /* จัดข้อความกลาง */
-        }
-
-        .container .details {
-            margin-right: 120px;
-            /* ขยับ "รายละเอียดกิจกรรม" มาด้านหน้าเล็กน้อย */
         }
 
         .activity-card {
@@ -123,89 +117,59 @@
             margin: 10px 0;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             width: 95%;
-            /* กำหนดให้กล่องกิจกรรมกว้างเต็ม */
         }
 
-        .editATV-button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
-            cursor: pointer;
+        .activity-details {
+            text-align: left;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
         }
 
-        .editATV-button:hover {
-            background-color: #218838;
+        .activity-details strong {
+            color: #007bff;
         }
+
+        .container {
+
+            max-width: 620px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 95%;
+        }
+
+        .container-c {
+            width: 90vw;
+            max-width: 650px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        
     </style>
 </head>
 
 <body>
+
     <a href="/organizer" class="app-button">เพิ่มกิจกรรม</a>
-    <a href="/organizerEdit" class="edit-button">แก้ไขกิจกรรม</a>
-    <a href="/organizerDelet" class="deletePage-button">ลบกิจกรรม</a>
+    <a href="/organizerEditHome.html" class="editPage-button">แก้ไขกิจกรรม</a>
+    <a href="/organizerDelet" class="delete-button">ลบกิจกรรม</a>
     <a href="/organizerHome" class="home-button">หน้าหลัก</a>
 
+    <h1>ผู้จัดกิจกรรม</h1>
 
-    <h1>Organizer Page</h1>
     <div class="container">
-        <p>แก้ไขกิจกรรม</p>
-        <p class="details">กิจกรรมที่มีอยู่</p>
+        <h3>เลือกกิจกรรมที่จะแก้ไข</h3>
+        <p>กิจกรรมทั้งหมด</p>
     </div>
-    <div class="container" id="activities-container"></div>
 
-    <script>
-        // ฟังก์ชันเพื่อดึงข้อมูลกิจกรรม
-        async function fetchActivities() {
-            const response = await fetch('/activities');
-            const activities = await response.json();
-
-            const container = document.getElementById('activities-container');
-            container.innerHTML = ''; // ล้างข้อมูลเก่า
-
-            activities.forEach(activity => {
-                const activityCard = document.createElement('div');
-                activityCard.classList.add('activity-card');
-                activityCard.innerHTML = `
-                    <h3>${activity.ActivityName}</h3>
-                    <p><strong>วันที่จัดกิจกรรม:</strong> ${activity.ActivityDate}</p>
-                    <p><strong>สถานที่:</strong> ${activity.EventLocation}</p>
-                    <p><strong>คำอธิบาย:</strong> ${activity.ActivityDescription}</p>
-                    <button class="editATV-button" onclick="editActivity(${activity.Activityid})">แก้ไข</button>
-                `;
-                container.appendChild(activityCard);
-            });
-        }
-
-        // ฟังก์ชันเพื่อไปยังหน้าแก้ไขพร้อม Activityid
-        function editActivity(activityId) {
-            // ไปยังหน้าแก้ไข โดยส่ง activityId ผ่าน URL
-            window.location.href = `/editActivity?Activityid=${activityId}`;
-        }
-
-
-
-        // เรียกใช้งานฟังก์ชันเพื่อดึงกิจกรรม
-        fetchActivities();
-    </script>
-</body>
-
-</html> -->
-
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เลือกกิจกรรม</title>
-</head>
-
-<body>
-    <h1>เลือกกิจกรรมที่จะแก้ไข</h1>
-    <div id="activity-list"></div>
+    <div class="container-c" id="activity-list"></div>
 
     <script>
         fetch('http://localhost:3000/api/activities')
@@ -215,9 +179,19 @@
                 if (data.length > 0) {
                     data.forEach(activity => {
                         const activityElement = document.createElement('div');
+                        activityElement.classList.add('activity-card');
                         activityElement.innerHTML = `
-            <a href="/organizerEdit.html?Activityid=${activity.Activityid}">${activity.ActivityName}</a>
-          `;
+                            <p><strong>ชื่อกิจกรรม:</strong> ${activity.ActivityName}</p>
+                            <div class="activity-details">
+                                <p><strong>หน่วยงาน:</strong> ${activity.OrganizationName}</p>
+                                <p><strong>วันที่จัด:</strong> ${new Date(activity.ActivityDate).toLocaleDateString()}</p>
+                                <p><strong>วันสิ้นสุด:</strong> ${new Date(activity.ActivityEndDate).toLocaleDateString()}</p>
+                                <p><strong>ภาค/ปีการศึกษา:</strong> ${activity.SemesterAcademicYear}</p>
+                            </div>
+                            <button class="edit-button" onclick="window.location.href='/organizerEdit.html?Activityid=${activity.Activityid}'">
+                                แก้ไข
+                            </button>
+                        `;
                         activityList.appendChild(activityElement);
                     });
                 } else {
@@ -228,6 +202,7 @@
                 console.error('Error fetching activities:', error);
             });
     </script>
+
 </body>
 
 </html>
