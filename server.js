@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path');
 const mysql = require('mysql2'); // ประกาศเพียงครั้งเดียว
 const bodyParser = require('body-parser');
+const cors = require('cors');
+
 const app = express();
 const port = 3000;
 
@@ -16,8 +18,25 @@ const pool = mysql.createPool({
     port: 8889
 });
 
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true })); // ใช้สำหรับรับข้อมูลจากฟอร์ม HTML
+
+
+//--------------------------------------------------------------------
+
+// db.connect(err => {
+//     if (err) {
+//         console.error('Error connecting to the database:', err);
+//         return;
+//     }
+//     console.log('Connected to the database');
+// });
+
+
+//--------------------------------------------------------------------
+
+app.use(express.static(path.join(__dirname, 'public'))); // โฟลเดอร์ที่เก็บไฟล์ static
 
 // Serve the main page
 app.get('/', (req, res) => {
@@ -29,10 +48,10 @@ app.get('/organizer', (req, res) => {
     res.sendFile(path.join(__dirname, 'organizer.html'));
 });
 
-// Serve the OrganizerEdit page
-app.get('/organizerEdit', (req, res) => {
-    res.sendFile(path.join(__dirname, 'organizerEdit.html'));
-});
+// // Serve the OrganizerEdit page
+// app.get('/organizerEdit', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'public/organizerEdit.html'));
+// });
 
 // Serve the OrganizerDelet page
 app.get('/organizerDelet', (req, res) => {
@@ -44,14 +63,14 @@ app.get('/organizerHome', (req, res) => {
     res.sendFile(path.join(__dirname, 'organizerHome.html'));
 });
 
-// Serve the OrganizerEditHome page
-app.get('/organizerEditHome', (req, res) => {
-    res.sendFile(path.join(__dirname, 'organizerEditHome.html'));
-});
+// // Serve the OrganizerEditHome page
+// app.get('/organizerEditHome', (req, res) => {
+//     res.sendFile(path.join(__dirname, 'organizerEditHome.html'));
+// });
 
 
 
-//------------------------------------------------------------------------------------------
+//------------------------------------------------------------------
 
 // Serve the Participant page
 app.get('/participant', (req, res) => {
@@ -63,6 +82,8 @@ app.get('/admin', (req, res) => {
     res.sendFile(path.join(__dirname, 'admin.html'));
 });
 
+
+//-------------------------------------------------------------
 
 // ฟังก์ชันสร้าง ActivityID อัตโนมัติ
 async function generateActivityId() {
@@ -206,6 +227,63 @@ app.post('/add-activity', async (req, res) => {
     }
 });
 
+//----------------------------------------------
+
+// ดึงข้อมูลกิจกรรมทั้งหมด
+app.get('/api/activities', (req, res) => {
+    const sql = 'SELECT * FROM activity';
+    pool.query(sql, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error fetching activity');
+    } else {
+      console.log(result); // ตรวจสอบข้อมูลที่ดึงมา
+      res.json(result);
+    }
+  });
+});
+
+// ดึงข้อมูลกิจกรรมตาม Activityid
+app.get('/api/activities/:Activityid', (req, res) => {
+    const { Activityid } = req.params;
+    pool.query('SELECT * FROM activity WHERE Activityid = ?', [Activityid], (err, result) => {
+        if (err) {
+            return res.status(500).send(err);
+        }
+        res.json(result[0]);
+    });
+});
+
+// อัปเดตข้อมูลกิจกรรม
+app.put('/api/activities/:Activityid', (req, res) => {
+    const activityId = req.params.Activityid;
+    const { ActivityName, OrganizationName, ActivityDate, ActivityEndDate, StartTime, EndTime } = req.body;
+
+    // ตัวอย่าง SQL query เพื่ออัปเดตข้อมูล
+    const sqlUpdate = `UPDATE activity SET ActivityName = ?, OrganizationName = ?, ActivityDate = ?, ActivityEndDate = ?, StartTime = ?, EndTime = ? WHERE Activityid = ?`;
+    const values = [ActivityName, OrganizationName, ActivityDate, ActivityEndDate, StartTime, EndTime, activityId];
+
+    pool.query(sqlUpdate, values, (err, result) => {
+        if (err) {
+            console.error(err);
+            if (!res.headersSent) {
+                // ส่ง error response หากยังไม่มีการส่ง response มาก่อน
+                return res.status(500).json({ error: 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล' });
+            }
+        } else {
+            if (!res.headersSent) {
+                // ส่ง response สำเร็จกลับไปยัง client เพียงครั้งเดียว
+                return res.status(200).json({ message: 'อัปเดตสำเร็จ!' });
+            }
+        }
+
+    
+    
+    });
+});
+
+
+
 // Route สำหรับแก้ไขกิจกรรม (Organizer)
 app.post('/edit-activity', (req, res) => {
     const activity = req.body;
@@ -234,6 +312,8 @@ app.post('/edit-activity', (req, res) => {
         res.status(200).send('Activity updated successfully');
     });
 });
+
+//-----------------------------------------------------------------------
 
 // API สำหรับดึงข้อมูลกิจกรรม
 app.get('/activities', (req, res) => {

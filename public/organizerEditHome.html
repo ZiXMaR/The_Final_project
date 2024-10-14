@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -188,6 +188,45 @@
 
         // เรียกใช้งานฟังก์ชันเพื่อดึงกิจกรรม
         fetchActivities();
+    </script>
+</body>
+
+</html> -->
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เลือกกิจกรรม</title>
+</head>
+
+<body>
+    <h1>เลือกกิจกรรมที่จะแก้ไข</h1>
+    <div id="activity-list"></div>
+
+    <script>
+        fetch('http://localhost:3000/api/activities')
+            .then(response => response.json())
+            .then(data => {
+                const activityList = document.getElementById('activity-list');
+                if (data.length > 0) {
+                    data.forEach(activity => {
+                        const activityElement = document.createElement('div');
+                        activityElement.innerHTML = `
+            <a href="/organizerEdit.html?Activityid=${activity.Activityid}">${activity.ActivityName}</a>
+          `;
+                        activityList.appendChild(activityElement);
+                    });
+                } else {
+                    activityList.innerHTML = '<p>No activities available.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching activities:', error);
+            });
     </script>
 </body>
 
