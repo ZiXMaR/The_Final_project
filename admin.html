@@ -153,7 +153,6 @@
         async function fetchActivities() {
             const response = await fetch('/activities');
             const activities = await response.json();
-
             const container = document.getElementById('activities-container');
             container.innerHTML = ''; // ล้างข้อมูลเก่า
 
@@ -167,6 +166,7 @@
                         <p><strong>วันที่จัด:</strong> ${new Date(activity.ActivityDate).toLocaleDateString()}</p>
                         <p><strong>วันสิ้นสุด:</strong> ${new Date(activity.ActivityEndDate).toLocaleDateString()}</p>
                         <p><strong>ภาค/ปีการศึกษา:</strong> ${activity.SemesterAcademicYear}</p>
+                        <p><strong>สถานที่:</strong> ${activity.EventLocation}</p>
                     </div>
                 `;
                 container.appendChild(activityCard);

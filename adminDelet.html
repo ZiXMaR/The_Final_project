@@ -195,6 +195,7 @@
                         <p><strong>วันที่จัด:</strong> ${new Date(activity.ActivityDate).toLocaleDateString()}</p>
                         <p><strong>วันสิ้นสุด:</strong> ${new Date(activity.ActivityEndDate).toLocaleDateString()}</p>
                         <p><strong>ภาค/ปีการศึกษา:</strong> ${activity.SemesterAcademicYear}</p>
+                        <p><strong>สถานที่:</strong> ${activity.EventLocation}</p>
                     </div>
                     <button class="delete-button" onclick="deleteActivity('${activity.Activityid}')">ลบกิจกรรม</button>
                 `;
