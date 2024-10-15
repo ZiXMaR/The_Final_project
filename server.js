@@ -287,6 +287,127 @@ app.post('/add-activity', (req, res) => {
 //     });
 // });
 
+app.use(bodyParser.json());
+
+app.use(express.json());
+
+// API สำหรับเพิ่มข้อมูลผู้เข้าร่วม
+app.post('/add-participant', (req, res) => {
+    console.log('Request body:', req.body); // Log request body
+    const { studentId, full_name, year, department, program } = req.body;
+    
+    // ตรวจสอบค่าที่ส่งมาเพื่อให้แน่ใจว่าไม่มีค่า null
+    if (!studentId || !full_name || !year || !department || !program) {
+        return res.status(400).send('ข้อมูลไม่ครบถ้วน');
+    }
+
+    const query = 'INSERT INTO PersonalInfo (student_id, full_name, year, department, program) VALUES (?, ?, ?, ?, ?)';
+    
+    pool.query(query, [studentId, full_name, year, department, program], (err, result) => {
+        if (err) {
+            console.error('Database error:', err); // Log database errors
+            res.status(500).send('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
+            return;
+        }
+        res.status(200).send('เพิ่มข้อมูลสำเร็จ');
+    });
+});
+
+
+
+
+
+// API สำหรับแก้ไขข้อมูลผู้เข้าร่วม
+app.put('/update-participant/:id', (req, res) => {
+    const { id } = req.params;
+    const { full_name, year, department, program } = req.body;
+    const query = 'UPDATE PersonalInfo SET full_name = ?, year = ?, department = ?, program = ? WHERE student_id = ?';
+    pool.query(query, [full_name, year, department, program, id], (err, result) => {
+        if (err) {
+            res.status(500).send('เกิดข้อผิดพลาดในการแก้ไขข้อมูล');
+            return;
+        }
+        res.status(200).send('แก้ไขข้อมูลสำเร็จ');
+    });
+});
+
+
+// API สำหรับลบข้อมูลผู้เข้าร่วม
+app.delete('/delete-participant/:id', (req, res) => {
+    const { id } = req.params;
+    const query = 'DELETE FROM PersonalInfo WHERE student_id = ?';
+    pool.query(query, [id], (err, result) => {
+        if (err) {
+            res.status(500).send('เกิดข้อผิดพลาดในการลบข้อมูล');
+            return;
+        }
+        res.status(200).send('ลบข้อมูลสำเร็จ');
+    });
+});
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// เส้นทางเพื่อแสดง activityhistory.html
+app.get('/activityhistory', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'activityhistory.html')); // ตรวจสอบว่าไฟล์อยู่ในตำแหน่งที่ถูกต้อง
+});
+
+app.get('/get-activityhistory', (req, res) => {
+    const sql = 'SELECT * FROM activityhistory';
+    
+    pool.query(sql, (error, results) => {
+        if (error) {
+            console.error('Error fetching activity history:', error);
+            res.status(500).send('Error fetching activity history');
+            return;
+        }
+        res.json(results);
+    });
+});
+
+// บันทึกกิจกรรมใหม่ใน Activity History
+app.post('/record-activityhistory', (req, res) => {
+    const { user_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours } = req.body;
+
+    const query = `
+        INSERT INTO activityhistory (user_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `;
+    
+    pool.query(query, [user_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours], (err, result) => {
+        if (err) {
+            console.error('ไม่สามารถเพิ่มข้อมูลได้:', err);
+            res.status(500).send('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
+            return;
+        }
+        res.status(200).send('เพิ่มข้อมูลสำเร็จ');
+    });
+});
+
+// แก้ไขข้อมูลกิจกรรมใน Activity History
+app.put('/update-activityhistory', (req, res) => {
+    const { user_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours, activity_id } = req.body;
+    const query = 'UPDATE activityhistory SET user_id = ?, activity_name = ?, activity_date = ?, is_promoted = ?, competency_hours = ?, interest_hours = ? WHERE activity_id = ?';
+    pool.query(query, [user_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours, activity_id], (err, result) => {
+        if (err) {
+            return res.status(500).send('เกิดข้อผิดพลาดในการอัปเดตกิจกรรม');
+        }
+        res.sendStatus(200);
+    });
+});
+
+// ลบกิจกรรม
+app.delete('/delete-activityhistory/:id', (req, res) => {
+    const activityId = req.params.id;
+    const query = 'DELETE FROM activityhistory WHERE activity_id = ?';
+    pool.query(query, [activityId], (err, result) => {
+        if (err) {
+            return res.status(500).send('เกิดข้อผิดพลาดในการลบกิจกรรม');
+        }
+        res.sendStatus(200);
+    });
+});
+
+
 app.post('/activity-recommendations', (req, res) => {
     const { days, types, categories } = req.body;
 
