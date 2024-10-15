@@ -19,7 +19,7 @@ const pool = mysql.createPool({
     user: 'root',
     password: 'root',
     database: 'demo_project_2',
-    post: 8889
+    port: 8889
 });
 
 pool.getConnection((err, connection) => {
