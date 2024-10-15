@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizer Page</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+
+        .app-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #00ccff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .app-button:hover {
+            background-color: #00b8e6;
+        }
+
+        .edit-button {
+            position: absolute;
+            /* จัดให้มีตำแหน่งเหมือนปุ่มแก้ไข */
+            top: 20px;
+            /* ให้สูงเท่ากับปุ่มแก้ไข */
+            left: 150px;
+            /* ขยับให้ห่างจากปุ่มแก้ไข */
+            background-color: #28a745;
+            /* สีแดงสำหรับปุ่มลบ */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .edit-button:hover {
+            background-color: #218838;
+        }
+
+        .delete-button {
+            position: absolute;
+            top: 20px;
+            left: 280px;
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+
+
+        h1 {
+            color: #007bff;
+            margin: 0;
+            padding: 20px 0;
+        }
+
+        .container {
+            width: 90vw;
+            max-width: 800px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container p {
+            margin: 0;
+            padding: 10px 0;
+            text-align: center;
+            /* จัดข้อความกลาง */
+        }
+
+        .container .details {
+            margin-right: 120px;
+            /* ขยับ "รายละเอียดกิจกรรม" มาด้านหน้าเล็กน้อย */
+        }
+
+        .container .applicant-qualities {
+            margin-right: 120px;
+            /* ขยับ "คุณสมบัติของผู้รับสมัคร" มาด้านหน้าเล็กน้อย */
+            margin-top: 10px;
+            /* เพิ่มระยะห่างด้านบน */
+        }
+
+        .form-group {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-group label {
+            flex-basis: 200px;
+            text-align: right;
+            margin: 0;
+            padding: 10px;
+        }
+
+        .form-group input,
+        .form-group select {
+            flex: 1;
+            /* ทำให้กล่องข้อความขยายเต็มที่ */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .form-group select {
+            /* ปรับขนาดของ select ให้เหมาะสม */
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .save-button-container {
+            width: 100%;
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        button[type="submit"] {
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <a href="/adminAdd" class="app-button">เพิ่มกิจกรรม</a>
+    <a href="/adminEditHome.html" class="edit-button">แก้ไขกิจกรรม</a>
+    <a href="/adminDelet" class="delete-button">ลบกิจกรรม</a>
+    <a href="/admin" class="home-button">หน้าหลัก</a>
+
+
+
+    <h1>แอดมิน</h1>
+    <div class="container">
+        <h3>บันทึกกิจกรรม</h3>
+        <p class="details">รายละเอียดกิจกรรม</p>
+
+        <form id="activityForm" action="/add-activity" method="POST">
+
+            <div class="form-group">
+                <label for="ActivityName">ชื่อกิจกรรม</label>
+                <input type="text" id="ActivityName" name="ActivityName" placeholder="กรอกชื่อกิจกรรมที่นี่" required>
+            </div>
+            <div class="form-group">
+                <label for="OrganizationName">ชื่อหน่วยงาน</label>
+                <input type="text" id="OrganizationName" name="OrganizationName" placeholder="กรอกชื่อหน่วยงาน" required>
+            </div>
+            <div class="form-group">
+                <label for="ActivityDate">วันที่จัดกิจกรรม</label>
+                <input type="date" id="ActivityDate" name="ActivityDate" placeholder="เลือกวันที่จัดกิจกรรม" required>
+            </div>
+
+            <div class="form-group">
+                <label for="ActivityEndDate">วันสิ้นสุดกิจกรรม</label>
+                <input type="date" id="ActivityEndDate" name="ActivityEndDate" placeholder="กรอกวันสิ้นสุดกิจกรรม"
+                    required>
+            </div>
+
+            <div class="form-group">
+                <label for="StartTime">เวลาเริ่มกิจกรรม</label>
+                <input type="time" id="StartTime" name="StartTime" placeholder="กรอกเวลาเริ่มกิจกรรม" required>
+            </div>
+            <div class="form-group">
+                <label for="EndTime">เวลาจบกิจกรรม</label>
+                <input type="time" id="EndTime" name="EndTime" placeholder="กรอกเวลาจบกิจกรรม" required>
+            </div>
+            <div class="form-group">
+                <label for="SemesterAcademicYear">ภาคการศึกษา/ปีการศึกษา</label>
+                <input type="text" id="SemesterAcademicYear" name="SemesterAcademicYear"
+                    placeholder="ภาคการศึกษา/ปีการศึกษา" required>
+            </div>
+            <div class="form-group">
+                <label for="ActivityHours">จำนวนชั่วโมงกิจกรรม</label>
+                <input type="number" id="ActivityHours" name="ActivityHours" placeholder="กรอกจำนวนชั่วโมงกิจกรรม"
+                    required>
+            </div>
+            <div class="form-group">
+                <label for="EventLocation">สถานที่จัดกิจกรรม</label>
+                <input type="text" id="EventLocation" name="EventLocation" placeholder="กรอกสถานที่จัดกิจกรรม" required>
+            </div>
+            <div class="form-group">
+                <label for="ActivityCategoryID">หมวดหมู่กิจกรรม</label>
+                <select id="ActivityCategoryID" name="ActivityCategoryID" required>
+                    <option value="ACID01">กิจกรรมเสริมสร้างสมรรถนะ</option>
+                    <option value="ACID02">กิจกรรมเข้าร่วมตามความสนใจ</option>
+                </select>
+
+            </div>
+            <div class="form-group">
+                <label for="ActivityTypeID">ประเภทกิจกรรม</label>
+                <select id="ActivityTypeID" name="ActivityTypeID" required>
+                    <option value="ATID01">1.กิจกรรมเสริมสร้างการพัฒนาทักษะการใช้ชีวิตอย่างมีความสุข เป็นส่วนหนึ่งของ
+                        มหาวิทยาลัย ชุมชน สังคม และมีความเป็นพลเมืองโลก</option>
+                    <option value="ATID02">2.กิจกรรมเสริมสร้างการพัฒนาทักษะแห่งศตวรรษที่ 21 เช่น กิจกรรมเสริมสร้าง
+                        ทักษะการสื่อสาร ความฉลาดทางอารมณ์ ความคิดสร้างสรรค์ การคิดเชิงวิเคราะห์ การคิดเชิงวิพากษ์
+                        การคิดอย่างมีวิจารณญาณ การบริหารเวลา การแก้ไขปัญหาที่มีความซับซ้อน และการเรียนรู้ตลอดชีวิต
+                    </option>
+                    <option value="ATID03">3.กิจกรรมเสริมสร้างการพัฒนาทักษะการมีส่วนร่วมทางสังคม มีจิตสำนึกสาธารณะ
+                        มุ่งเน้นประโยชน์ของเพื่อนมนุษย์ เรียนรู้สังคม เรียนรู้ชุมชน สามารถทำงานร่วมกับชุมชนได้</option>
+                    <option value="ATID04">4.กิจกรรมเสริมสร้างการพัฒนาทักษะภาวะผู้นำ การทำงานเป็นทีม
+                        การทำงานร่วมกับผู้อื่น</option>
+                    <option value="ATID05">5.กิจกรรมเสริมสร้างการพัฒนาทักษะภาษาต่างประเทศ สมรรถนะสากล
+                        มีความเข้าใจในสังคม และวัฒนธรรมต่างประเทศ</option>
+                    <option value="ATID06">6.กิจกรรมเสริมสร้างการพัฒนาทักษะการเป็นผู้ประกอบการ
+                        และทักษะที่จำเป็นในการเตรียมความพร้อมเพื่อการทำงาน</option>
+                    <option value="ATID07">7.กิจกรรมเสริมสร้างการพัฒนาทักษะวิชาชีพ</option>
+                    <option value="ATID08">8.กิจกรรมเสริมสร้างการพัฒนาทักษะดิจิทัลและเทคโนโลยี</option>
+                    <option value="ATID09">9.กิจกรรมเสริมสร้างคุณลักษณะความซื่อสัตย์มีวินัย คุณธรรมจริยธรรม</option>
+                    <option value="ATID10">10.กิจกรรมเสริมสร้างความรู้ทางวิชาการ</option>
+                    <option value="ATID11">11.กิจกรรมเสริมสร้างความเป็นประชาธิปไตย</option>
+                    <option value="ATID12">12.กิจกรรมเสริมสร้างความภูมิใจในมหาวิทยาลัย</option>
+                    <option value="ATID13">13.กิจกรรมส่งเสริมศิลปวัฒนธรรมและศาสนา</option>
+                    <option value="ATID14">14.กิจกรรมเสริมสร้างพัฒนาสุขภาพกายและใจ</option>
+                    <option value="ATID15">15.กิจกรรมเสริมสร้างความสุขและนันทนาการ</option>
+                    <option value="ATID16">16.กิจกรรมเสริมสร้างความเป็นสังคมพหุวัฒนธรรม</option>
+                </select>
+
+            </div>
+
+            <div class="form-group">
+                <label for="NumberOfApplications">จำนวนที่รับสมัคร</label>
+                <input type="number" id="NumberOfApplications" name="NumberOfApplications"
+                    placeholder="กรอกจำนวนที่รับสมัคร">
+            </div>
+            <div class="form-group">
+                <label for="ApplicationChannel">ช่องทางรับสมัคร</label>
+                <input type="text" id="ApplicationChannel" name="ApplicationChannel" placeholder="กรอกช่องทางรับสมัคร">
+            </div>
+            <div class="form-group">
+                <label for="ApplicationDeadline">วันสิ้นสุดการรับสมัคร</label>
+                <input type="date" id="ApplicationDeadline" name="ApplicationDeadline"
+                    placeholder="วันสิ้นสุดการรับสมัคร">
+            </div>
+            <div class="form-group">
+                <label for="ActivityDescription">คำอธิบายกิจกรรม</label>
+                <textarea id="ActivityDescription" name="ActivityDescription"
+                    placeholder="กรอกคำอธิบายกิจกรรม"></textarea>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <p class="details">คุณสมบัติของผู้รับสมัคร</p>
+            </div>
+
+            <div class="form-group">
+                <label for="AcademicYear">ชั้นปีการศึกษา</label>
+                <select id="AcademicYear" name="AcademicYear" required>
+                    <option value="all">ทั้งหมด</option>
+                    <option value="1">ชั้นปี 1</option>
+                    <option value="2">ชั้นปี 2</option>
+                    <option value="3">ชั้นปี 3</option>
+                    <option value="4">ชั้นปี 4</option>
+                </select>
+
+            </div>
+            <div class="form-group">
+                <label for="Department">ภาควิชา</label>
+                <select id="Department" name="Department" required>
+                    <option value="all">ทั้งหมด</option>
+                    <option value="วิทยาศาสตร์กายภาพ">วิทยาศาสตร์กายภาพ</option>
+                    <option value="วิทยาศาสตร์ชีวภาพ">วิทยาศาสตร์ชีวภาพ</option>
+                    <option value="วิทยาศาสตร์การคำนวณ">วิทยาศาสตร์การคำนวณ</option>
+                    <option value="วิทยาศาสตร์สุขภาพ">วิทยาศาสตร์สุขภาพ</option>
+                    <option value="วิทยาศาสตร์ประยุกต์">วิทยาศาสตร์ประยุกต์</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="Major">สาขาวิชา</label>
+                <select id="Major" name="Major" required>
+                    <option value="all">ทั้งหมด</option>
+                    <option value="สาขาวิชาเคมี">สาขาวิชาเคมี</option>
+                    <option value="สาขาวิชาวัสดุศาสตร์">สาขาวิชาวัสดุศาสตร์</option>
+                    <option value="สาขาวิชาฟิสิกส์">สาขาวิชาฟิสิกส์</option>
+                    <option value="สาขาวิชาชีววิทยา">สาขาวิชาชีววิทยา</option>
+                    <option value="สาขาวิชาเทคโนโลยีชีวภาพ">สาขาวิชาเทคโนโลยีชีวภาพ</option>
+                    <option value="สาขาวิชาจุลชีววิทยา">สาขาวิชาจุลชีววิทยา</option>
+                    <option value="สาขาวิชาคณิตศาสตร์">สาขาวิชาคณิตศาสตร์</option>
+                    <option value="สาขาวิชาสถิติ">สาขาวิชาสถิติ</option>
+                    <option value="สาขาวิชาวิทยาการคอมพิวเตอร์">สาขาวิชาวิทยาการคอมพิวเตอร์</option>
+                    <option value="สาขาวิชาเทคโนโลยีสารสนเทศและการสื่อสาร">สาขาวิชาเทคโนโลยีสารสนเทศและการสื่อสาร
+                    </option>
+                    <option value="สาขาวิชาเทคโนโลยีสารสนเทศ(ต่อเนื่อง)">สาขาวิชาเทคโนโลยีสารสนเทศ (ต่อเนื่อง)</option>
+                    <option value="สาขาวิชาเคมี-ชีววิทยาประยุกต์">สาขาวิชาเคมี-ชีววิทยาประยุกต์</option>
+                    <option value="สาขาวิชาวิทยาศาสตร์พอลิเมอร์">สาขาวิชาวิทยาศาสตร์พอลิเมอร์</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="display:none;">
+                <label for="ApproveActivity">คำอนุมัติ</label>
+                <input type="hidden" id="ApproveActivity" name="ApproveActivity" value="Y">
+            </div>
+
+            <div class="save-button-container">
+                <button type="submit">บันทึกกิจกรรม</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="resultMessage"></div> <!-- ส่วนแสดงข้อความผลลัพธ์ -->
+
+    <script>
+        const form = document.querySelector('form');
+
+        document.getElementById('activityForm').addEventListener('submit', async (event) => {
+            event.preventDefault(); // ป้องกันไม่ให้ฟอร์มส่งข้อมูลแบบปกติ
+
+            const formData = new FormData(event.target);
+            const activityData = Object.fromEntries(formData.entries());
+
+            // ส่งวันที่ไปยังเซิร์ฟเวอร์เพื่อคำนวณ DailyID
+            const response = await fetch('/calculate-daily-ids', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ActivityDate: activityData.ActivityDate,
+                    ActivityEndDate: activityData.ActivityEndDate
+                }),
+            });
+
+            if (response.ok) {
+                const { dailyIDs } = await response.json();
+
+                // ค้นหาค่าที่มากที่สุดจาก dailyIDs
+                const maxDailyID = dailyIDs.length > 0 ? dailyIDs[dailyIDs.length - 1] : null; // สมมติว่า dailyIDs เรียงตามลำดับ
+
+                // นำ DailyID ที่มากที่สุดไปใส่ใน activityData
+                if (maxDailyID) {
+                    activityData.DailyID = maxDailyID; // ส่งเฉพาะ DailyID ที่มากที่สุด
+                }
+
+                // เรียกใช้ API เพื่อเพิ่มกิจกรรม
+                const addActivityResponse = await fetch('/add-activity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(activityData),
+                });
+
+                if (addActivityResponse.ok) {
+                    alert('Activity added successfully!');
+                } else {
+                    alert('Error adding activity: ' + await addActivityResponse.text());
+                }
+            } else {
+                alert('Error calculating DailyID: ' + await response.text());
+            }
+        });
+
+
+    </script>
+
+
+
+</body>
+
+</html>

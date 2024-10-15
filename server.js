@@ -48,11 +48,6 @@ app.get('/organizer', (req, res) => {
     res.sendFile(path.join(__dirname, 'organizer.html'));
 });
 
-// // Serve the OrganizerEdit page
-// app.get('/organizerEdit', (req, res) => {
-//     res.sendFile(path.join(__dirname, 'public/organizerEdit.html'));
-// });
-
 // Serve the OrganizerDelet page
 app.get('/organizerDelet', (req, res) => {
     res.sendFile(path.join(__dirname, 'organizerDelet.html'));
@@ -63,11 +58,22 @@ app.get('/organizerHome', (req, res) => {
     res.sendFile(path.join(__dirname, 'organizerHome.html'));
 });
 
-// // Serve the OrganizerEditHome page
-// app.get('/organizerEditHome', (req, res) => {
-//     res.sendFile(path.join(__dirname, 'organizerEditHome.html'));
-// });
+//------------------------------------------------------------------
 
+// Serve the admin page
+app.get('/adminAdd', (req, res) => {
+    res.sendFile(path.join(__dirname, 'adminAdd.html'));
+});
+
+// Serve the adminaDelet page
+app.get('/adminDelet', (req, res) => {
+    res.sendFile(path.join(__dirname, 'adminDelet.html'));
+});
+
+// Serve the admina page
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin.html'));
+});
 
 
 //------------------------------------------------------------------
@@ -300,34 +306,34 @@ app.put('/api/activities/:Activityid', (req, res) => {
 
 
 
-// Route สำหรับแก้ไขกิจกรรม (Organizer)
-app.post('/edit-activity', (req, res) => {
-    const activity = req.body;
+// // Route สำหรับแก้ไขกิจกรรม (Organizer)
+// app.post('/edit-activity', (req, res) => {
+//     const activity = req.body;
     
-    const sql = `UPDATE activity SET 
-        ActivityCategoryID = ?, ActivityTypeID = ?, ActivityName = ?, ActivityDate = ?, DailyID = ?, 
-        ActivityHours = ?, StartTime = ?, EndTime = ?, OrganizationName = ?, EventLocation = ?, 
-        NumberOfApplications = ?, ApplicationChannel = ?, ApplicationDeadline = ?, SemesterAcademicYear = ?, 
-        AcademicYear = ?, Department = ?, Major = ?, ActivityDescription = ?, ApproveActivity = ?, ActivityEndDate = ?
-        WHERE Activityid = ?`;  // ระบุเงื่อนไข WHERE ด้วย Activityid
+//     const sql = `UPDATE activity SET 
+//         ActivityCategoryID = ?, ActivityTypeID = ?, ActivityName = ?, ActivityDate = ?, DailyID = ?, 
+//         ActivityHours = ?, StartTime = ?, EndTime = ?, OrganizationName = ?, EventLocation = ?, 
+//         NumberOfApplications = ?, ApplicationChannel = ?, ApplicationDeadline = ?, SemesterAcademicYear = ?, 
+//         AcademicYear = ?, Department = ?, Major = ?, ActivityDescription = ?, ApproveActivity = ?, ActivityEndDate = ?
+//         WHERE Activityid = ?`;  // ระบุเงื่อนไข WHERE ด้วย Activityid
 
-    const values = [
-        activity.ActivityCategoryID, activity.ActivityTypeID, activity.ActivityName, activity.ActivityDate, activity.DailyID,
-        activity.ActivityHours, activity.StartTime, activity.EndTime, activity.OrganizationName, activity.EventLocation,
-        activity.NumberOfApplications, activity.ApplicationChannel, activity.ApplicationDeadline, activity.SemesterAcademicYear,
-        activity.AcademicYear, activity.Department, activity.Major, activity.ActivityDescription, activity.ApproveActivity, activity.ActivityEndDate,
-        activity.Activityid // Activityid จะถูกใช้เพื่อระบุว่าต้องแก้ไขกิจกรรมใด
-    ];
+//     const values = [
+//         activity.ActivityCategoryID, activity.ActivityTypeID, activity.ActivityName, activity.ActivityDate, activity.DailyID,
+//         activity.ActivityHours, activity.StartTime, activity.EndTime, activity.OrganizationName, activity.EventLocation,
+//         activity.NumberOfApplications, activity.ApplicationChannel, activity.ApplicationDeadline, activity.SemesterAcademicYear,
+//         activity.AcademicYear, activity.Department, activity.Major, activity.ActivityDescription, activity.ApproveActivity, activity.ActivityEndDate,
+//         activity.Activityid // Activityid จะถูกใช้เพื่อระบุว่าต้องแก้ไขกิจกรรมใด
+//     ];
 
-    pool.query(sql, values, (error, results) => {
-        if (error) {
-            console.error('Error updating activity:', error);
-            res.status(500).send('Error updating activity: ' + error.message);
-            return;
-        }
-        res.status(200).send('Activity updated successfully');
-    });
-});
+//     pool.query(sql, values, (error, results) => {
+//         if (error) {
+//             console.error('Error updating activity:', error);
+//             res.status(500).send('Error updating activity: ' + error.message);
+//             return;
+//         }
+//         res.status(200).send('Activity updated successfully');
+//     });
+// });
 
 //-----------------------------------------------------------------------
 
