@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เลือกกิจกรรม</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+
+        .app-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #00ccff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .app-button:hover {
+            background-color: #00b8e6;
+        }
+
+        .edit-button {
+            position: relative;
+            /* แก้ไขเป็น relative เพื่อไม่ให้ชนกับปุ่มอื่น */
+            background-color: #ffc107;
+            /* สีเหลืองสำหรับปุ่มแก้ไข */
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 10px;
+            /* เพิ่มระยะห่างจากชื่อกิจกรรม */
+            cursor: pointer;
+            /* เปลี่ยนรูปแบบของเมาส์ */
+            border: none;
+            /* ลบขอบของปุ่ม */
+
+        }
+
+        .edit-button:hover {
+            background-color: #e0a800;
+            /* สีที่เข้มขึ้นเมื่อเอาเมาส์ไปวาง */
+        }
+
+        .editPage-button {
+            position: absolute;
+            top: 20px;
+            left: 150px;
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .editPage-button:hover {
+            background-color: #218838;
+        }
+
+        .delete-button {
+            position: absolute;
+            top: 20px;
+            left: 280px;
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+
+        .home-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+
+        h1 {
+            color: #007bff;
+            margin: 20px 0;
+        }
+
+        .activity-card {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 95%;
+        }
+
+        .activity-details {
+            text-align: left;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .activity-details strong {
+            color: #007bff;
+        }
+
+        .container {
+
+            max-width: 620px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 95%;
+        }
+
+        .container-c {
+            width: 90vw;
+            max-width: 650px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+
+    <a href="/organizer" class="app-button">เพิ่มกิจกรรม</a>
+    <a href="/organizerEditHome.html" class="editPage-button">แก้ไขกิจกรรม</a>
+    <a href="/organizerDelet" class="delete-button">ลบกิจกรรม</a>
+    <a href="/organizerHome" class="home-button">หน้าหลัก</a>
+
+    <h1>ผู้จัดกิจกรรม</h1>
+
+    <div class="container">
+        <h3>เลือกกิจกรรมที่จะแก้ไข</h3>
+        <p>กิจกรรมทั้งหมด</p>
+    </div>
+
+    <div class="container-c" id="activity-list"></div>
+
+    <script>
+        fetch('http://localhost:3000/api/activities')
+            .then(response => response.json())
+            .then(data => {
+                const activityList = document.getElementById('activity-list');
+                if (data.length > 0) {
+                    data.forEach(activity => {
+                        const activityElement = document.createElement('div');
+                        activityElement.classList.add('activity-card');
+                        activityElement.innerHTML = `
+                            <p><strong>ชื่อกิจกรรม:</strong> ${activity.ActivityName}</p>
+                            <div class="activity-details">
+                                <p><strong>หน่วยงาน:</strong> ${activity.OrganizationName}</p>
+                                <p><strong>วันที่จัด:</strong> ${new Date(activity.ActivityDate).toLocaleDateString()}</p>
+                                <p><strong>วันสิ้นสุด:</strong> ${new Date(activity.ActivityEndDate).toLocaleDateString()}</p>
+                                <p><strong>ภาค/ปีการศึกษา:</strong> ${activity.SemesterAcademicYear}</p>
+                                <p><strong>สถานที่:</strong> ${activity.EventLocation}</p>
+                            </div>
+                            <button class="edit-button" onclick="window.location.href='/organizerEdit.html?Activityid=${activity.Activityid}'">
+                                แก้ไข
+                            </button>
+                        `;
+                        activityList.appendChild(activityElement);
+                    });
+                } else {
+                    activityList.innerHTML = '<p>No activities available.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching activities:', error);
+            });
+    </script>
+
+</body>
+
+</html>

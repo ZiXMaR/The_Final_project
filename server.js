@@ -10,6 +10,8 @@ const crypto = require('crypto');
 const secretKey = crypto.randomBytes(64).toString('hex');
 console.log(secretKey);
 
+const cors = require('cors');
+
 app.use(express.urlencoded({ extended: true }));
 
 // Set up database connection
@@ -18,7 +20,7 @@ const pool = mysql.createPool({
     host: 'localhost',
     user: 'root',
     password: 'root',
-    database: 'demo_project_2',
+    database: 'project_2',
     port: 8889
 });
 
@@ -31,6 +33,15 @@ pool.getConnection((err, connection) => {
     }
 });
 
+//---------------------------------------------------
+
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true })); // ใช้สำหรับรับข้อมูลจากฟอร์ม HTML
+
+
+//---------------------------------------------------
+
 // Add session middleware
 app.use(session({
     secret: secretKey,
@@ -39,6 +50,59 @@ app.use(session({
     cookie: { secure: false } // set to true when using https
 }));
 
+//---------------------------------------------------
+
+app.use(express.static(path.join(__dirname, 'public'))); // โฟลเดอร์ที่เก็บไฟล์ static
+
+//---------------------------------------------------
+
+
+// Serve the main page
+app.get('/index', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Serve the Organizer page
+app.get('/organizer', (req, res) => {
+    res.sendFile(path.join(__dirname, 'organizer.html'));
+});
+
+// Serve the OrganizerDelet page
+app.get('/organizerDelet', (req, res) => {
+    res.sendFile(path.join(__dirname, 'organizerDelet.html'));
+});
+
+// Serve the OrganizerHome page
+app.get('/organizerHome', (req, res) => {
+    res.sendFile(path.join(__dirname, 'organizerHome.html'));
+});
+
+//------------------------------------------------------------------
+
+// Serve the admin page
+app.get('/adminAdd', (req, res) => {
+    res.sendFile(path.join(__dirname, 'adminAdd.html'));
+});
+
+// Serve the adminaDelet page
+app.get('/adminDelet', (req, res) => {
+    res.sendFile(path.join(__dirname, 'adminDelet.html'));
+});
+
+// Serve the admina page
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'admin.html'));
+});
+
+//----------------------------------------------------
+
+// Serve the Participant page
+app.get('/participant', (req, res) => {
+    res.sendFile(path.join(__dirname, 'participant.html'));
+});
+
+//----------------------------------------------------
+
 // Serve static files
 app.use(express.static('public')); // public folder สำหรับไฟล์ static เช่น CSS
 
@@ -46,6 +110,254 @@ app.use(express.static('public')); // public folder สำหรับไฟล�
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'login.html')); // เปิด login.html เป็นหน้าแรก
 });
+
+
+//-------------------------------------------------------------
+
+// ฟังก์ชันสร้าง ActivityID อัตโนมัติ
+async function generateActivityId() {
+    return new Promise((resolve, reject) => {
+        const sql = 'SELECT Activityid FROM activity ORDER BY Activityid DESC LIMIT 1';
+        pool.query(sql, (error, results) => {
+            if (error) return reject(error);
+
+            let newId = 'AID001'; // ค่าเริ่มต้น
+            if (results.length > 0) {
+                const lastId = results[0].Activityid;
+                const lastNumber = parseInt(lastId.replace('AID', ''));
+                const newNumber = lastNumber + 1;
+                newId = `AID${String(newNumber).padStart(3, '0')}`;
+            }
+            resolve(newId);
+        });
+    });
+}
+
+
+// ฟังก์ชันเพื่อคำนวณวันในช่วงวันที่
+function getDaysInRange(start, end) {
+    const days = [];
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    endDate.setDate(endDate.getDate() + 1); // รวมวันสิ้นสุดด้วย
+
+    while (startDate < endDate) {
+        days.push(startDate.getDay()); // 'getDay()' คืนค่า 0 (อาทิตย์) ถึง 6 (เสาร์)
+        startDate.setDate(startDate.getDate() + 1);
+    }
+    return days;
+}
+
+// ฟังก์ชันเพื่อแมพวันไปยัง DailyID
+function mapDaysToDailyID(days) {
+    const mapping = {
+        'DID01': [1],
+        'DID02': [2],
+        'DID03': [3],
+        'DID04': [4],
+        'DID05': [5],
+        'DID06': [6],
+        'DID07': [0],
+        'DID08': [1, 2],
+        'DID09': [2, 3],
+        'DID10': [3, 4],
+        'DID11': [4, 5],
+        'DID12': [5, 6],
+        'DID13': [6, 0],
+        'DID14': [0, 1],
+        'DID15': [1, 2, 3],
+        'DID16': [2, 3, 4],
+        'DID17': [3, 4, 5],
+        'DID18': [4, 5, 6],
+        'DID19': [5, 6, 0],
+        'DID20': [6, 0, 1],
+        'DID21': [0, 1, 2],
+        'DID22': [1, 2, 3, 4],
+        'DID23': [2, 3, 4, 5],
+        'DID24': [3, 4, 5, 6],
+        'DID25': [4, 5, 6, 0],
+        'DID26': [5, 6, 0, 1],
+        'DID27': [6, 0, 1, 2],
+        'DID28': [0, 1, 2, 3],
+        'DID29': [1, 2, 3, 4, 5],
+        'DID30': [2, 3, 4, 5, 6],
+        'DID31': [3, 4, 5, 6, 0],
+        'DID32': [4, 5, 6, 0, 1],
+        'DID33': [5, 6, 0, 1, 2],
+        'DID34': [6, 0, 1, 2, 3],
+        'DID35': [0, 1, 2, 3, 4],
+        'DID36': [1, 2, 3, 4, 5, 6],
+        'DID37': [2, 3, 4, 5, 6, 0],
+        'DID38': [3, 4, 5, 6, 0, 1],
+        'DID39': [4, 5, 6, 0, 1, 2],
+        'DID40': [5, 6, 0, 1, 2, 3],
+        'DID41': [6, 0, 1, 2, 3, 4],
+        'DID42': [0, 1, 2, 3, 4, 5],
+        'DID43': [0, 1, 2, 3, 4, 5, 6],
+    };
+
+    const resultIDs = [];
+    for (const [id, daysArray] of Object.entries(mapping)) {
+        if (daysArray.every(day => days.includes(day))) {
+            resultIDs.push(id);
+        }
+    }
+
+    return resultIDs;
+}
+
+// Route ใหม่สำหรับคำนวณ DailyID
+app.post('/calculate-daily-ids', (req, res) => {
+    const { ActivityDate, ActivityEndDate } = req.body;
+
+    // คำนวณวันในช่วงวันที่
+    const daysInRange = getDaysInRange(ActivityDate, ActivityEndDate);
+
+    // แมพวันไปยัง DailyID
+    const dailyIDs = mapDaysToDailyID(daysInRange);
+
+    // ส่ง DailyID กลับเป็น JSON
+    res.json({ dailyIDs });
+});
+
+
+//  Route สำหรับเพิ่มกิจกรรม (Organizer)
+app.post('/add-activity', async (req, res) => {
+    try {
+        const activity = req.body;
+
+        // เรียกใช้ฟังก์ชันเพื่อสร้าง ActivityID ใหม่
+        activity.Activityid = await generateActivityId();
+
+        const sql = `INSERT INTO activity (
+            Activityid, ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime, 
+            OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline, SemesterAcademicYear, AcademicYear, 
+            Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+
+        const values = [
+            activity.Activityid, activity.ActivityCategoryID, activity.ActivityTypeID, activity.ActivityName, activity.ActivityDate,
+            activity.DailyID, activity.ActivityHours, activity.StartTime, activity.EndTime, activity.OrganizationName, activity.EventLocation,
+            activity.NumberOfApplications, activity.ApplicationChannel, activity.ApplicationDeadline, activity.SemesterAcademicYear,
+            activity.AcademicYear, activity.Department, activity.Major, activity.ActivityDescription, activity.ApproveActivity, activity.ActivityEndDate
+        ];
+
+        pool.query(sql, values, (error, results) => {
+            if (error) {
+                console.error('Error inserting activity:', error);
+                res.status(500).send('Error inserting activity: ' + error.message);
+                return;
+            }
+            res.status(200).send('Activity added successfully with ID: ' + activity.Activityid);
+        });
+    } catch (error) {
+        console.error('Error generating Activity ID:', error);
+        res.status(500).send('Error generating Activity ID: ' + error.message);
+    }
+});
+
+//----------------------------------------------
+
+// ดึงข้อมูลกิจกรรมทั้งหมด
+app.get('/api/activities', (req, res) => {
+    const sql = 'SELECT * FROM activity';
+    pool.query(sql, (err, result) => {
+    if (err) {
+      console.error(err);
+      res.status(500).send('Error fetching activity');
+    } else {
+      console.log(result); // ตรวจสอบข้อมูลที่ดึงมา
+      res.json(result);
+    }
+  });
+});
+
+// ดึงข้อมูลกิจกรรมตาม Activityid
+app.get('/api/activities/:Activityid', (req, res) => {
+    const { Activityid } = req.params;
+    pool.query('SELECT * FROM activity WHERE Activityid = ?', [Activityid], (err, result) => {
+        if (err) {
+            return res.status(500).send(err);
+        }
+        res.json(result[0]);
+    });
+});
+
+// อัปเดตข้อมูลกิจกรรม
+app.put('/api/activities/:Activityid', (req, res) => {
+    const activityId = req.params.Activityid;
+    const {ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime, 
+        OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline, 
+        SemesterAcademicYear, AcademicYear, Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate
+    } = req.body;
+
+    // ตัวอย่าง SQL query เพื่ออัปเดตข้อมูล
+    const sql = `
+        UPDATE activity SET 
+            ActivityCategoryID = ?, ActivityTypeID = ?, ActivityName = ?, ActivityDate = ?, DailyID = ?, ActivityHours = ?, 
+            StartTime = ?, EndTime = ?, OrganizationName = ?, EventLocation = ?, NumberOfApplications = ?, 
+            ApplicationChannel = ?, ApplicationDeadline = ?, SemesterAcademicYear = ?, AcademicYear = ?, 
+            Department = ?, Major = ?, ActivityDescription = ?, ApproveActivity = ?, ActivityEndDate = ?
+        WHERE Activityid = ?`;
+
+    // const values = [ActivityName, OrganizationName, ActivityDate, ActivityEndDate, StartTime, EndTime, activityId];
+
+    pool.query(sql, [
+        ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime, 
+        OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline, 
+        SemesterAcademicYear, AcademicYear, Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate,
+        activityId
+    ],
+        (err, result) => {
+        if (err) {
+            console.error(err);
+            if (!res.headersSent) {
+                // ส่ง error response หากยังไม่มีการส่ง response มาก่อน
+                return res.status(500).json({ error: 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล' });
+            }
+        } else {
+            if (!res.headersSent) {
+                // ส่ง response สำเร็จกลับไปยัง client เพียงครั้งเดียว
+                return res.status(200).json({ message: 'อัปเดตสำเร็จ!' });
+            }
+        }
+
+    
+    
+    });
+});
+
+//-----------------------------------------------------------------------
+
+// API สำหรับดึงข้อมูลกิจกรรม
+app.get('/activities', (req, res) => {
+    const sql = 'SELECT * FROM activity';
+    pool.query(sql, (error, results) => {
+        if (error) {
+            console.error('Error fetching activities:', error);
+            res.status(500).send('Error fetching activities: ' + error.message);
+            return;
+        }
+        res.json(results);
+    });
+});
+
+// API สำหรับลบกิจกรรม
+app.post('/delete-activity', (req, res) => {
+    const { Activityid } = req.body;
+    const sql = 'DELETE FROM activity WHERE Activityid = ?';
+    
+    pool.query(sql, [Activityid], (error, results) => {
+        if (error) {
+            console.error('Error deleting activity:', error);
+            res.status(500).send('Error deleting activity: ' + error.message);
+            return;
+        }
+        res.status(200).send('Activity deleted successfully');
+    });
+});
+
+//----------------------------------------------------
 
 app.post('/register', async (req, res) => {
     const { username, password, role } = req.body; // รับข้อมูลจากฟอร์มสมัคร
@@ -72,25 +384,6 @@ app.get('/login', (req, res) => {
 });
 
 
-// app.post('/login', (req, res) => {
-//     const { username, password } = req.body;
-//     const query = 'SELECT * FROM users WHERE username = ?';
-//     db.query(query, [username], async (err, results) => {
-//         if (err) return res.status(500).send('Error fetching user');
-//         if (results.length === 0) return res.status(400).send('User not found');
-        
-//         const user = results[0];
-//         const match = await bcrypt.compare(password, user.password);
-        
-//         if (match) {
-//             req.session.userId = user.id;
-//             req.session.role = user.role;
-//             res.send('Login successful');
-//         } else {
-//             res.status(400).send('Invalid password');
-//         }
-//     });
-// });
 
 app.post('/login', (req, res) => {
     const { username, password } = req.body;
@@ -113,7 +406,7 @@ app.post('/login', (req, res) => {
                 if (user.role === 'admin') {
                     res.redirect('/admin');
                 } else if (user.role === 'organizer') {
-                    res.redirect('/organizer');
+                    res.redirect('/organizerHome');
                 } else if (user.role === 'participant') {
                     res.redirect('/participant');
                 } else {
@@ -176,28 +469,6 @@ app.get('/protected-route', isAuthenticated, (req, res) => {
     res.send('You are authorized to access this page');
 });
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Serve the main page
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Serve the Organizer page
-app.get('/organizer', (req, res) => {
-    res.sendFile(path.join(__dirname, 'organizer.html'));
-});
-
-// Serve the Participant page
-app.get('/participant', (req, res) => {
-    res.sendFile(path.join(__dirname, 'participant.html'));
-});
-
-// Serve the Admin page
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'admin.html'));
-});
 
 app.post('/add-student', (req, res) => {
     const { studentID, name, year, department, program } = req.body;
@@ -255,38 +526,6 @@ app.post('/add-activity', (req, res) => {
     });
 });
 
-// // Route for recommending activities
-// app.post('/get-recommendations', (req, res) => {
-//     const { days, types, categories } = req.body;
-
-//     let sql = 'SELECT * FROM activity WHERE ApproveActivity = "Y"';
-//     let params = [];
-
-//     if (days && days.length > 0) {
-//         sql += ' AND DailyID IN (SELECT DailyID FROM dailyid WHERE `Daily Name` IN (?))';
-//         params.push(days);
-//     }
-
-//     if (types && types.length > 0) {
-//         sql += ' AND ActivityTypeID IN (?)';
-//         params.push(types);
-//     }
-
-//     if (categories && categories.length > 0) {
-//         sql += ' AND ActivityCategoryID IN (?)';
-//         params.push(categories);
-//     }
-
-//     pool.query(sql, params, (error, results) => {
-//         if (error) {
-//             console.error('Error fetching recommended activities:', error);
-//             res.status(500).send('Server error');
-//             return;
-//         }
-
-//         res.json(results);
-//     });
-// });
 
 app.use(bodyParser.json());
 
