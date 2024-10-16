@@ -7,10 +7,22 @@ const port = 3000;
 const session = require('express-session');
 const bcrypt = require('bcrypt'); // ใช้สำหรับการ hash password
 const crypto = require('crypto');
+const jwt = require('jsonwebtoken');
 const secretKey = crypto.randomBytes(64).toString('hex');
 console.log(secretKey);
 
 app.use(express.urlencoded({ extended: true }));
+
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(express.static('public'));
+app.use(session({
+    secret: secretKey,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false } // Set to true when using HTTPS
+}));
 
 // Set up database connection
 const pool = mysql.createPool({
@@ -66,102 +78,61 @@ app.post('/register', async (req, res) => {
 });
 
 
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
-});
+// สร้างโทเค็น JWT หลังจากล็อกอินสำเร็จ
+// const jwt = require('jsonwebtoken');  // ต้องติดตั้งด้วยคำสั่ง npm install jsonwebtoken
 
-
-// app.post('/login', (req, res) => {
-//     const { username, password } = req.body;
-//     const query = 'SELECT * FROM users WHERE username = ?';
-//     db.query(query, [username], async (err, results) => {
-//         if (err) return res.status(500).send('Error fetching user');
-//         if (results.length === 0) return res.status(400).send('User not found');
-        
-//         const user = results[0];
-//         const match = await bcrypt.compare(password, user.password);
-        
-//         if (match) {
-//             req.session.userId = user.id;
-//             req.session.role = user.role;
-//             res.send('Login successful');
-//         } else {
-//             res.status(400).send('Invalid password');
-//         }
-//     });
-// });
-
-app.post('/login', (req, res) => {
+app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
     const query = 'SELECT * FROM users WHERE username = ?';
-
     pool.query(query, [username], async (err, results) => {
         if (err) {
             console.error('Database error:', err);
-            return res.status(500).send('Internal server error');
+            return res.status(500).json({ error: 'Internal server error' });
         }
 
         if (results.length > 0) {
             const user = results[0];
             const match = await bcrypt.compare(password, user.password);
             if (match) {
-                req.session.user = user.username;
-                req.session.role = user.role; // บันทึก role ลงใน session
-                // นำไปยังหน้าเฉพาะตาม role
-                if (user.role === 'admin') {
-                    res.redirect('/admin');
-                } else if (user.role === 'organizer') {
-                    res.redirect('/organizer');
-                } else if (user.role === 'participant') {
-                    res.redirect('/participant');
-                } else {
-                    res.redirect('/dashboard'); // หรือหน้าอื่นๆ ที่ต้องการ
-                }
+                const token = jwt.sign({ user_id: user.id, role: user.role }, secretKey, { expiresIn: '1h' });
+                res.json({ token });
             } else {
-                res.send('Invalid password');
+                res.status(401).json({ error: 'Invalid password' });
             }
         } else {
-            res.send('Invalid username or password');
+            res.status(401).json({ error: 'Invalid username or password' });
         }
     });
 });
 
-
-// Authentication middleware
+// Middleware สำหรับการตรวจสอบสิทธิ์
 function isAuthenticated(req, res, next) {
     if (req.session.user) {
         return next();
     } else {
-        res.status(401).send('You need to log in first');
+        res.status(401).send('คุณต้องล็อกอินก่อน');
     }
 }
 
-// app.post('/logout', (req, res) => {
-//     req.session.destroy((err) => {
-//         if (err) return res.status(500).send('Error logging out');
-//         res.send('Logged out successfully');
-//     });
-// });
-
-// Logout route
+// เส้นทางสำหรับออกจากระบบ
 app.get('/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
-            return res.send('Error logging out');
+            return res.send('เกิดข้อผิดพลาดในการออกจากระบบ');
         }
         res.redirect('/');
     });
 });
 
+// เส้นทางสำหรับตรวจสอบการล็อกอิน
 app.get('/check-login', (req, res) => {
     if (req.session.userId) {
-        res.status(200).send('Logged in');
+        res.status(200).send('ล็อกอินแล้ว');
     } else {
-        res.status(401).send('Not logged in');
+        res.status(401).send('ยังไม่ได้ล็อกอิน');
     }
 });
-
 
 // Route สำหรับแสดงหน้า signup
 app.get('/signup', (req, res) => {
@@ -175,8 +146,8 @@ app.get('/protected-route', isAuthenticated, (req, res) => {
     res.send('You are authorized to access this page');
 });
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
 
 // Serve the main page
 app.get('/', (req, res) => {
@@ -202,7 +173,7 @@ app.post('/add-student', (req, res) => {
     const { studentID, name, year, department, program } = req.body;
     const query = `INSERT INTO students (studentID, name, year, department, program) VALUES (?, ?, ?, ?, ?)`;
     
-    db.query(query, [studentID, name, year, department, program], (err, result) => {
+    pool.query(query, [studentID, name, year, department, program], (err, result) => {
         if (err) throw err;
         res.json({ message: 'Student added successfully' });
     });
@@ -212,7 +183,7 @@ app.put('/update-student/:id', (req, res) => {
     const { studentID, name, year, department, program } = req.body;
     const query = `UPDATE students SET studentID = ?, name = ?, year = ?, department = ?, program = ? WHERE id = ?`;
     
-    db.query(query, [studentID, name, year, department, program, req.params.id], (err, result) => {
+    pool.query(query, [studentID, name, year, department, program, req.params.id], (err, result) => {
         if (err) throw err;
         res.json({ message: 'Student updated successfully' });
     });
@@ -221,7 +192,7 @@ app.put('/update-student/:id', (req, res) => {
 app.delete('/delete-student/:id', (req, res) => {
     const query = `DELETE FROM students WHERE id = ?`;
     
-    db.query(query, [req.params.id], (err, result) => {
+    pool.query(query, [req.params.id], (err, result) => {
         if (err) throw err;
         res.json({ message: 'Student deleted successfully' });
     });
@@ -254,39 +225,6 @@ app.post('/add-activity', (req, res) => {
     });
 });
 
-// // Route for recommending activities
-// app.post('/get-recommendations', (req, res) => {
-//     const { days, types, categories } = req.body;
-
-//     let sql = 'SELECT * FROM activity WHERE ApproveActivity = "Y"';
-//     let params = [];
-
-//     if (days && days.length > 0) {
-//         sql += ' AND DailyID IN (SELECT DailyID FROM dailyid WHERE `Daily Name` IN (?))';
-//         params.push(days);
-//     }
-
-//     if (types && types.length > 0) {
-//         sql += ' AND ActivityTypeID IN (?)';
-//         params.push(types);
-//     }
-
-//     if (categories && categories.length > 0) {
-//         sql += ' AND ActivityCategoryID IN (?)';
-//         params.push(categories);
-//     }
-
-//     pool.query(sql, params, (error, results) => {
-//         if (error) {
-//             console.error('Error fetching recommended activities:', error);
-//             res.status(500).send('Server error');
-//             return;
-//         }
-
-//         res.json(results);
-//     });
-// });
-
 app.use(bodyParser.json());
 
 app.use(express.json());
@@ -312,10 +250,6 @@ app.post('/add-participant', (req, res) => {
         res.status(200).send('เพิ่มข้อมูลสำเร็จ');
     });
 });
-
-
-
-
 
 // API สำหรับแก้ไขข้อมูลผู้เข้าร่วม
 app.put('/update-participant/:id', (req, res) => {
@@ -366,34 +300,42 @@ app.get('/get-activityhistory', (req, res) => {
 
 // บันทึกกิจกรรมใหม่ใน Activity History
 app.post('/record-activityhistory', (req, res) => {
-    const { user_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours } = req.body;
+    const { student_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours } = req.body;
 
     const query = `
-        INSERT INTO activityhistory (user_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours)
+        INSERT INTO activityhistory (student_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours)
         VALUES (?, ?, ?, ?, ?, ?)
     `;
     
-    pool.query(query, [user_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours], (err, result) => {
+    pool.query(query, [student_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours], (err, result) => {
         if (err) {
+            // เพิ่มข้อความแจ้งเตือนเกี่ยวกับข้อมูลซ้ำ
+            if (err.code === 'ER_DUP_ENTRY') {
+                return res.status(409).send('ข้อมูลกิจกรรมซ้ำสำหรับนักศึกษา');
+            }
             console.error('ไม่สามารถเพิ่มข้อมูลได้:', err);
             res.status(500).send('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
             return;
         }
+        console.log('ผลลัพธ์จากการเพิ่มข้อมูล:', result);
         res.status(200).send('เพิ่มข้อมูลสำเร็จ');
     });
 });
 
+
 // แก้ไขข้อมูลกิจกรรมใน Activity History
 app.put('/update-activityhistory', (req, res) => {
-    const { user_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours, activity_id } = req.body;
-    const query = 'UPDATE activityhistory SET user_id = ?, activity_name = ?, activity_date = ?, is_promoted = ?, competency_hours = ?, interest_hours = ? WHERE activity_id = ?';
-    pool.query(query, [user_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours, activity_id], (err, result) => {
+    const { activity_name, activity_date, is_promoted, competency_hours, interest_hours, activity_id } = req.body;
+    const query = 'UPDATE activityhistory SET activity_name = ?, activity_date = ?, is_promoted = ?, competency_hours = ?, interest_hours = ? WHERE activity_id = ?';
+    pool.query(query, [activity_name, activity_date, is_promoted, competency_hours, interest_hours, activity_id], (err, result) => {
         if (err) {
             return res.status(500).send('เกิดข้อผิดพลาดในการอัปเดตกิจกรรม');
         }
         res.sendStatus(200);
     });
 });
+
+
 
 // ลบกิจกรรม
 app.delete('/delete-activityhistory/:id', (req, res) => {
@@ -512,7 +454,6 @@ app.get('/get-events', (req, res) => {
     });
 });
 
-// app.listen(port, () => {
 //     console.log(`App running on port ${port}`);
 // });
 

@@ -5,29 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login</title>
   <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script> <!-- สำหรับถอดรหัส JWT -->
 </head>
 <body>
   <div class="login-container">
     <div class="login-box">
       <div class="logo">
-        <img src="user-icon.png" alt="User Icon">
+        <!-- <img src="user-icon.png" alt="User Icon"> -->
       </div>
       <h2>Welcome</h2>
-      <form action="/login" method="POST">
-        <div class="input-group">
-          <input type="text" placeholder="Username" name="username" required>
-        </div>
-        <div class="input-group">
-          <input type="password" placeholder="Password" name="password" required>
-        </div>
-        <div class="actions">
-          <label><input type="checkbox" name="remember"> Remember me</label>
-          <a href="#">Forgot your password?</a>
-        </div>
-        <button type="submit" class="login-btn">Login</button>
-      </form>
+      <!-- ฟอร์มใช้ JavaScript แทน -->
+      <div class="input-group">
+        <input type="text" id="username" placeholder="Username" required>
+      </div>
+      <div class="input-group">
+        <input type="password" id="password" placeholder="Password" required>
+      </div>
+      <div class="actions">
+        <label><input type="checkbox" name="remember"> Remember me</label>
+        <a href="#">Forgot your password?</a>
+      </div>
+      <button onclick="login()" class="login-btn">Login</button>
       <p>Not a member? <a href="/signup">Sign up now</a></p>
     </div>
   </div>
+
+  <script>
+async function login() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+
+  const response = await fetch('/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password })
+  });
+
+  // ตรวจสอบว่าการตอบกลับสำเร็จหรือไม่
+  if (response.ok) {
+    const data = await response.json();
+    const token = data.token;
+
+    // เก็บโทเค็นใน LocalStorage
+    localStorage.setItem('token', token);
+
+    // ถอดรหัสโทเค็นเพื่อเช็ค role
+    const decodedToken = jwt_decode(token);
+    const role = decodedToken.role;
+
+    // เปลี่ยนเส้นทางตาม role
+    if (role === 'admin') {
+      window.location.href = '/admin';
+    } else if (role === 'organizer') {
+      window.location.href = '/organizer';
+    } else if (role === 'participant') {
+      window.location.href = '/participant';
+    } else {
+      window.location.href = '/dashboard';
+    }
+  } else {
+    // ดึงข้อความ error จาก response
+    const errorData = await response.json();
+    alert(errorData.error); // แจ้งเตือนข้อผิดพลาด
+  }
+}
+
+    </script>
+    
 </body>
 </html>

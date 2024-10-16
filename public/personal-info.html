@@ -72,6 +72,36 @@
         .action-buttons button {
             flex: 1;
         }
+
+        /* Styles for activity history */
+        .activity-history {
+            margin-top: 30px;
+        }
+
+        .activity-history h3 {
+            color: #ffd700;
+        }
+
+        .activity-history table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .activity-history table th,
+        .activity-history table td {
+            padding: 12px;
+            border: 1px solid #ffd700;
+            text-align: left;
+        }
+
+        .activity-history table th {
+            background-color: #243b63;
+        }
+
+        .activity-history table td {
+            background-color: #1a2b49;
+        }
     </style>
 </head>
 <body>
@@ -104,20 +134,60 @@
                 <button type="button" onclick="deleteParticipant(document.getElementById('studentId').value)">Delete</button>
             </div>
         </form>
+
+        <!-- Section for displaying activity history -->
+        <div class="activity-history">
+            <h3>Activity History</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Activity Name</th>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Duration (hours)</th>
+                    </tr>
+                </thead>
+                <tbody id="activityHistoryBody">
+                    <!-- Activity data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <script>
-        // ฟังก์ชันสำหรับเพิ่มข้อมูลผู้เข้าร่วม
+        // Fetch and display activity history for a specific user
+        function fetchActivityHistory(userId) {
+            fetch(`/get-activity-history/${userId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const activityHistoryBody = document.getElementById('activityHistoryBody');
+                    activityHistoryBody.innerHTML = ''; // Clear previous entries
+
+                    data.forEach(activity => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${activity.activity_name}</td>
+                            <td>${new Date(activity.activity_date).toLocaleDateString()}</td>
+                            <td>${activity.activity_type}</td>
+                            <td>${activity.activity_duration}</td>
+                        `;
+                        activityHistoryBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching activity history:', error);
+                });
+        }
+
+        // Add participant function
         function addParticipant() {
             const data = {
-        studentId: document.getElementById('studentId').value,
-        full_name: document.getElementById('fullName').value, // ตรวจสอบที่นี่
-        year: document.getElementById('year').value,
-        department: document.getElementById('department').value,
-        program: document.getElementById('program').value
-    };
-
-    console.log('Data to send:', data);
+                studentId: document.getElementById('studentId').value,
+                full_name: document.getElementById('fullName').value,
+                year: document.getElementById('year').value,
+                department: document.getElementById('department').value,
+                program: document.getElementById('program').value
+            };
 
             fetch('/add-participant', {
                 method: 'POST',
@@ -136,34 +206,33 @@
             });
         }
 
-        // ฟังก์ชันสำหรับแก้ไขข้อมูลผู้เข้าร่วม
+        // Update participant function
         function updateParticipant(studentId) {
-    const data = {
-        full_name: document.getElementById('fullName').value,
-        year: document.getElementById('year').value,
-        department: document.getElementById('department').value,
-        program: document.getElementById('program').value
-    };
+            const data = {
+                full_name: document.getElementById('fullName').value,
+                year: document.getElementById('year').value,
+                department: document.getElementById('department').value,
+                program: document.getElementById('program').value
+            };
 
-    fetch(`/update-participant/${studentId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data)
-    }).then(response => {
-        if (response.ok) {
-            alert('แก้ไขข้อมูลสำเร็จ');
-        } else {
-            alert('เกิดข้อผิดพลาดในการแก้ไขข้อมูล');
+            fetch(`/update-participant/${studentId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(response => {
+                if (response.ok) {
+                    alert('แก้ไขข้อมูลสำเร็จ');
+                } else {
+                    alert('เกิดข้อผิดพลาดในการแก้ไขข้อมูล');
+                }
+            }).catch(error => {
+                console.error('เกิดข้อผิดพลาด:', error);
+            });
         }
-    }).catch(error => {
-        console.error('เกิดข้อผิดพลาด:', error);
-    });
-}
 
-
-        // ฟังก์ชันสำหรับลบข้อมูลผู้เข้าร่วม
+        // Delete participant function
         function deleteParticipant(studentId) {
             fetch(`/delete-participant/${studentId}`, {
                 method: 'DELETE'
