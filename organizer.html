@@ -180,10 +180,10 @@
 </head>
 
 <body>
-    <a href="/organizer" class="app-button">เพิ่มกิจกรรม</a>
-    <a href="/organizerEditHome.html" class="edit-button">แก้ไขกิจกรรม</a>
-    <a href="/organizerDelet" class="delete-button">ลบกิจกรรม</a>
-    <a href="/organizerHome" class="home-button">หน้าหลัก</a>
+    <a href="#" class="app-button" id="add-activity-button">เพิ่มกิจกรรม</a>
+    <a href="#" class="edit-button" id="edit-activity-button">แก้ไขกิจกรรม</a>
+    <a href="#" class="delete-button" id="delete-activity-button">ลบกิจกรรม</a>
+    <a href="#" class="home-button" id="home-button">หน้าหลัก</a>
 
 
     <h1>ผู้จัดกิจกรรม</h1>
@@ -197,10 +197,10 @@
                 <label for="ActivityName">ชื่อกิจกรรม</label>
                 <input type="text" id="ActivityName" name="ActivityName" placeholder="กรอกชื่อกิจกรรมที่นี่" required>
             </div>
-            <div class="form-group">
-                <label for="OrganizationName">ชื่อหน่วยงาน</label>
-                <input type="text" id="OrganizationName" name="OrganizationName" placeholder="กรอกชื่อหน่วยงาน" required>
-            </div>
+
+            <input type="hidden" id="OrganizationName" name="OrganizationName">
+
+
             <div class="form-group">
                 <label for="ActivityDate">วันที่จัดกิจกรรม</label>
                 <input type="date" id="ActivityDate" name="ActivityDate" placeholder="เลือกวันที่จัดกิจกรรม" required>
@@ -276,16 +276,16 @@
             <div class="form-group">
                 <label for="NumberOfApplications">จำนวนที่รับสมัคร</label>
                 <input type="number" id="NumberOfApplications" name="NumberOfApplications"
-                    placeholder="กรอกจำนวนที่รับสมัคร">
+                    placeholder="กรอกจำนวนที่รับสมัคร" >
             </div>
             <div class="form-group">
                 <label for="ApplicationChannel">ช่องทางรับสมัคร</label>
-                <input type="text" id="ApplicationChannel" name="ApplicationChannel" placeholder="กรอกช่องทางรับสมัคร">
+                <input type="text" id="ApplicationChannel" name="ApplicationChannel" placeholder="กรอกช่องทางรับสมัคร" >
             </div>
             <div class="form-group">
                 <label for="ApplicationDeadline">วันสิ้นสุดการรับสมัคร</label>
                 <input type="date" id="ApplicationDeadline" name="ApplicationDeadline"
-                    placeholder="วันสิ้นสุดการรับสมัคร">
+                    placeholder="วันสิ้นสุดการรับสมัคร" required>
             </div>
             <div class="form-group">
                 <label for="ActivityDescription">คำอธิบายกิจกรรม</label>
@@ -342,7 +342,7 @@
 
             <div class="form-group" style="display:none;">
                 <label for="ApproveActivity">คำอนุมัติ</label>
-                <input type="hidden" id="ApproveActivity" name="ApproveActivity" value="Y">
+                <input type="hidden" id="ApproveActivity" name="ApproveActivity" value="รออนุมัติ">
             </div>
 
             <div class="save-button-container">
@@ -354,13 +354,40 @@
     <div id="resultMessage"></div> <!-- ส่วนแสดงข้อความผลลัพธ์ -->
 
     <script>
-        const form = document.querySelector('form');
 
+        // ฟังก์ชันดึงค่า organizationName จาก URL หรือ path
+        function getOrganizationName() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let organizationName = urlParams.get('organizationName');
+
+            if (!organizationName) {
+                // ถ้าไม่มีใน query string ให้ดึงจาก path
+                const pathSegments = window.location.pathname.split('/');
+                if (pathSegments.length > 2) {
+                    organizationName = pathSegments[pathSegments.length - 1];
+                }
+            }
+
+            // ทำการ URL-decode เพื่อถอดรหัสให้ได้ค่าเป็นข้อความปกติ
+            return decodeURIComponent(organizationName || ''); // ถ้าไม่มีค่าให้คืนค่าว่าง
+        }
+
+        // ตั้งค่าให้กับฟิลด์ OrganizationName ก่อนการส่งฟอร์ม
         document.getElementById('activityForm').addEventListener('submit', async (event) => {
             event.preventDefault(); // ป้องกันไม่ให้ฟอร์มส่งข้อมูลแบบปกติ
 
+            // ดึงค่า organizationName จาก URL หรือ path และใส่ลงในฟิลด์
+            const organizationName = getOrganizationName();
+            document.getElementById('OrganizationName').value = organizationName; // ใส่ชื่อหน่วยงานในฟิลด์
+
             const formData = new FormData(event.target);
             const activityData = Object.fromEntries(formData.entries());
+
+            // ตรวจสอบว่ามีค่า organizationName หรือไม่
+            if (!organizationName) {
+                alert('Error: organizationName สูญหาย ');
+                return; // ยกเลิกการส่งฟอร์ม
+            }
 
             // ส่งวันที่ไปยังเซิร์ฟเวอร์เพื่อคำนวณ DailyID
             const response = await fetch('/calculate-daily-ids', {
@@ -376,16 +403,12 @@
 
             if (response.ok) {
                 const { dailyIDs } = await response.json();
+                const maxDailyID = dailyIDs.length > 0 ? dailyIDs[dailyIDs.length - 1] : null;
 
-                // ค้นหาค่าที่มากที่สุดจาก dailyIDs
-                const maxDailyID = dailyIDs.length > 0 ? dailyIDs[dailyIDs.length - 1] : null; // สมมติว่า dailyIDs เรียงตามลำดับ
-
-                // นำ DailyID ที่มากที่สุดไปใส่ใน activityData
                 if (maxDailyID) {
-                    activityData.DailyID = maxDailyID; // ส่งเฉพาะ DailyID ที่มากที่สุด
+                    activityData.DailyID = maxDailyID;
                 }
 
-                // เรียกใช้ API เพื่อเพิ่มกิจกรรม
                 const addActivityResponse = await fetch('/add-activity', {
                     method: 'POST',
                     headers: {
@@ -395,14 +418,39 @@
                 });
 
                 if (addActivityResponse.ok) {
-                    alert('Activity added successfully!');
+                    alert('บันทึกข้อมูลเสร็จสิ้น!');
+                    window.location.reload(); // รีเฟรชหน้าเมื่อส่งข้อมูลสำเร็จ
                 } else {
-                    alert('Error adding activity: ' + await addActivityResponse.text());
+                    alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + await addActivityResponse.text());
                 }
+
             } else {
-                alert('Error calculating DailyID: ' + await response.text());
+                alert('เกิดข้อผิดพลาดในการคำนวน DailyID: ' + await response.text());
             }
         });
+
+
+        // ฟังก์ชันเพื่อดึง organizationName จาก path
+        function getOrganizationNameFromPath() {
+            const pathSegments = window.location.pathname.split('/');
+            // ตรวจสอบให้แน่ใจว่ามีการส่ง organizationName ใน path
+            if (pathSegments.length > 2) {
+                return pathSegments[pathSegments.length - 1]; // ดึง organizationName จาก path
+            }
+            return null;
+        }
+
+        // ดึงค่า organizationName จาก path
+        const organizationName = getOrganizationNameFromPath();
+        if (organizationName) {
+            // ตั้งค่าให้ปุ่มต่าง ๆ ส่ง organizationName ไปด้วย
+            document.getElementById('home-button').href = `/organizerHome/${organizationName}`;
+            document.getElementById('add-activity-button').href = `/organizer/${organizationName}`;
+            document.getElementById('edit-activity-button').href = `/organizerEditHome/${organizationName}`;
+            document.getElementById('delete-activity-button').href = `/organizerDelet/${organizationName}`;
+        } else {
+            console.error('Organization name not found in the URL path.');
+        }
 
 
     </script>

@@ -185,10 +185,11 @@
 
 <body>
 
-    <a href="/organizer" class="app-button">เพิ่มกิจกรรม</a>
-    <a href="/organizerEditHome.html" class="edit-button">แก้ไขกิจกรรม</a>
-    <a href="/organizerDelet" class="delete-button">ลบกิจกรรม</a>
-    <a href="/organizerHome" class="home-button">หน้าหลัก</a>
+    <a href="#" class="app-button" id="add-activity-button">เพิ่มกิจกรรม</a>
+    <a href="#" class="edit-button" id="edit-activity-button">แก้ไขกิจกรรม</a>
+    <a href="#" class="delete-button" id="delete-activity-button">ลบกิจกรรม</a>
+    <a href="#" class="home-button" id="home-button">หน้าหลัก</a>
+
 
     <h1>ผู้จัดกิจกรรม</h1>
     <div class="container">
@@ -202,11 +203,11 @@
                 <label for="ActivityName">ชื่อกิจกรรม</label>
                 <input type="text" id="ActivityName" name="ActivityName" placeholder="เลือกวันที่จัดกิจกรรม" required>
             </div>
-            <div class="form-group">
-                <label for="OrganizationName">ชื่อหน่วยงาน</label>
-                <input type="text" id="OrganizationName" name="OrganizationName" placeholder="กรอกชื่อหน่วยงาน"
-                    required>
-            </div>
+
+
+            <input type="hidden" id="OrganizationName" name="OrganizationName">
+
+
             <div class="form-group">
                 <label for="ActivityDate">วันที่จัดกิจกรรม</label>
                 <input type="date" id="ActivityDate" name="ActivityDate" placeholder="กรอกชื่อกิจกรรมที่นี่" required>
@@ -289,7 +290,8 @@
             </div>
             <div class="form-group">
                 <label for="ApplicationChannel">ช่องทางรับสมัคร</label>
-                <input type="text" id="ApplicationChannel" name="ApplicationChannel" placeholder="กรอกช่องทางรับสมัคร" required>
+                <input type="text" id="ApplicationChannel" name="ApplicationChannel" placeholder="กรอกช่องทางรับสมัคร"
+                    required>
             </div>
             <div class="form-group">
                 <label for="ApplicationDeadline">วันสิ้นสุดการรับสมัคร</label>
@@ -350,8 +352,10 @@
             </div>
 
             <!-- เก็บไว้ -->
-            <label for="ApproveActivity">อนุมัติกิจกรรม:</label>
-            <input type="checkbox" id="ApproveActivity" name="ApproveActivity"><br>
+            <div class="form-group" style="display:none;">
+                <label for="ApproveActivity">คำอนุมัติ</label>
+                <input type="hidden" id="ApproveActivity" name="ApproveActivity" value="รออนุมัติ">
+            </div>
 
 
             <div class="save-button-container">
@@ -361,6 +365,14 @@
     </div>
 
     <script>
+
+        // ฟังก์ชันเพื่อดึงค่า organizationName จาก URL
+        function getOrganizationNameFromUrl() {
+            const urlParams = new URLSearchParams(window.location.pathname);
+            const pathSegments = window.location.pathname.split('/');
+            return pathSegments[pathSegments.length - 1]; // ดึงค่า organizationName จาก URL
+        }
+
         // ดึง Activityid จาก URL
         const params = new URLSearchParams(window.location.search);
         const Activityid = params.get('Activityid');
@@ -399,7 +411,7 @@
                     document.getElementById('Department').value = activity.Department;
                     document.getElementById('Major').value = activity.Major;
                     document.getElementById('ActivityDescription').value = activity.ActivityDescription;
-                    document.getElementById('ApproveActivity').checked = activity.ApproveActivity;
+                    document.getElementById('ApproveActivity').value = activity.ApproveActivity;
                     document.getElementById('ActivityEndDate').value = formatDate(activity.ActivityEndDate);
                 })
                 .catch(error => console.error('Error fetching activity:', error));
@@ -457,7 +469,7 @@
                 Department: document.getElementById('Department').value,
                 Major: document.getElementById('Major').value,
                 ActivityDescription: document.getElementById('ActivityDescription').value,
-                ApproveActivity: document.getElementById('ApproveActivity').checked ? 'Y' : 'N', // ส่งค่า Y ถ้า checked, N ถ้าไม่
+                ApproveActivity: 'รออนุมัติ', // บังคับให้ ApproveActivity เป็น "รออนุมัติ"
                 ActivityEndDate: document.getElementById('ActivityEndDate').value
             };
 
@@ -484,7 +496,7 @@
                 if (updateResponse.ok) {
                     alert('บันทึกการแก้ไขสำเร็จ!');
                     console.log(formData); // ตรวจสอบว่าข้อมูลถูกต้องก่อนส่งไปยัง backend
-                    window.location.href = '/organizerEditHome.html'; // ย้อนกลับไปยังหน้าแรกหลังอัปเดตเสร็จ
+                    window.location.href = `/organizerEditHome/${organizationName}`; // ย้อนกลับไปยังหน้าแรกหลังอัปเดตเสร็จ
                 } else {
                     alert('Error updating activity: ' + await updateResponse.text());
                 }
@@ -512,8 +524,31 @@
             //     .catch(error => console.error('Error updating activity:', error));
             // console.log(formData);  // ตรวจสอบว่าข้อมูลถูกต้องก่อนส่งไปยัง backend
 
-            
+
         });
+
+        // ฟังก์ชันเพื่อดึง organizationName จาก path
+        function getOrganizationNameFromPath() {
+            const pathSegments = window.location.pathname.split('/');
+            // ตรวจสอบให้แน่ใจว่ามีการส่ง organizationName ใน path
+            if (pathSegments.length > 2) {
+                return pathSegments[pathSegments.length - 1]; // ดึง organizationName จาก path
+            }
+            return null;
+        }
+
+        // ดึงค่า organizationName จาก path
+        const organizationName = getOrganizationNameFromPath();
+        if (organizationName) {
+            // ตั้งค่าให้ปุ่มต่าง ๆ ส่ง organizationName ไปด้วย
+            document.getElementById('home-button').href = `/organizerHome/${organizationName}`;
+            document.getElementById('add-activity-button').href = `/organizer/${organizationName}`;
+            document.getElementById('edit-activity-button').href = `/organizerEditHome/${organizationName}`;
+            document.getElementById('delete-activity-button').href = `/organizerDelet/${organizationName}`;
+        } else {
+            console.error('Organization name not found in the URL path.');
+        }
+
     </script>
 </body>
 

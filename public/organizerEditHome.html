@@ -150,17 +150,15 @@
             flex-direction: column;
             align-items: center;
         }
-
-        
     </style>
 </head>
 
 <body>
 
-    <a href="/organizer" class="app-button">เพิ่มกิจกรรม</a>
-    <a href="/organizerEditHome.html" class="editPage-button">แก้ไขกิจกรรม</a>
-    <a href="/organizerDelet" class="delete-button">ลบกิจกรรม</a>
-    <a href="/organizerHome" class="home-button">หน้าหลัก</a>
+    <a href="#" class="app-button" id="add-activity-button">เพิ่มกิจกรรม</a>
+    <a href="#" class="editPage-button" id="edit-activity-button">แก้ไขกิจกรรม</a>
+    <a href="#" class="delete-button" id="delete-activity-button">ลบกิจกรรม</a>
+    <a href="#" class="home-button" id="home-button">หน้าหลัก</a>
 
     <h1>ผู้จัดกิจกรรม</h1>
 
@@ -172,37 +170,75 @@
     <div class="container-c" id="activity-list"></div>
 
     <script>
-        fetch('http://localhost:3000/api/activities')
-            .then(response => response.json())
-            .then(data => {
-                const activityList = document.getElementById('activity-list');
-                if (data.length > 0) {
-                    data.forEach(activity => {
-                        const activityElement = document.createElement('div');
-                        activityElement.classList.add('activity-card');
-                        activityElement.innerHTML = `
-                            <p><strong>ชื่อกิจกรรม:</strong> ${activity.ActivityName}</p>
-                            <div class="activity-details">
-                                <p><strong>หน่วยงาน:</strong> ${activity.OrganizationName}</p>
-                                <p><strong>วันที่จัด:</strong> ${new Date(activity.ActivityDate).toLocaleDateString()}</p>
-                                <p><strong>วันสิ้นสุด:</strong> ${new Date(activity.ActivityEndDate).toLocaleDateString()}</p>
-                                <p><strong>ภาค/ปีการศึกษา:</strong> ${activity.SemesterAcademicYear}</p>
-                                <p><strong>สถานที่:</strong> ${activity.EventLocation}</p>
-                            </div>
-                            <button class="edit-button" onclick="window.location.href='/organizerEdit.html?Activityid=${activity.Activityid}'">
-                                แก้ไข
-                            </button>
-                        `;
-                        activityList.appendChild(activityElement);
-                    });
-                } else {
-                    activityList.innerHTML = '<p>No activities available.</p>';
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching activities:', error);
-            });
+        // ฟังก์ชันเพื่อดึงค่า organizationName จาก URL
+        function getOrganizationNameFromUrl() {
+            const urlParams = new URLSearchParams(window.location.pathname);
+            const pathSegments = window.location.pathname.split('/');
+            return pathSegments[pathSegments.length - 1]; // ดึงค่า organizationName จาก URL
+        }
+
+        // ฟังก์ชันดึงกิจกรรมที่ตรงกับ organizationName
+        function fetchActivitiesByOrganization(organizationName) {
+            fetch(`http://localhost:3000/api/activities-e?organizationName=${organizationName}`)
+                .then(response => response.json())
+                .then(data => {
+                    const activityList = document.getElementById('activity-list');
+                    if (data.length > 0) {
+                        data.forEach(activity => {
+                            const activityElement = document.createElement('div');
+                            activityElement.classList.add('activity-card');
+                            activityElement.innerHTML = `
+                                <p><strong>ชื่อกิจกรรม:</strong> ${activity.ActivityName}</p>
+                                <div class="activity-details">
+                                    <p><strong>หน่วยงาน:</strong> ${activity.OrganizationName}</p>
+                                    <p><strong>วันที่จัด:</strong> ${new Date(activity.ActivityDate).toLocaleDateString()}</p>
+                                    <p><strong>วันสิ้นสุด:</strong> ${new Date(activity.ActivityEndDate).toLocaleDateString()}</p>
+                                    <p><strong>ภาค/ปีการศึกษา:</strong> ${activity.SemesterAcademicYear}</p>
+                                    <p><strong>สถานที่:</strong> ${activity.EventLocation}</p>
+                                    <p><strong>สถานะกิจกรรม:</strong> ${activity.ApproveActivity}</p>
+                                </div>
+                                <button class="edit-button" onclick="window.location.href='/organizerEdit/${organizationName}?Activityid=${activity.Activityid}'">
+                                    แก้ไข
+                                </button>
+                            `;
+                            activityList.appendChild(activityElement);
+                        });
+                    } else {
+                        activityList.innerHTML = '<p>ไม่มีกิจกรรมที่จะแสดง</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching activities:', error);
+                });
+        }
+
+        // ฟังก์ชันเพื่อดึง organizationName จาก path
+        function getOrganizationNameFromPath() {
+            const pathSegments = window.location.pathname.split('/');
+            // ตรวจสอบให้แน่ใจว่ามีการส่ง organizationName ใน path
+            if (pathSegments.length > 2) {
+                return pathSegments[pathSegments.length - 1]; // ดึง organizationName จาก path
+            }
+            return null;
+        }
+
+        // ดึงค่า organizationName จาก path
+        const organizationName = getOrganizationNameFromPath();
+        if (organizationName) {
+            // ตั้งค่าให้ปุ่มต่าง ๆ ส่ง organizationName ไปด้วย
+            document.getElementById('home-button').href = `/organizerHome/${organizationName}`;
+            document.getElementById('add-activity-button').href = `/organizer/${organizationName}`;
+            document.getElementById('edit-activity-button').href = `/organizerEditHome/${organizationName}`;
+            document.getElementById('delete-activity-button').href = `/organizerDelet/${organizationName}`;
+        } else {
+            console.error('Organization name not found in the URL path.');
+        }
+
+        // ดึง organizationName จาก URL และเรียกใช้ฟังก์ชันเพื่อดึงข้อมูลกิจกรรม
+        
+        fetchActivitiesByOrganization(organizationName);
     </script>
+
 
 </body>
 
