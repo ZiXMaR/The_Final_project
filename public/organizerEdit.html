@@ -428,6 +428,7 @@
                     document.getElementById('ActivityEndDate').value = formatDate(activity.ActivityEndDate);
                     document.getElementById('StartTimeLastDay').value = activity.StartTimeLastDay;
                     document.getElementById('EndTimeLastDay').value = activity.EndTimeLastDay;
+                
                 })
                 .catch(error => console.error('Error fetching activity:', error));
         });
@@ -454,7 +455,7 @@
 
                 return maxDailyID; // คืนค่า DailyID ที่มากที่สุด
             } else {
-                throw new Error('Error calculating DailyID: ' + await response.text());
+                throw new Error('เกิดข้อผิดพลาดในการคำนวณ DailyID: ' + await response.text());
             }
         }
 

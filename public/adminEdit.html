@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แก้ไขกิจกรรม</title>
+    <title>ผู้ดูแลระบบ แก้ไขกิจกรรม</title>
 
     <style>
         body {
@@ -190,7 +190,7 @@
     <a href="/adminDelet" class="delete-button">ลบกิจกรรม</a>
     <a href="/admin" class="home-button">หน้าหลัก</a>
 
-    <h1>แอดมิน</h1>
+    <h1>ผู้ดูแลระบบ</h1>
     <div class="container">
 
         <h3>แก้ไขกิจกรรม</h3>
@@ -207,28 +207,44 @@
                 <input type="text" id="OrganizationName" name="OrganizationName" placeholder="กรอกชื่อหน่วยงาน"
                     required>
             </div>
+
+
+            <!-------------------------------------------------------------------------------------------- -->
+
             <div class="form-group">
                 <label for="ActivityDate">วันที่จัดกิจกรรม</label>
                 <input type="date" id="ActivityDate" name="ActivityDate" placeholder="กรอกชื่อกิจกรรมที่นี่" required>
             </div>
 
             <div class="form-group">
+                <label for="StartTime">เวลาเริ่มกิจกรรมวันแรก</label>
+                <input type="time" id="StartTime" name="StartTime" placeholder="กรอกเวลาเริ่มกิจกรรมวันแรก" required>
+            </div>
+
+            <div class="form-group">
+                <label for="EndTime">เวลาจบกิจกรรมวันแรก</label>
+                <input type="time" id="EndTime" name="EndTime" placeholder="กรอกเวลาจบกิจกรรมวันแรก" required>
+            </div>
+
+            <!-------------------------------------------------------------------------------------------- -->
+            <div class="form-group">
                 <label for="ActivityEndDate">วันสิ้นสุดกิจกรรม</label>
-                <input type="date" id="ActivityEndDate" name="ActivityEndDate" placeholder="กรอกวันสิ้นสุดกิจกรรม"
-                    required>
+                <input type="date" id="ActivityEndDate" name="ActivityEndDate" placeholder="กรอกวันสิ้นสุดกิจกรรม">
+            </div>
+
+            <div class="form-group">
+                <label for="StartTimeLastDay">เวลาเริ่มกิจกรรมวันสุดท้าย</label>
+                <input type="time" id="StartTimeLastDay" name="StartTimeLastDay"
+                    placeholder="กรอกเวลาเริ่มกิจกรรมวันสุดท้าย">
+            </div>
+            <div class="form-group">
+                <label for="EndTimeLastDay">เวลาจบกิจกรรมวันสุดท้าย</label>
+                <input type="time" id="EndTimeLastDay" name="EndTimeLastDay" placeholder="กรอกเวลาจบกิจกรรมวันสุดท้าย">
             </div>
 
             <!-- เก็บไว้ -->
             <input type="hidden" id="DailyID" name="DailyID">
 
-            <div class="form-group">
-                <label for="StartTime">เวลาเริ่มกิจกรรม</label>
-                <input type="time" id="StartTime" name="StartTime" placeholder="กรอกเวลาเริ่มกิจกรรม" required>
-            </div>
-            <div class="form-group">
-                <label for="EndTime">เวลาจบกิจกรรม</label>
-                <input type="time" id="EndTime" name="EndTime" placeholder="กรอกเวลาจบกิจกรรม" required>
-            </div>
             <div class="form-group">
                 <label for="SemesterAcademicYear">ภาคการศึกษา/ปีการศึกษา</label>
                 <input type="text" id="SemesterAcademicYear" name="SemesterAcademicYear"
@@ -289,7 +305,8 @@
             </div>
             <div class="form-group">
                 <label for="ApplicationChannel">ช่องทางรับสมัคร</label>
-                <input type="text" id="ApplicationChannel" name="ApplicationChannel" placeholder="กรอกช่องทางรับสมัคร" required>
+                <input type="text" id="ApplicationChannel" name="ApplicationChannel" placeholder="กรอกช่องทางรับสมัคร"
+                    required>
             </div>
             <div class="form-group">
                 <label for="ApplicationDeadline">วันสิ้นสุดการรับสมัคร</label>
@@ -350,8 +367,10 @@
             </div>
 
             <!-- เก็บไว้ -->
-            <label for="ApproveActivity">อนุมัติกิจกรรม:</label>
-            <input type="checkbox" id="ApproveActivity" name="ApproveActivity"><br>
+            <div style="margin-top: 20px;">
+                <label for="ApproveActivity">อนุมัติกิจกรรม:</label>
+                <input type="checkbox" id="ApproveActivity" name="ApproveActivity"><br>
+            </div>
 
 
             <div class="save-button-container">
@@ -401,6 +420,9 @@
                     document.getElementById('ActivityDescription').value = activity.ActivityDescription;
                     document.getElementById('ApproveActivity').checked = activity.ApproveActivity;
                     document.getElementById('ActivityEndDate').value = formatDate(activity.ActivityEndDate);
+                    document.getElementById('StartTimeLastDay').value = activity.StartTimeLastDay;
+                    document.getElementById('EndTimeLastDay').value = activity.EndTimeLastDay;
+
                 })
                 .catch(error => console.error('Error fetching activity:', error));
         });
@@ -427,7 +449,7 @@
 
                 return maxDailyID; // คืนค่า DailyID ที่มากที่สุด
             } else {
-                throw new Error('Error calculating DailyID: ' + await response.text());
+                throw new Error('เกิดข้อผิดพลาดในการคำนวณ DailyID: ' + await response.text());
             }
         }
 
@@ -458,7 +480,9 @@
                 Major: document.getElementById('Major').value,
                 ActivityDescription: document.getElementById('ActivityDescription').value,
                 ApproveActivity: document.getElementById('ApproveActivity').checked ? 'Y' : 'N', // ส่งค่า Y ถ้า checked, N ถ้าไม่
-                ActivityEndDate: document.getElementById('ActivityEndDate').value
+                ActivityEndDate: document.getElementById('ActivityEndDate').value,
+                StartTimeLastDay: document.getElementById('StartTime').value,
+                EndTimeLastDay: document.getElementById('EndTime').value
             };
 
             console.log(formData);
@@ -493,26 +517,6 @@
                 alert(error.message);
             }
 
-
-
-            // // ส่งข้อมูลไปอัปเดตที่เซิร์ฟเวอร์
-            // fetch(`/api/activities/${Activityid}`, {
-            //     method: 'PUT',
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify(formData)
-            // })
-            //     .then(response => response.json())
-            //     .then(data => {
-            //         alert('บันทึกการแก้ไขสำเร็จ!');
-            //         console.log(formData);  // ตรวจสอบว่าข้อมูลถูกต้องก่อนส่งไปยัง backend
-            //         window.location.href = '/organizerEditHome.html'; // ย้อนกลับไปยังหน้าแรกหลังอัปเดตเสร็จ
-            //     })
-            //     .catch(error => console.error('Error updating activity:', error));
-            // console.log(formData);  // ตรวจสอบว่าข้อมูลถูกต้องก่อนส่งไปยัง backend
-
-            
         });
     </script>
 </body>

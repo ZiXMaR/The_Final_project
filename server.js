@@ -98,6 +98,19 @@ app.get('/organizerMultiAdd/:organizationName', (req, res) => {
     res.sendFile(path.join(__dirname, 'organizerMultiAdd.html'));
 });
 
+//-----------------------------------------------------------------------------------
+
+
+// Serve the adminMultiAdd page
+app.get('/adminMultiAdd', (req, res) => {
+    res.sendFile(path.join(__dirname, 'adminMultiAdd.html'));
+});
+
+// Serve the adminSingleAdd page
+app.get('/adminSingleAdd', (req, res) => {
+    res.sendFile(path.join(__dirname, 'adminSingleAdd.html'));
+});
+
 //------------------------------------------------------------------------------------
 
 // Serve the OrganizerDelet page
@@ -408,6 +421,18 @@ app.get('/api/activities-e', (req, res) => {
 
 //------------------------------------------------------------------------
 
+// API สำหรับดึงข้อมูลกิจกรรมเฉพาะกิจกรรมที่ผ่านการอนุมัติ
+app.get('/activities-y', (req, res) => {
+    const sql = 'SELECT * FROM activity WHERE ApproveActivity = "Y"';
+    pool.query(sql, (error, results) => {
+        if (error) {
+            console.error('Error fetching activities:', error);
+            res.status(500).send('Error fetching activities: ' + error.message);
+            return;
+        }
+        res.json(results);
+    });
+});
 
 // API สำหรับดึงข้อมูลกิจกรรม
 app.get('/activities', (req, res) => {
