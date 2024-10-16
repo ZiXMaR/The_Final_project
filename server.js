@@ -84,6 +84,22 @@ app.get('/organizer/:organizationName', (req, res) => {
     res.sendFile(path.join(__dirname, 'organizer.html'));
 });
 
+//-----------------------------------------------------------------------------------
+
+// Serve the OrganizerSingleAdd page
+app.get('/organizerSingleAdd/:organizationName', (req, res) => {
+    const organizationName = decodeURIComponent(req.params.organizationName);
+    res.sendFile(path.join(__dirname, 'organizerSingleAdd.html'));
+});
+
+// Serve the OrganizerMultiAdd page
+app.get('/organizerMultiAdd/:organizationName', (req, res) => {
+    const organizationName = decodeURIComponent(req.params.organizationName);
+    res.sendFile(path.join(__dirname, 'organizerMultiAdd.html'));
+});
+
+//------------------------------------------------------------------------------------
+
 // Serve the OrganizerDelet page
 app.get('/organizerDelet/:organizationName', (req, res) => {
     const organizationName = decodeURIComponent(req.params.organizationName);
@@ -252,14 +268,15 @@ app.post('/add-activity', async (req, res) => {
         const sql = `INSERT INTO activity (
             Activityid, ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime, 
             OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline, SemesterAcademicYear, AcademicYear, 
-            Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+            Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate, StartTimeLastDay , EndTimeLastDay
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
         const values = [
             activity.Activityid, activity.ActivityCategoryID, activity.ActivityTypeID, activity.ActivityName, activity.ActivityDate,
             activity.DailyID, activity.ActivityHours, activity.StartTime, activity.EndTime, activity.OrganizationName, activity.EventLocation,
             activity.NumberOfApplications, activity.ApplicationChannel, activity.ApplicationDeadline, activity.SemesterAcademicYear,
-            activity.AcademicYear, activity.Department, activity.Major, activity.ActivityDescription, activity.ApproveActivity, activity.ActivityEndDate
+            activity.AcademicYear, activity.Department, activity.Major, activity.ActivityDescription, activity.ApproveActivity, activity.ActivityEndDate,
+            activity.StartTimeLastDay, activity.EndTimeLastDay 
         ];
 
         pool.query(sql, values, (error, results) => {
@@ -308,7 +325,7 @@ app.put('/api/activities/:Activityid', (req, res) => {
     const activityId = req.params.Activityid;
     const { ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime,
         OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline,
-        SemesterAcademicYear, AcademicYear, Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate
+        SemesterAcademicYear, AcademicYear, Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate, StartTimeLastDay, EndTimeLastDay
     } = req.body;
 
     // ตัวอย่าง SQL query เพื่ออัปเดตข้อมูล
@@ -317,7 +334,7 @@ app.put('/api/activities/:Activityid', (req, res) => {
             ActivityCategoryID = ?, ActivityTypeID = ?, ActivityName = ?, ActivityDate = ?, DailyID = ?, ActivityHours = ?, 
             StartTime = ?, EndTime = ?, OrganizationName = ?, EventLocation = ?, NumberOfApplications = ?, 
             ApplicationChannel = ?, ApplicationDeadline = ?, SemesterAcademicYear = ?, AcademicYear = ?, 
-            Department = ?, Major = ?, ActivityDescription = ?, ApproveActivity = ?, ActivityEndDate = ?
+            Department = ?, Major = ?, ActivityDescription = ?, ApproveActivity = ?, ActivityEndDate = ?, StartTimeLastDay = ?, EndTimeLastDay = ?
         WHERE Activityid = ?`;
 
     // const values = [ActivityName, OrganizationName, ActivityDate, ActivityEndDate, StartTime, EndTime, activityId];
@@ -325,7 +342,7 @@ app.put('/api/activities/:Activityid', (req, res) => {
     pool.query(sql, [
         ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime,
         OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline,
-        SemesterAcademicYear, AcademicYear, Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate,
+        SemesterAcademicYear, AcademicYear, Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate, StartTimeLastDay, EndTimeLastDay,
         activityId
     ],
         (err, result) => {

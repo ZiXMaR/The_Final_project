@@ -4,8 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ผู้จัดกิจกรรม แก้ไขกิจกรรม</title>
-
+    <title>ผู้จัดกิจกรรม เพิ่มกิจกรรม </title>
     <style>
         body {
             margin: 0;
@@ -177,14 +176,38 @@
         button[type="submit"]:hover {
             background-color: #0056b3;
         }
+
+        .split-button {
+            background-color: #007bff;
+            color: rgb(255, 255, 255);
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .split-button:hover {
+            background-color: #0056b3;
+        }
+
+        .split-c-button {
+            background-color: #00ac1a;
+            color: rgb(255, 255, 255);
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .split-c-button:hover {
+            background-color: #007812;
+        }
     </style>
-
-
 </head>
 
-
 <body>
-
     <a href="#" class="app-button" id="add-activity-button">เพิ่มกิจกรรม</a>
     <a href="#" class="edit-button" id="edit-activity-button">แก้ไขกิจกรรม</a>
     <a href="#" class="delete-button" id="delete-activity-button">ลบกิจกรรม</a>
@@ -193,55 +216,64 @@
 
     <h1>ผู้จัดกิจกรรม</h1>
     <div class="container">
-
-        <h3>แก้ไขกิจกรรม</h3>
+        <h3>บันทึกกิจกรรม</h3>
         <p class="details">รายละเอียดกิจกรรม</p>
-        <form id="editForm">
+        <div class="form-group">
+            <label>เลือกประเภทวันจัด</label>
+            <a href="#" class="split-c-button" id="SingleAdd-button">วันเดียว</a>
+            <a href="#" class="split-button" id="MultiAdd-button">หลายวัน</a>
+        </div>
+
+        <form id="activityForm" action="/add-activity" method="POST">
 
 
             <div class="form-group">
                 <label for="ActivityName">ชื่อกิจกรรม</label>
-                <input type="text" id="ActivityName" name="ActivityName" placeholder="เลือกวันที่จัดกิจกรรม" required>
+                <input type="text" id="ActivityName" name="ActivityName" placeholder="กรอกชื่อกิจกรรมที่นี่" required>
             </div>
-
 
             <input type="hidden" id="OrganizationName" name="OrganizationName">
 
+
             <!-------------------------------------------------------------------------------------------- -->
+
 
             <div class="form-group">
                 <label for="ActivityDate">วันที่จัดกิจกรรม</label>
                 <input type="date" id="ActivityDate" name="ActivityDate" placeholder="กรอกชื่อกิจกรรมที่นี่" required>
             </div>
-            
+
             <div class="form-group">
-                <label for="StartTime">เวลาเริ่มกิจกรรมวันแรก</label>
-                <input type="time" id="StartTime" name="StartTime" placeholder="กรอกเวลาเริ่มกิจกรรมวันแรก" required>
+                <label for="StartTime">เวลาเริ่มกิจกรรม</label>
+                <input type="time" id="StartTime" name="StartTime" placeholder="กรอกเวลาเริ่มกิจกรรม" required>
             </div>
 
             <div class="form-group">
-                <label for="EndTime">เวลาจบกิจกรรมวันแรก</label>
-                <input type="time" id="EndTime" name="EndTime" placeholder="กรอกเวลาจบกิจกรรมวันแรก" required>
+                <label for="EndTime">เวลาจบกิจกรรม</label>
+                <input type="time" id="EndTime" name="EndTime" placeholder="กรอกเวลาจบกิจกรรม" required>
             </div>
+
+            <!-- ซ่อนช่องกรอก ActivityEndDate ด้วย display: none -->
+            <input type="date" id="ActivityEndDate" name="ActivityEndDate" style="display: none;" required>
 
             <!-------------------------------------------------------------------------------------------- -->
-            <div class="form-group">
+
+            <!-- <div class="form-group">
                 <label for="ActivityEndDate">วันสิ้นสุดกิจกรรม</label>
                 <input type="date" id="ActivityEndDate" name="ActivityEndDate" placeholder="กรอกวันสิ้นสุดกิจกรรม">
             </div>
 
             <div class="form-group">
                 <label for="StartTimeLastDay">เวลาเริ่มกิจกรรมวันสุดท้าย</label>
-                <input type="time" id="StartTimeLastDay" name="StartTimeLastDay" placeholder="กรอกเวลาเริ่มกิจกรรมวันสุดท้าย" >
+                <input type="time" id="StartTimeLastDay" name="StartTimeLastDay"
+                    placeholder="กรอกเวลาเริ่มกิจกรรมวันสุดท้าย">
             </div>
             <div class="form-group">
                 <label for="EndTimeLastDay">เวลาจบกิจกรรมวันสุดท้าย</label>
-                <input type="time" id="EndTimeLastDay" name="EndTimeLastDay" placeholder="กรอกเวลาจบกิจกรรมวันสุดท้าย" >
-            </div>
+                <input type="time" id="EndTimeLastDay" name="EndTimeLastDay" placeholder="กรอกเวลาจบกิจกรรมวันสุดท้าย">
+            </div> -->
 
-
-            <!-- เก็บไว้ -->
-            <input type="hidden" id="DailyID" name="DailyID">
+            <!-------------------------------------------------------------------------------------------- -->
 
             <div class="form-group">
                 <label for="SemesterAcademicYear">ภาคการศึกษา/ปีการศึกษา</label>
@@ -299,17 +331,16 @@
             <div class="form-group">
                 <label for="NumberOfApplications">จำนวนที่รับสมัคร</label>
                 <input type="number" id="NumberOfApplications" name="NumberOfApplications"
-                    placeholder="กรอกจำนวนที่รับสมัคร" required>
+                    placeholder="กรอกจำนวนที่รับสมัคร">
             </div>
             <div class="form-group">
                 <label for="ApplicationChannel">ช่องทางรับสมัคร</label>
-                <input type="text" id="ApplicationChannel" name="ApplicationChannel" placeholder="กรอกช่องทางรับสมัคร"
-                    required>
+                <input type="text" id="ApplicationChannel" name="ApplicationChannel" placeholder="กรอกช่องทางรับสมัคร">
             </div>
             <div class="form-group">
                 <label for="ApplicationDeadline">วันสิ้นสุดการรับสมัคร</label>
                 <input type="date" id="ApplicationDeadline" name="ApplicationDeadline"
-                    placeholder="วันสิ้นสุดการรับสมัคร">
+                    placeholder="วันสิ้นสุดการรับสมัคร" required>
             </div>
             <div class="form-group">
                 <label for="ActivityDescription">คำอธิบายกิจกรรม</label>
@@ -364,77 +395,63 @@
                 </select>
             </div>
 
-            <!-- เก็บไว้ -->
             <div class="form-group" style="display:none;">
                 <label for="ApproveActivity">คำอนุมัติ</label>
                 <input type="hidden" id="ApproveActivity" name="ApproveActivity" value="รออนุมัติ">
             </div>
 
-
             <div class="save-button-container">
-                <button type="submit">บันทึกการแก้ไข</button>
+                <button type="submit">บันทึกกิจกรรม</button>
             </div>
         </form>
     </div>
 
+    <div id="resultMessage"></div> <!-- ส่วนแสดงข้อความผลลัพธ์ -->
+
     <script>
 
-        // ฟังก์ชันเพื่อดึงค่า organizationName จาก URL
-        function getOrganizationNameFromUrl() {
-            const urlParams = new URLSearchParams(window.location.pathname);
-            const pathSegments = window.location.pathname.split('/');
-            return pathSegments[pathSegments.length - 1]; // ดึงค่า organizationName จาก URL
+
+
+        // ฟังก์ชันดึงค่า organizationName จาก URL หรือ path
+        function getOrganizationName() {
+            const urlParams = new URLSearchParams(window.location.search);
+            let organizationName = urlParams.get('organizationName');
+
+            if (!organizationName) {
+                // ถ้าไม่มีใน query string ให้ดึงจาก path
+                const pathSegments = window.location.pathname.split('/');
+                if (pathSegments.length > 2) {
+                    organizationName = pathSegments[pathSegments.length - 1];
+                }
+            }
+
+            // ทำการ URL-decode เพื่อถอดรหัสให้ได้ค่าเป็นข้อความปกติ
+            return decodeURIComponent(organizationName || ''); // ถ้าไม่มีค่าให้คืนค่าว่าง
         }
 
-        // ดึง Activityid จาก URL
-        const params = new URLSearchParams(window.location.search);
-        const Activityid = params.get('Activityid');
-
-        // เมื่อโหลดหน้าเสร็จ ดึงข้อมูลกิจกรรมจากเซิร์ฟเวอร์
-        document.addEventListener("DOMContentLoaded", function () {
-            fetch(`/api/activities/${Activityid}`)
-                .then(response => response.json())
-                .then(activity => {
-
-                    // ฟังก์ชันสำหรับแปลงวันที่จาก ISO 8601 ให้เป็นรูปแบบ yyyy-MM-dd
-                    const formatDate = (isoString) => {
-                        const date = new Date(isoString);
-                        const year = date.getFullYear();
-                        const month = String(date.getMonth() + 1).padStart(2, '0'); // เพิ่ม 0 ถ้าเดือนเป็นตัวเลขหลักเดียว
-                        const day = String(date.getDate()).padStart(2, '0'); // เพิ่ม 0 ถ้าวันเป็นตัวเลขหลักเดียว
-                        return `${year}-${month}-${day}`;
-                    };
-
-
-                    document.getElementById('ActivityCategoryID').value = activity.ActivityCategoryID;
-                    document.getElementById('ActivityTypeID').value = activity.ActivityTypeID;
-                    document.getElementById('ActivityName').value = activity.ActivityName;
-                    document.getElementById('ActivityDate').value = formatDate(activity.ActivityDate);
-                    document.getElementById('DailyID').value = activity.DailyID;
-                    document.getElementById('ActivityHours').value = activity.ActivityHours;
-                    document.getElementById('StartTime').value = activity.StartTime;
-                    document.getElementById('EndTime').value = activity.EndTime;
-                    document.getElementById('OrganizationName').value = activity.OrganizationName;
-                    document.getElementById('EventLocation').value = activity.EventLocation;
-                    document.getElementById('NumberOfApplications').value = activity.NumberOfApplications;
-                    document.getElementById('ApplicationChannel').value = activity.ApplicationChannel;
-                    document.getElementById('ApplicationDeadline').value = formatDate(activity.ApplicationDeadline);
-                    document.getElementById('SemesterAcademicYear').value = activity.SemesterAcademicYear;
-                    document.getElementById('AcademicYear').value = activity.AcademicYear;
-                    document.getElementById('Department').value = activity.Department;
-                    document.getElementById('Major').value = activity.Major;
-                    document.getElementById('ActivityDescription').value = activity.ActivityDescription;
-                    document.getElementById('ApproveActivity').value = activity.ApproveActivity;
-                    document.getElementById('ActivityEndDate').value = formatDate(activity.ActivityEndDate);
-                    document.getElementById('StartTimeLastDay').value = activity.StartTimeLastDay;
-                    document.getElementById('EndTimeLastDay').value = activity.EndTimeLastDay;
-                })
-                .catch(error => console.error('Error fetching activity:', error));
+        document.getElementById('ActivityDate').addEventListener('input', function () {
+            // คัดลอกค่าวันที่จาก ActivityDate ไปที่ ActivityEndDate
+            document.getElementById('ActivityEndDate').value = this.value;
         });
 
+        // ตั้งค่าให้กับฟิลด์ OrganizationName ก่อนการส่งฟอร์ม
+        document.getElementById('activityForm').addEventListener('submit', async (event) => {
+            event.preventDefault(); // ป้องกันไม่ให้ฟอร์มส่งข้อมูลแบบปกติ
 
-        // ฟังก์ชันสำหรับคำนวณ DailyID จาก ActivityDate และ ActivityEndDate
-        async function calculateDailyID(activityData) {
+            // ดึงค่า organizationName จาก URL หรือ path และใส่ลงในฟิลด์
+            const organizationName = getOrganizationName();
+            document.getElementById('OrganizationName').value = organizationName; // ใส่ชื่อหน่วยงานในฟิลด์
+
+            const formData = new FormData(event.target);
+            const activityData = Object.fromEntries(formData.entries());
+
+            // ตรวจสอบว่ามีค่า organizationName หรือไม่
+            if (!organizationName) {
+                alert('Error: organizationName สูญหาย ');
+                return; // ยกเลิกการส่งฟอร์ม
+            }
+
+            // ส่งวันที่ไปยังเซิร์ฟเวอร์เพื่อคำนวณ DailyID
             const response = await fetch('/calculate-daily-ids', {
                 method: 'POST',
                 headers: {
@@ -448,82 +465,32 @@
 
             if (response.ok) {
                 const { dailyIDs } = await response.json();
-
-                // ค้นหาค่าที่มากที่สุดจาก dailyIDs
-                const maxDailyID = dailyIDs.length > 0 ? dailyIDs[dailyIDs.length - 1] : null; // สมมติว่า dailyIDs เรียงตามลำดับ
-
-                return maxDailyID; // คืนค่า DailyID ที่มากที่สุด
-            } else {
-                throw new Error('Error calculating DailyID: ' + await response.text());
-            }
-        }
-
-
-
-        // จัดการเมื่อส่งฟอร์ม
-        document.getElementById('editForm').addEventListener('submit', async function (event) {
-            event.preventDefault(); // ป้องกันการรีเฟรชหน้า
-
-            // ดึงข้อมูลจากฟอร์ม
-            const formData = {
-                ActivityCategoryID: document.getElementById('ActivityCategoryID').value,
-                ActivityTypeID: document.getElementById('ActivityTypeID').value,
-                ActivityName: document.getElementById('ActivityName').value,
-                ActivityDate: document.getElementById('ActivityDate').value,
-                DailyID: document.getElementById('DailyID').value,
-                ActivityHours: document.getElementById('ActivityHours').value,
-                StartTime: document.getElementById('StartTime').value,
-                EndTime: document.getElementById('EndTime').value,
-                OrganizationName: document.getElementById('OrganizationName').value,
-                EventLocation: document.getElementById('EventLocation').value,
-                NumberOfApplications: document.getElementById('NumberOfApplications').value,
-                ApplicationChannel: document.getElementById('ApplicationChannel').value,
-                ApplicationDeadline: document.getElementById('ApplicationDeadline').value,
-                SemesterAcademicYear: document.getElementById('SemesterAcademicYear').value,
-                AcademicYear: document.getElementById('AcademicYear').value,
-                Department: document.getElementById('Department').value,
-                Major: document.getElementById('Major').value,
-                ActivityDescription: document.getElementById('ActivityDescription').value,
-                ApproveActivity: 'รออนุมัติ', // บังคับให้ ApproveActivity เป็น "รออนุมัติ"
-                ActivityEndDate: document.getElementById('ActivityEndDate').value,
-                StartTimeLastDay: document.getElementById('StartTime').value,
-                EndTimeLastDay: document.getElementById('EndTime').value
-            };
-
-            console.log(formData);
-
-
-            // คำนวณ DailyID
-            try {
-                const maxDailyID = await calculateDailyID(formData);
+                const maxDailyID = dailyIDs.length > 0 ? dailyIDs[dailyIDs.length - 1] : null;
 
                 if (maxDailyID) {
-                    formData.DailyID = maxDailyID; // ใส่ค่า DailyID ที่มากที่สุดใน formData
+                    activityData.DailyID = maxDailyID;
                 }
 
-                // ส่งข้อมูลไปอัปเดตที่เซิร์ฟเวอร์
-                const updateResponse = await fetch(`/api/activities/${Activityid}`, {
-                    method: 'PUT',
+                const addActivityResponse = await fetch('/add-activity', {
+                    method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify(activityData),
                 });
 
-                if (updateResponse.ok) {
-                    alert('บันทึกการแก้ไขสำเร็จ!');
-                    console.log(formData); // ตรวจสอบว่าข้อมูลถูกต้องก่อนส่งไปยัง backend
-                    window.location.href = `/organizerEditHome/${organizationName}`; // ย้อนกลับไปยังหน้าแรกหลังอัปเดตเสร็จ
+                if (addActivityResponse.ok) {
+                    alert('บันทึกข้อมูลเสร็จสิ้น!');
+                    window.location.reload(); // รีเฟรชหน้าเมื่อส่งข้อมูลสำเร็จ
                 } else {
-                    alert('Error updating activity: ' + await updateResponse.text());
+                    alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + await addActivityResponse.text());
                 }
-            } catch (error) {
-                console.error('Error calculating DailyID:', error);
-                alert(error.message);
+
+            } else {
+                alert('เกิดข้อผิดพลาดในการคำนวน DailyID: ' + await response.text());
             }
-
-
         });
+
 
         // ฟังก์ชันเพื่อดึง organizationName จาก path
         function getOrganizationNameFromPath() {
@@ -543,11 +510,18 @@
             document.getElementById('add-activity-button').href = `/organizer/${organizationName}`;
             document.getElementById('edit-activity-button').href = `/organizerEditHome/${organizationName}`;
             document.getElementById('delete-activity-button').href = `/organizerDelet/${organizationName}`;
+            document.getElementById('SingleAdd-button').href = `/organizerSingleAdd/${organizationName}`;
+            document.getElementById('MultiAdd-button').href = `/organizerMultiAdd/${organizationName}`;
+
         } else {
             console.error('Organization name not found in the URL path.');
         }
 
+
     </script>
+
+
+
 </body>
 
 </html>
