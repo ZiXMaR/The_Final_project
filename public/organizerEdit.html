@@ -13,19 +13,47 @@
             flex-direction: column;
             align-items: center;
             height: 100vh;
-            background-color: #f8f9fa;
+            background-color: #F2F4F7;
             text-align: center;
         }
 
-        .app-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: #00ccff;
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            padding: 15px 0 10px 0;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar a {
+            text-decoration: none;
+            margin-right: 15px;
+        }
+
+        .home-button {
+            background-color: #007bff;
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
             text-decoration: none;
+            font-size: 14px;
+            margin-left: 20px;
+        }
+
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+
+        .app-button {
+            background-color: #00ccff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
             font-size: 14px;
         }
 
@@ -34,34 +62,22 @@
         }
 
         .edit-button {
-            position: absolute;
-            /* จัดให้มีตำแหน่งเหมือนปุ่มแก้ไข */
-            top: 20px;
-            /* ให้สูงเท่ากับปุ่มแก้ไข */
-            left: 150px;
-            /* ขยับให้ห่างจากปุ่มแก้ไข */
-            background-color: #28a745;
-            /* สีแดงสำหรับปุ่มลบ */
+            background-color: #ffc107;
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
-            text-decoration: none;
             font-size: 14px;
         }
 
         .edit-button:hover {
-            background-color: #218838;
+            background-color: #e0a800;
         }
 
         .delete-button {
-            position: absolute;
-            top: 20px;
-            left: 280px;
             background-color: #dc3545;
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
-            text-decoration: none;
             font-size: 14px;
         }
 
@@ -69,9 +85,9 @@
             background-color: #c82333;
         }
 
-        .home-button {
+
+        .logout-button {
             position: absolute;
-            top: 20px;
             right: 20px;
             background-color: #007bff;
             color: white;
@@ -81,7 +97,7 @@
             font-size: 14px;
         }
 
-        .home-button:hover {
+        .logout-button:hover {
             background-color: #0056b3;
         }
 
@@ -90,6 +106,8 @@
             color: #007bff;
             margin: 0;
             padding: 20px 0;
+            margin-top: 55px;
+
         }
 
         .container {
@@ -157,6 +175,11 @@
             text-overflow: ellipsis;
         }
 
+        .form-group textarea {
+            width: 62%;
+            height: 60px;
+        }
+
         .save-button-container {
             width: 100%;
             display: flex;
@@ -177,6 +200,8 @@
         button[type="submit"]:hover {
             background-color: #0056b3;
         }
+
+        
     </style>
 
 
@@ -185,12 +210,15 @@
 
 <body>
 
-    <a href="#" class="app-button" id="add-activity-button">เพิ่มกิจกรรม</a>
-    <a href="#" class="edit-button" id="edit-activity-button">แก้ไขกิจกรรม</a>
-    <a href="#" class="delete-button" id="delete-activity-button">ลบกิจกรรม</a>
-    <a href="#" class="home-button" id="home-button">หน้าหลัก</a>
+    <div class="navbar">
+        <a href="#" class="home-button" id="home-button">หน้าหลัก</a>
+        <a href="#" class="app-button" id="add-activity-button">เพิ่มกิจกรรม</a>
+        <a href="#" class="edit-button" id="edit-activity-button">แก้ไขกิจกรรม</a>
+        <a href="#" class="delete-button" id="delete-activity-button">ลบกิจกรรม</a>
+        <a class="logout-button" onclick="handleLogout()">ออกจากระบบ</a>
+    </div>
 
-
+    
     <h1>ผู้จัดกิจกรรม</h1>
     <div class="container">
 
@@ -213,7 +241,7 @@
                 <label for="ActivityDate">วันที่จัดกิจกรรม</label>
                 <input type="date" id="ActivityDate" name="ActivityDate" placeholder="กรอกชื่อกิจกรรมที่นี่" required>
             </div>
-            
+
             <div class="form-group">
                 <label for="StartTime">เวลาเริ่มกิจกรรมวันแรก</label>
                 <input type="time" id="StartTime" name="StartTime" placeholder="กรอกเวลาเริ่มกิจกรรมวันแรก" required>
@@ -232,11 +260,12 @@
 
             <div class="form-group">
                 <label for="StartTimeLastDay">เวลาเริ่มกิจกรรมวันสุดท้าย</label>
-                <input type="time" id="StartTimeLastDay" name="StartTimeLastDay" placeholder="กรอกเวลาเริ่มกิจกรรมวันสุดท้าย" >
+                <input type="time" id="StartTimeLastDay" name="StartTimeLastDay"
+                    placeholder="กรอกเวลาเริ่มกิจกรรมวันสุดท้าย">
             </div>
             <div class="form-group">
                 <label for="EndTimeLastDay">เวลาจบกิจกรรมวันสุดท้าย</label>
-                <input type="time" id="EndTimeLastDay" name="EndTimeLastDay" placeholder="กรอกเวลาจบกิจกรรมวันสุดท้าย" >
+                <input type="time" id="EndTimeLastDay" name="EndTimeLastDay" placeholder="กรอกเวลาจบกิจกรรมวันสุดท้าย">
             </div>
 
 
@@ -366,8 +395,12 @@
 
             <!-- เก็บไว้ -->
             <div class="form-group" style="display:none;">
-                <label for="ApproveActivity">คำอนุมัติ</label>
                 <input type="hidden" id="ApproveActivity" name="ApproveActivity" value="รออนุมัติ">
+            </div>
+
+            <div class="form-group">
+                <label for="FixActivity">ส่งที่ต้องแก้ไข</label>
+                <textarea id="FixActivity" name="FixActivity" placeholder="กรอกสิ่งที่ต้องแก้ไข" readonly></textarea>
             </div>
 
 
@@ -428,7 +461,8 @@
                     document.getElementById('ActivityEndDate').value = formatDate(activity.ActivityEndDate);
                     document.getElementById('StartTimeLastDay').value = activity.StartTimeLastDay;
                     document.getElementById('EndTimeLastDay').value = activity.EndTimeLastDay;
-                
+                    document.getElementById('FixActivity').value = activity.FixActivity;
+
                 })
                 .catch(error => console.error('Error fetching activity:', error));
         });
@@ -488,7 +522,8 @@
                 ApproveActivity: 'รออนุมัติ', // บังคับให้ ApproveActivity เป็น "รออนุมัติ"
                 ActivityEndDate: document.getElementById('ActivityEndDate').value,
                 StartTimeLastDay: document.getElementById('StartTime').value,
-                EndTimeLastDay: document.getElementById('EndTime').value
+                EndTimeLastDay: document.getElementById('EndTime').value,
+                FixActivity: document.getElementById('FixActivity').value
             };
 
             console.log(formData);
@@ -546,6 +581,11 @@
             document.getElementById('delete-activity-button').href = `/organizerDelet/${organizationName}`;
         } else {
             console.error('Organization name not found in the URL path.');
+        }
+
+        function handleLogout() {
+            // เปลี่ยนเส้นทางหรือจัดการ logout ที่นี่
+            window.location.href = '/logout'; // ตัวอย่างการเปลี่ยนเส้นทางไปหน้า logout
         }
 
     </script>

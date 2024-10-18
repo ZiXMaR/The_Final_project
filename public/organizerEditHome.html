@@ -12,19 +12,47 @@
             flex-direction: column;
             align-items: center;
             height: 100vh;
-            background-color: #f8f9fa;
+            background-color: #F2F4F7;
             text-align: center;
         }
 
-        .app-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: #00ccff;
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            padding: 15px 0 10px 0;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar a {
+            text-decoration: none;
+            margin-right: 15px;
+        }
+
+        .home-button {
+            background-color: #007bff;
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
             text-decoration: none;
+            font-size: 14px;
+            margin-left: 20px;
+        }
+
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+
+        .app-button {
+            background-color: #00ccff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
             font-size: 14px;
         }
 
@@ -32,55 +60,23 @@
             background-color: #00b8e6;
         }
 
-        .edit-button {
-            position: relative;
-            /* แก้ไขเป็น relative เพื่อไม่ให้ชนกับปุ่มอื่น */
+        .editP-button {
             background-color: #ffc107;
-            /* สีเหลืองสำหรับปุ่มแก้ไข */
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
-            text-decoration: none;
             font-size: 14px;
-            margin-top: 10px;
-            /* เพิ่มระยะห่างจากชื่อกิจกรรม */
-            cursor: pointer;
-            /* เปลี่ยนรูปแบบของเมาส์ */
-            border: none;
-            /* ลบขอบของปุ่ม */
-
         }
 
-        .edit-button:hover {
+        .editP-button:hover {
             background-color: #e0a800;
-            /* สีที่เข้มขึ้นเมื่อเอาเมาส์ไปวาง */
-        }
-
-        .editPage-button {
-            position: absolute;
-            top: 20px;
-            left: 150px;
-            background-color: #28a745;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        .editPage-button:hover {
-            background-color: #218838;
         }
 
         .delete-button {
-            position: absolute;
-            top: 20px;
-            left: 280px;
             background-color: #dc3545;
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
-            text-decoration: none;
             font-size: 14px;
         }
 
@@ -88,9 +84,9 @@
             background-color: #c82333;
         }
 
-        .home-button {
+
+        .logout-button {
             position: absolute;
-            top: 20px;
             right: 20px;
             background-color: #007bff;
             color: white;
@@ -100,13 +96,17 @@
             font-size: 14px;
         }
 
-        .home-button:hover {
+        .logout-button:hover {
             background-color: #0056b3;
         }
 
+
         h1 {
             color: #007bff;
-            margin: 20px 0;
+            margin: 0;
+            padding: 20px 0;
+            margin-top: 55px;
+
         }
 
         .activity-card {
@@ -150,15 +150,37 @@
             flex-direction: column;
             align-items: center;
         }
+
+        .edit-button {
+            
+            background-color: #ffc107;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 10px;
+            cursor: pointer;
+            border: none;
+
+        }
+
+        .edit-button:hover {
+            background-color: #e0a800;
+        }
     </style>
+
 </head>
 
 <body>
 
-    <a href="#" class="app-button" id="add-activity-button">เพิ่มกิจกรรม</a>
-    <a href="#" class="editPage-button" id="edit-activity-button">แก้ไขกิจกรรม</a>
-    <a href="#" class="delete-button" id="delete-activity-button">ลบกิจกรรม</a>
-    <a href="#" class="home-button" id="home-button">หน้าหลัก</a>
+    <div class="navbar">
+        <a href="#" class="home-button" id="home-button">หน้าหลัก</a>
+        <a href="#" class="app-button" id="add-activity-button">เพิ่มกิจกรรม</a>
+        <a href="#" class="editP-button" id="edit-activity-button">แก้ไขกิจกรรม</a>
+        <a href="#" class="delete-button" id="delete-activity-button">ลบกิจกรรม</a>
+        <a class="logout-button" onclick="handleLogout()">ออกจากระบบ</a>
+    </div>
 
     <h1>ผู้จัดกิจกรรม</h1>
 
@@ -235,8 +257,13 @@
         }
 
         // ดึง organizationName จาก URL และเรียกใช้ฟังก์ชันเพื่อดึงข้อมูลกิจกรรม
-        
+
         fetchActivitiesByOrganization(organizationName);
+
+        function handleLogout() {
+            // เปลี่ยนเส้นทางหรือจัดการ logout ที่นี่
+            window.location.href = '/logout'; // ตัวอย่างการเปลี่ยนเส้นทางไปหน้า logout
+        }
     </script>
 
 

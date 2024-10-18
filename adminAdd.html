@@ -12,19 +12,47 @@
             flex-direction: column;
             align-items: center;
             height: 100vh;
-            background-color: #f8f9fa;
+            background-color: #F2F4F7;
             text-align: center;
         }
 
-        .app-button {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background-color: #00ccff;
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            padding: 15px 0 10px 0;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar a {
+            text-decoration: none;
+            margin-right: 15px;
+        }
+
+        .home-button {
+            background-color: #007bff;
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
             text-decoration: none;
+            font-size: 14px;
+            margin-left: 20px;
+        }
+
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+
+        .app-button {
+            background-color: #00ccff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
             font-size: 14px;
         }
 
@@ -32,45 +60,33 @@
             background-color: #00b8e6;
         }
 
-        .edit-button {
-            position: absolute;
-            /* จัดให้มีตำแหน่งเหมือนปุ่มแก้ไข */
-            top: 20px;
-            /* ให้สูงเท่ากับปุ่มแก้ไข */
-            left: 150px;
-            /* ขยับให้ห่างจากปุ่มแก้ไข */
-            background-color: #28a745;
-            /* สีแดงสำหรับปุ่มลบ */
+        .editP-button {
+            background-color: #ffc107;
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
-            text-decoration: none;
             font-size: 14px;
         }
 
-        .edit-button:hover {
-            background-color: #218838;
+        .editP-button:hover {
+            background-color: #e0a800;
         }
 
-        .delete-button {
-            position: absolute;
-            top: 20px;
-            left: 280px;
+        .deleteP-button {
             background-color: #dc3545;
             color: white;
             padding: 10px 20px;
             border-radius: 5px;
-            text-decoration: none;
             font-size: 14px;
         }
 
-        .delete-button:hover {
+        .deleteP-button:hover {
             background-color: #c82333;
         }
 
-        .home-button {
+
+        .logout-button {
             position: absolute;
-            top: 20px;
             right: 20px;
             background-color: #007bff;
             color: white;
@@ -80,7 +96,7 @@
             font-size: 14px;
         }
 
-        .home-button:hover {
+        .logout-button:hover {
             background-color: #0056b3;
         }
 
@@ -89,6 +105,8 @@
             color: #007bff;
             margin: 0;
             padding: 20px 0;
+            margin-top: 55px;
+
         }
 
         .container {
@@ -194,10 +212,14 @@
 </head>
 
 <body>
-    <a href="/adminAdd" class="app-button">เพิ่มกิจกรรม</a>
-    <a href="/adminEditHome.html" class="edit-button">แก้ไขกิจกรรม</a>
-    <a href="/adminDelet" class="delete-button">ลบกิจกรรม</a>
-    <a href="/admin" class="home-button">หน้าหลัก</a>
+
+    <div class="navbar">
+        <a href="/admin" class="home-button">หน้าหลัก</a>
+        <a href="/adminAdd" class="app-button">เพิ่มกิจกรรม</a>
+        <a href="/adminEditHome.html" class="editP-button">แก้ไขกิจกรรม</a>
+        <a href="/adminDelet" class="deleteP-button">ลบกิจกรรม</a>
+        <a class="logout-button" onclick="handleLogout()">ออกจากระบบ</a>
+    </div>
 
 
 
@@ -212,12 +234,17 @@
             <a href="/adminMultiAdd" class="split-button">หลายวัน</a>
         </div>
 
-        
+
     </div>
 
     <div id="resultMessage"></div> <!-- ส่วนแสดงข้อความผลลัพธ์ -->
 
     <script>
+
+        function handleLogout() {
+            // เปลี่ยนเส้นทางหรือจัดการ logout ที่นี่
+            window.location.href = '/logout'; // ตัวอย่างการเปลี่ยนเส้นทางไปหน้า logout
+        }
 
 
     </script>

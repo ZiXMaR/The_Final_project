@@ -338,7 +338,7 @@ app.put('/api/activities/:Activityid', (req, res) => {
     const activityId = req.params.Activityid;
     const { ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime,
         OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline,
-        SemesterAcademicYear, AcademicYear, Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate, StartTimeLastDay, EndTimeLastDay
+        SemesterAcademicYear, AcademicYear, Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate, StartTimeLastDay, EndTimeLastDay,FixActivity
     } = req.body;
 
     // ตัวอย่าง SQL query เพื่ออัปเดตข้อมูล
@@ -347,7 +347,7 @@ app.put('/api/activities/:Activityid', (req, res) => {
             ActivityCategoryID = ?, ActivityTypeID = ?, ActivityName = ?, ActivityDate = ?, DailyID = ?, ActivityHours = ?, 
             StartTime = ?, EndTime = ?, OrganizationName = ?, EventLocation = ?, NumberOfApplications = ?, 
             ApplicationChannel = ?, ApplicationDeadline = ?, SemesterAcademicYear = ?, AcademicYear = ?, 
-            Department = ?, Major = ?, ActivityDescription = ?, ApproveActivity = ?, ActivityEndDate = ?, StartTimeLastDay = ?, EndTimeLastDay = ?
+            Department = ?, Major = ?, ActivityDescription = ?, ApproveActivity = ?, ActivityEndDate = ?, StartTimeLastDay = ?, EndTimeLastDay = ?, FixActivity = ?
         WHERE Activityid = ?`;
 
     // const values = [ActivityName, OrganizationName, ActivityDate, ActivityEndDate, StartTime, EndTime, activityId];
@@ -355,7 +355,7 @@ app.put('/api/activities/:Activityid', (req, res) => {
     pool.query(sql, [
         ActivityCategoryID, ActivityTypeID, ActivityName, ActivityDate, DailyID, ActivityHours, StartTime, EndTime,
         OrganizationName, EventLocation, NumberOfApplications, ApplicationChannel, ApplicationDeadline,
-        SemesterAcademicYear, AcademicYear, Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate, StartTimeLastDay, EndTimeLastDay,
+        SemesterAcademicYear, AcademicYear, Department, Major, ActivityDescription, ApproveActivity, ActivityEndDate, StartTimeLastDay, EndTimeLastDay,FixActivity,
         activityId
     ],
         (err, result) => {
