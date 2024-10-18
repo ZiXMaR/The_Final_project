@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ผู้ดูแลระบบ เพิ่มกิจกรรม</title>
+    <title>ผู้ดูแลระบบ แก้ไขกิจกรรม</title>
     <style>
         body {
             margin: 0;
@@ -109,90 +109,79 @@
 
         }
 
-        .container {
-            width: 90vw;
-            max-width: 800px;
-            background-color: #ffffff;
+        .activity-card {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-            margin-top: 20px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 95%;
+        }
+
+        .activity-details {
+            text-align: left;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .activity-details strong {
+            color: #007bff;
+        }
+
+        .container {
+
+            max-width: 620px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 95%;
+        }
+
+        .container-c {
+            width: 90vw;
+            max-width: 650px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        .container p {
-            margin: 0;
-            padding: 10px 0;
-            text-align: center;
-            /* จัดข้อความกลาง */
-        }
-
-        .container .details {
-            margin-right: 120px;
-            /* ขยับ "รายละเอียดกิจกรรม" มาด้านหน้าเล็กน้อย */
-        }
-
-        .container .applicant-qualities {
-            margin-right: 120px;
-            /* ขยับ "คุณสมบัติของผู้รับสมัคร" มาด้านหน้าเล็กน้อย */
-            margin-top: 10px;
-            /* เพิ่มระยะห่างด้านบน */
-        }
-
-        .form-group {
-            width: 100%;
-            max-width: 600px;
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-        }
-
-        .form-group label {
-            flex-basis: 200px;
-            text-align: right;
-            margin: 0;
-            padding: 10px;
-        }
-
-        .form-group input,
-        .form-group select {
-            flex: 1;
-            /* ทำให้กล่องข้อความขยายเต็มที่ */
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-
-        .form-group select {
-            /* ปรับขนาดของ select ให้เหมาะสม */
-            max-width: 600px;
-            width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .save-button-container {
-            width: 100%;
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 20px;
-        }
-
-        button[type="submit"] {
+        .delete-button {
+            position: absolute;
+            top: 20px;
+            left: 280px;
+            background-color: #dc3545;
+            color: white;
             padding: 10px 20px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #007bff;
-            border: none;
             border-radius: 5px;
-            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
         }
 
-        button[type="submit"]:hover {
-            background-color: #0056b3;
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+
+        .edit-button {
+            background-color: #ffc107;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 10px;
+            cursor: pointer;
+            border: none;
+
+        }
+
+        .edit-button:hover {
+            background-color: #e0a800;
         }
 
         .split-button {
@@ -222,8 +211,7 @@
         .split-c-button:hover {
             background-color: #0056b3;
         }
-
-    
+    </style>
     </style>
 </head>
 
@@ -237,35 +225,57 @@
         <a class="logout-button" onclick="handleLogout()">ออกจากระบบ</a>
     </div>
 
-
-
     <h1>ผู้ดูแลระบบ</h1>
+
     <div class="container">
-        <h3>บันทึกกิจกรรม</h3>
-        <p class="details">รายละเอียดกิจกรรม</p>
-
-        <div class="form-group">
-            <label>เลือกประเภทวันจัด</label>
-            <a href="/adminSingleAdd" class="split-button">วันเดียว</a>
-            <a href="/adminMultiAdd" class="split-button">หลายวัน</a>
-        </div>
-
-
+        <h3>เลือกกิจกรรมที่จะแก้ไข</h3>
+        <p>กิจกรรมทั้งหมด</p>
+        <a href="/adminEditHome.html" class="split-button">ทั้งหมด</a>
+        <a href="/adminEditHome-W.html" class="split-button">รอการอนุมัติ</a>
+        <a href="/adminEditHome-Y.html" class="split-button">ได้รับการอนุมัติ</a>
+        <a href="/adminEditHome-N.html" class="split-c-button">ไม่ได้รับการอนุมัติ</a>
     </div>
 
-    <div id="resultMessage"></div> <!-- ส่วนแสดงข้อความผลลัพธ์ -->
+    <div class="container-c" id="activity-list"></div>
 
     <script>
+        fetch('http://localhost:3000/api/activities-a-n')
+            .then(response => response.json())
+            .then(data => {
+                const activityList = document.getElementById('activity-list');
+                if (data.length > 0) {
+                    data.forEach(activity => {
+                        const activityElement = document.createElement('div');
+                        activityElement.classList.add('activity-card');
+                        activityElement.innerHTML = `
+                            <p><strong>ชื่อกิจกรรม:</strong> ${activity.ActivityName}</p>
+                            <div class="activity-details">
+                                <p><strong>หน่วยงาน:</strong> ${activity.OrganizationName}</p>
+                                <p><strong>วันที่จัด:</strong> ${new Date(activity.ActivityDate).toLocaleDateString()}</p>
+                                <p><strong>วันสิ้นสุด:</strong> ${new Date(activity.ActivityEndDate).toLocaleDateString()}</p>
+                                <p><strong>ภาค/ปีการศึกษา:</strong> ${activity.SemesterAcademicYear}</p>
+                                <p><strong>สถานที่:</strong> ${activity.EventLocation}</p>
+                                <p><strong>สถานะกิจกรรม:</strong> ${activity.ApproveActivity}</p>
+                            </div>
+                            <button class="edit-button" onclick="window.location.href='/adminEdit.html?Activityid=${activity.Activityid}'">
+                                แก้ไข
+                            </button>
+                        `;
+                        activityList.appendChild(activityElement);
+                    });
+                } else {
+                    activityList.innerHTML = '<p>No activities available.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching activities:', error);
+            });
 
         function handleLogout() {
             // เปลี่ยนเส้นทางหรือจัดการ logout ที่นี่
             window.location.href = '/logout'; // ตัวอย่างการเปลี่ยนเส้นทางไปหน้า logout
         }
-
-
     </script>
-
-
 
 </body>
 

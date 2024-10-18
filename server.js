@@ -72,6 +72,26 @@ app.get('/organizerEdit/:organizationName', (req, res) => {
 
 //----------------------------------------------------
 
+app.get('/organizerEditHome-W/:organizationName', (req, res) => {
+    const organizationName = decodeURIComponent(req.params.organizationName);
+    // ส่งไฟล์ HTML โดยตรงจากโฟลเดอร์ public
+    res.sendFile(path.join(__dirname, 'public', 'organizerEditHome-W.html'));
+});
+
+app.get('/organizerEditHome-Y/:organizationName', (req, res) => {
+    const organizationName = decodeURIComponent(req.params.organizationName);
+    // ส่งไฟล์ HTML โดยตรงจากโฟลเดอร์ public
+    res.sendFile(path.join(__dirname, 'public', 'organizerEditHome-Y.html'));
+});
+
+app.get('/organizerEditHome-N/:organizationName', (req, res) => {
+    const organizationName = decodeURIComponent(req.params.organizationName);
+    // ส่งไฟล์ HTML โดยตรงจากโฟลเดอร์ public
+    res.sendFile(path.join(__dirname, 'public', 'organizerEditHome-N.html'));
+});
+
+//----------------------------------------------------
+
 
 // Serve the main page
 app.get('/index', (req, res) => {
@@ -379,6 +399,50 @@ app.put('/api/activities/:Activityid', (req, res) => {
 
 //-----------------------------------------------------------------------
 
+// แอดมิน แก้ไข รออนุมัติ
+app.get('/api/activities-a-w', (req, res) => {
+    const sql = 'SELECT * FROM activity WHERE ApproveActivity = "รออนุมัติ"';
+    pool.query(sql, (err, result) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Error fetching activity');
+        } else {
+            console.log(result); // ตรวจสอบข้อมูลที่ดึงมา
+            res.json(result);
+        }
+    });
+});
+
+// แอดมิน แก้ไข อนุมัติ
+app.get('/api/activities-a-y', (req, res) => {
+    const sql = 'SELECT * FROM activity WHERE ApproveActivity = "Y"';
+    pool.query(sql, (err, result) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Error fetching activity');
+        } else {
+            console.log(result); // ตรวจสอบข้อมูลที่ดึงมา
+            res.json(result);
+        }
+    });
+});
+
+// แอดมิน แก้ไข ไม่อนุมัติ
+app.get('/api/activities-a-n', (req, res) => {
+    const sql = 'SELECT * FROM activity WHERE ApproveActivity = "N"';
+    pool.query(sql, (err, result) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Error fetching activity');
+        } else {
+            console.log(result); // ตรวจสอบข้อมูลที่ดึงมา
+            res.json(result);
+        }
+    });
+});
+
+//-----------------------------------------------------------------------
+
 //ลบกิจกรรม ผู้จัด ล็อกอิน
 app.get('/activities-d', (req, res) => {
     const organizationName = req.query.organizationName; // รับค่า organizationName จาก query string
@@ -410,6 +474,62 @@ app.get('/api/activities-e', (req, res) => {
                 return res.status(500).send('Internal server error');
             }
             res.json(results); // ส่งผลลัพธ์กิจกรรมเฉพาะ organizationName ที่ตรงกันกลับไป
+        });
+    } else {
+        res.status(400).send('Missing organizationName');
+    }
+});
+
+//-------------------------------------------------------------------------
+
+//ผู้จัด แก้ไข รออนุมัติ
+app.get('/api/activities-w', (req, res) => {
+    const organizationName = req.query.organizationName; // รับค่า organizationName จาก query string
+
+    if (organizationName) {
+        const query = 'SELECT * FROM activity WHERE OrganizationName = ? AND ApproveActivity = "รออนุมัติ"';
+        pool.query(query, [organizationName], (err, results) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).send('Internal server error');
+            }
+            res.json(results); // ส่งผลลัพธ์กิจกรรมเฉพาะ organizationName ที่ตรงกันและต้องได้รับการ approve
+        });
+    } else {
+        res.status(400).send('Missing organizationName');
+    }
+});
+
+//ผู้จัด แก้ไข อนุมัติ
+app.get('/api/activities-y', (req, res) => {
+    const organizationName = req.query.organizationName; // รับค่า organizationName จาก query string
+
+    if (organizationName) {
+        const query = 'SELECT * FROM activity WHERE OrganizationName = ? AND ApproveActivity = "Y"';
+        pool.query(query, [organizationName], (err, results) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).send('Internal server error');
+            }
+            res.json(results); // ส่งผลลัพธ์กิจกรรมเฉพาะ organizationName ที่ตรงกันและต้องได้รับการ approve
+        });
+    } else {
+        res.status(400).send('Missing organizationName');
+    }
+});
+
+//ผู้จัด แก้ไข ไม่อนุมัติ
+app.get('/api/activities-n', (req, res) => {
+    const organizationName = req.query.organizationName; // รับค่า organizationName จาก query string
+
+    if (organizationName) {
+        const query = 'SELECT * FROM activity WHERE OrganizationName = ? AND ApproveActivity = "N"';
+        pool.query(query, [organizationName], (err, results) => {
+            if (err) {
+                console.error('Database error:', err);
+                return res.status(500).send('Internal server error');
+            }
+            res.json(results); // ส่งผลลัพธ์กิจกรรมเฉพาะ organizationName ที่ตรงกันและต้องได้รับการ approve
         });
     } else {
         res.status(400).send('Missing organizationName');

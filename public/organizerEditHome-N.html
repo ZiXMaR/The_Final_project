@@ -216,11 +216,11 @@
 
     <div class="container">
         <h3>เลือกกิจกรรมที่จะแก้ไข</h3>
-        <p>กิจกรรมทั้งหมด</p>
-        <a href="#" class="split-c-button" id="All-button">ทั้งหมด</a>
+        <p>กิจกรรมที่ไม่ได้รับการอนุมัติ</p>
+        <a href="#" class="split-button" id="All-button">ทั้งหมด</a>
         <a href="#" class="split-button" id="W-button">รอการอนุมัติ</a>
         <a href="#" class="split-button" id="Y-button">ได้รับการอนุมัติ</a>
-        <a href="#" class="split-button" id="N-button">ไม่ได้รับการอนุมัติ</a>
+        <a href="#" class="split-c-button" id="N-button">ไม่ได้รับการอนุมัติ</a>
     </div>
 
     <div class="container-c" id="activity-list"></div>
@@ -235,7 +235,7 @@
 
         // ฟังก์ชันดึงกิจกรรมที่ตรงกับ organizationName
         function fetchActivitiesByOrganization(organizationName) {
-            fetch(`http://localhost:3000/api/activities-e?organizationName=${organizationName}`)
+            fetch(`http://localhost:3000/api/activities-n?organizationName=${organizationName}`)
                 .then(response => response.json())
                 .then(data => {
                     const activityList = document.getElementById('activity-list');

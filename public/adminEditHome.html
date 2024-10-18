@@ -183,6 +183,35 @@
         .edit-button:hover {
             background-color: #e0a800;
         }
+
+        .split-button {
+            background-color: #F2F4F7;
+            color: rgb(0, 0, 0);
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .split-button:hover {
+            background-color: #007bff;
+        }
+
+        .split-c-button {
+            background-color: #007bff;
+            color: rgb(255, 255, 255);
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .split-c-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
     </style>
 </head>
 
@@ -201,6 +230,10 @@
     <div class="container">
         <h3>เลือกกิจกรรมที่จะแก้ไข</h3>
         <p>กิจกรรมทั้งหมด</p>
+        <a href="/adminEditHome.html" class="split-c-button">ทั้งหมด</a>
+        <a href="/adminEditHome-W.html" class="split-button">รอการอนุมัติ</a>
+        <a href="/adminEditHome-Y.html" class="split-button">ได้รับการอนุมัติ</a>
+        <a href="/adminEditHome-N.html" class="split-button">ไม่ได้รับการอนุมัติ</a>
     </div>
 
     <div class="container-c" id="activity-list"></div>
