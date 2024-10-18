@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const mysql = require('mysql2');
+// const mysql = require('mysql2');
 const bodyParser = require('body-parser');
 const app = express();
 const port = 3000;
@@ -10,6 +10,7 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const secretKey = crypto.randomBytes(64).toString('hex');
 console.log(secretKey);
+const mysql = require('mysql2/promise'); // เปลี่ยนมาใช้ promise version ของ mysql2
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -59,23 +60,33 @@ app.get('/', (req, res) => {
 });
 
 app.post('/register', async (req, res) => {
-    const { username, password, role } = req.body; // รับข้อมูลจากฟอร์มสมัคร
-    const hashedPassword = await bcrypt.hash(password, 10); // Hash password ด้วย bcrypt
+    const { username, password, role } = req.body;
 
-    const query = 'INSERT INTO users (username, password, role) VALUES (?, ?, ?)';
-    pool.query(query, [username, hashedPassword, role], (err, result) => {
-        if (err) {
-            console.error('Error registering user:', err);
-            return res.status(500).send('Error registering user');
+    try {
+        // ตรวจสอบว่าผู้ใช้ที่มี username นี้มีอยู่แล้วหรือไม่
+        const [results] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
+        if (results.length > 0) {
+            return res.status(400).send('Username already exists'); // แจ้งเตือนว่ามีผู้ใช้คนนี้อยู่แล้ว
         }
-        
+
+        // ถ้าผู้ใช้ไม่มีอยู่ ทำการแฮชรหัสผ่าน
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const query = 'INSERT INTO users (username, password, role) VALUES (?, ?, ?)';
+        await pool.query(query, [username, hashedPassword, role]);
+
         // สร้าง session ใหม่หลังการสมัครสำเร็จ
         req.session.user = username; // หรือข้อมูลที่คุณต้องการเก็บใน session
 
         // เมื่อสมัครเสร็จ ให้ redirect ไปยังหน้าลงชื่อเข้าใช้
         res.redirect('/'); // เปลี่ยนเป็น '/'
-    });
+    } catch (err) {
+        console.error('Error during registration:', err);
+        return res.status(500).send('Internal server error');
+    }
 });
+
+
+
 
 
 // สร้างโทเค็น JWT หลังจากล็อกอินสำเร็จ
@@ -84,36 +95,35 @@ app.post('/register', async (req, res) => {
 app.post('/login', async (req, res) => {
     const { username, password } = req.body;
 
-    const query = 'SELECT * FROM users WHERE username = ?';
-    pool.query(query, [username], async (err, results) => {
-        if (err) {
-            console.error('Database error:', err);
-            return res.status(500).json({ error: 'Internal server error' });
-        }
+    try {
+        console.log('Username:', username);
+        console.log('Password:', password);
+
+        const [results] = await pool.query('SELECT * FROM users WHERE username = ?', [username]);
+        console.log('Query results:', results); // ดูผลลัพธ์การค้นหา
 
         if (results.length > 0) {
             const user = results[0];
             const match = await bcrypt.compare(password, user.password);
             if (match) {
                 const token = jwt.sign({ user_id: user.id, role: user.role }, secretKey, { expiresIn: '1h' });
+                console.log('Generated token:', token);
                 res.json({ token });
             } else {
+                console.log('Password mismatch for user:', username); // ตรวจสอบการเปรียบเทียบรหัสผ่าน
                 res.status(401).json({ error: 'Invalid password' });
             }
         } else {
+            console.log('No user found with username:', username); // ไม่พบผู้ใช้
             res.status(401).json({ error: 'Invalid username or password' });
         }
-    });
+    } catch (err) {
+        console.error('Error during login:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
-// Middleware สำหรับการตรวจสอบสิทธิ์
-function isAuthenticated(req, res, next) {
-    if (req.session.user) {
-        return next();
-    } else {
-        res.status(401).send('คุณต้องล็อกอินก่อน');
-    }
-}
+
 
 // เส้นทางสำหรับออกจากระบบ
 app.get('/logout', (req, res) => {
@@ -145,6 +155,82 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.get('/protected-route', isAuthenticated, (req, res) => {
     res.send('You are authorized to access this page');
 });
+
+
+// Route สำหรับแนะนำกิจกรรมตามชั่วโมงที่ขาด
+app.get('/recommend-missing-activities', async (req, res) => {
+    const studentId = req.query.student_id; // ดึง student_id จาก query
+
+    try {
+        // ดึงข้อมูลชั่วโมงกิจกรรมที่มีอยู่
+        const [userActivities] = await pool.query(`
+            SELECT ActivityCategoryID, SUM(ActivityHours) AS TotalHours
+            FROM activityhistory
+            WHERE student_id = ?
+            GROUP BY ActivityCategoryID
+        `, [studentId]);
+
+        console.log('userActivities:', userActivities);
+
+        // เก็บชั่วโมงที่มีอยู่เป็น key-value pair
+        let userHours = {};
+        userActivities.forEach(activity => {
+            userHours[activity.ActivityCategoryID] = activity.TotalHours;
+        });
+
+        // เก็บชั่วโมงที่ต้องการในแต่ละหมวดหมู่
+        const requiredHours = {
+            'ACID01': 50, // กำหนดชั่วโมงที่ต้องการในหมวดหมู่ 1
+            'ACID02': 50, // กำหนดชั่วโมงที่ต้องการในหมวดหมู่ 2
+        };
+
+        // คำนวณชั่วโมงที่ขาดในแต่ละหมวดหมู่
+        let missingCategories = [];
+        for (let category in requiredHours) {
+            const userCurrentHours = userHours[category] || 0;
+            if (userCurrentHours < requiredHours[category]) {
+                missingCategories.push(category);
+            }
+        }
+
+        console.log('missingCategories:', missingCategories);
+
+        // ดึงกิจกรรมที่แนะนำตามหมวดหมู่ที่ขาดชั่วโมง
+        if (missingCategories.length > 0) {
+            // ใช้การ query ที่ถูกต้อง
+            const [recommendedActivities] = await pool.query(`
+                SELECT ActivityName, ActivityDate, ActivityHours, ActivityCategoryID
+                FROM activity
+                WHERE ActivityCategoryID IN (?) AND (ApproveActivity = 'Y' OR ApproveActivity IS NULL)
+            `, [missingCategories]);
+            ;
+
+            console.log('recommendedActivities:', recommendedActivities);
+
+            res.json({
+                success: true,
+                missingHours: requiredHours,
+                recommendedActivities: recommendedActivities
+            });
+        } else {
+            res.json({ success: false, message: "คุณมีชั่วโมงครบทุกหมวดหมู่แล้ว" });
+        }
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "เกิดข้อผิดพลาดในการดึงข้อมูล" });
+    }
+});
+
+// Middleware สำหรับการตรวจสอบสิทธิ์
+function isAuthenticated(req, res, next) {
+    if (req.session.user) {
+        return next();
+    } else {
+        res.status(401).send('คุณต้องล็อกอินก่อน');
+    }
+}
+
 
 // app.use(bodyParser.json());
 // app.use(bodyParser.urlencoded({ extended: true }));
@@ -229,11 +315,25 @@ app.use(bodyParser.json());
 
 app.use(express.json());
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+app.get('/get-activity-history/:studentId', async (req, res) => {
+    const studentId = req.params.studentId;
+
+    try {
+        const [rows] = await pool.query('SELECT * FROM activityhistory WHERE student_id = ?', [studentId]);
+        res.json(rows);
+    } catch (error) {
+        console.error('Error fetching activity history:', error);
+        res.status(500).json({ message: 'Error fetching activity history' });
+    }
+});
+
 // API สำหรับเพิ่มข้อมูลผู้เข้าร่วม
-app.post('/add-participant', (req, res) => {
+app.post('/add-participant', async (req, res) => {
     console.log('Request body:', req.body); // Log request body
     const { studentId, full_name, year, department, program } = req.body;
-    
+
     // ตรวจสอบค่าที่ส่งมาเพื่อให้แน่ใจว่าไม่มีค่า null
     if (!studentId || !full_name || !year || !department || !program) {
         return res.status(400).send('ข้อมูลไม่ครบถ้วน');
@@ -241,113 +341,176 @@ app.post('/add-participant', (req, res) => {
 
     const query = 'INSERT INTO PersonalInfo (student_id, full_name, year, department, program) VALUES (?, ?, ?, ?, ?)';
     
-    pool.query(query, [studentId, full_name, year, department, program], (err, result) => {
-        if (err) {
-            console.error('Database error:', err); // Log database errors
-            res.status(500).send('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
-            return;
+    try {
+        const [result] = await pool.query(query, [studentId, full_name, year, department, program]);
+        
+        // ตรวจสอบว่ามีแถวถูกเพิ่มเข้าหรือไม่
+        if (result.affectedRows > 0) {
+            return res.status(201).send('เพิ่มข้อมูลสำเร็จ'); // ใช้ 201 สำหรับการสร้างทรัพยากรใหม่
+        } else {
+            return res.status(500).send('ไม่สามารถเพิ่มข้อมูลได้');
         }
-        res.status(200).send('เพิ่มข้อมูลสำเร็จ');
-    });
+    } catch (err) {
+        console.error('Database error:', err); // Log database errors
+        return res.status(500).send('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
+    }
 });
+
 
 // API สำหรับแก้ไขข้อมูลผู้เข้าร่วม
-app.put('/update-participant/:id', (req, res) => {
-    const { id } = req.params;
-    const { full_name, year, department, program } = req.body;
-    const query = 'UPDATE PersonalInfo SET full_name = ?, year = ?, department = ?, program = ? WHERE student_id = ?';
-    pool.query(query, [full_name, year, department, program, id], (err, result) => {
-        if (err) {
-            res.status(500).send('เกิดข้อผิดพลาดในการแก้ไขข้อมูล');
-            return;
-        }
-        res.status(200).send('แก้ไขข้อมูลสำเร็จ');
-    });
-});
+app.put('/update-participant/:studentId', async (req, res) => {
+    const studentId = req.params.studentId; // ดึง student_id จากพารามิเตอร์ URL
+    const data = req.body; // ข้อมูลใหม่จากฟอร์ม
 
+    try {
+        const [result] = await pool.query(
+            `UPDATE PersonalInfo 
+             SET full_name = ?, year = ?, department = ?, program = ? 
+             WHERE student_id = ?`,
+            [data.full_name, data.year, data.department, data.program, studentId]
+        );
+
+        if (result.affectedRows > 0) {
+            res.status(200).json({ message: 'Update successful' });
+        } else {
+            res.status(404).json({ message: 'Participant not found' });
+        }
+    } catch (error) {
+        console.error('Error updating participant:', error);
+        res.status(500).json({ message: 'Error updating participant' });
+    }
+});
 
 // API สำหรับลบข้อมูลผู้เข้าร่วม
-app.delete('/delete-participant/:id', (req, res) => {
+app.delete('/delete-participant/:id', async (req, res) => {
     const { id } = req.params;
     const query = 'DELETE FROM PersonalInfo WHERE student_id = ?';
-    pool.query(query, [id], (err, result) => {
-        if (err) {
-            res.status(500).send('เกิดข้อผิดพลาดในการลบข้อมูล');
-            return;
+    
+    try {
+        const [result] = await pool.query(query, [id]);
+
+        // ตรวจสอบว่ามีแถวถูกลบหรือไม่
+        if (result.affectedRows > 0) {
+            return res.status(200).send('ลบข้อมูลสำเร็จ');
+        } else {
+            return res.status(404).send('ไม่พบผู้เข้าร่วมที่ต้องการลบ');
         }
-        res.status(200).send('ลบข้อมูลสำเร็จ');
-    });
+    } catch (err) {
+        console.error('Database error:', err); // Log database errors
+        return res.status(500).send('เกิดข้อผิดพลาดในการลบข้อมูล');
+    }
 });
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// เส้นทางเพื่อแสดง activityhistory.html
-app.get('/activityhistory', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'activityhistory.html')); // ตรวจสอบว่าไฟล์อยู่ในตำแหน่งที่ถูกต้อง
-});
+// ดึงข้อมูลกิจกรรมทั้งหมดจาก Activity History
+app.get('/get-activityhistory', async (req, res) => {
+    const query = 'SELECT * FROM activityhistory'; // ดัดแปลงให้ตรงกับโครงสร้างของตาราง
 
-app.get('/get-activityhistory', (req, res) => {
-    const sql = 'SELECT * FROM activityhistory';
-    
-    pool.query(sql, (error, results) => {
-        if (error) {
-            console.error('Error fetching activity history:', error);
-            res.status(500).send('Error fetching activity history');
-            return;
-        }
-        res.json(results);
-    });
+    try {
+        const [results] = await pool.query(query);
+        res.json(results); // ส่งข้อมูลกลับในรูปแบบ JSON
+    } catch (error) {
+        console.error('เกิดข้อผิดพลาดในการดึงข้อมูล:', error);
+        res.status(500).send('เกิดข้อผิดพลาดในการดึงข้อมูล');
+    }
 });
 
 // บันทึกกิจกรรมใหม่ใน Activity History
-app.post('/record-activityhistory', (req, res) => {
-    const { student_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours } = req.body;
+app.post('/record-activityhistory', async (req, res) => {
+    const { student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID } = req.body;
 
     const query = `
-        INSERT INTO activityhistory (student_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours)
+        INSERT INTO activityhistory (student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID)
         VALUES (?, ?, ?, ?, ?, ?)
     `;
-    
-    pool.query(query, [student_id, activity_name, activity_date, is_promoted, competency_hours, interest_hours], (err, result) => {
-        if (err) {
-            // เพิ่มข้อความแจ้งเตือนเกี่ยวกับข้อมูลซ้ำ
-            if (err.code === 'ER_DUP_ENTRY') {
-                return res.status(409).send('ข้อมูลกิจกรรมซ้ำสำหรับนักศึกษา');
-            }
-            console.error('ไม่สามารถเพิ่มข้อมูลได้:', err);
-            res.status(500).send('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
-            return;
-        }
+
+    try {
+        const [result] = await pool.query(query, [student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID]);
         console.log('ผลลัพธ์จากการเพิ่มข้อมูล:', result);
         res.status(200).send('เพิ่มข้อมูลสำเร็จ');
-    });
+    } catch (err) {
+        console.error('ไม่สามารถเพิ่มข้อมูลได้:', err);
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(409).send('ข้อมูลกิจกรรมซ้ำสำหรับนักศึกษา');
+        }
+        res.status(500).send('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
+    }
+});
+
+
+
+// บันทึกกิจกรรมใหม่ใน Activity History
+app.post('/record-activityhistory', async (req, res) => {
+    const { student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID } = req.body;
+
+    const query = `
+        INSERT INTO activityhistory (student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID)
+        VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    try {
+        const [result] = await pool.query(query, [student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID]);
+        console.log('ผลลัพธ์จากการเพิ่มข้อมูล:', result);
+        res.status(200).send('เพิ่มข้อมูลสำเร็จ');
+    } catch (err) {
+        // เพิ่มข้อความแจ้งเตือนเกี่ยวกับข้อมูลซ้ำ
+        if (err.code === 'ER_DUP_ENTRY') {
+            return res.status(409).send('ข้อมูลกิจกรรมซ้ำสำหรับนักศึกษา');
+        }
+        console.error('ไม่สามารถเพิ่มข้อมูลได้:', err);
+        res.status(500).send('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
+    }
+});
+
+// server.js
+app.get('/get-activity-categories', async (req, res) => {
+    const query = 'SELECT ActivityCategoryID, ActivityCategoryName FROM activitycategory';
+
+    try {
+        const [results] = await pool.query(query);
+        res.json(results); // ส่งข้อมูลหมวดหมู่กลับไปในรูปแบบ JSON
+    } catch (error) {
+        return res.status(500).send('Error fetching activity categories');
+    }
 });
 
 
 // แก้ไขข้อมูลกิจกรรมใน Activity History
-app.put('/update-activityhistory', (req, res) => {
-    const { activity_name, activity_date, is_promoted, competency_hours, interest_hours, activity_id } = req.body;
-    const query = 'UPDATE activityhistory SET activity_name = ?, activity_date = ?, is_promoted = ?, competency_hours = ?, interest_hours = ? WHERE activity_id = ?';
-    pool.query(query, [activity_name, activity_date, is_promoted, competency_hours, interest_hours, activity_id], (err, result) => {
-        if (err) {
-            return res.status(500).send('เกิดข้อผิดพลาดในการอัปเดตกิจกรรม');
+app.put('/update-activityhistory/:id', async (req, res) => {
+    const activityId = req.params.id;
+    const updatedActivity = req.body; // Get the updated data from the request body
+
+    const query = 'UPDATE activityhistory SET ? WHERE activity_id = ?';
+    try {
+        const [results] = await pool.query(query, [updatedActivity, activityId]);
+        if (results.affectedRows === 0) {
+            return res.status(404).send('ไม่พบกิจกรรมที่ต้องการแก้ไข');
         }
-        res.sendStatus(200);
-    });
+        res.status(200).json({ message: 'Activity updated successfully' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Database error' });
+    }
 });
 
 
 
 // ลบกิจกรรม
-app.delete('/delete-activityhistory/:id', (req, res) => {
+app.delete('/delete-activityhistory/:id', async (req, res) => {
     const activityId = req.params.id;
     const query = 'DELETE FROM activityhistory WHERE activity_id = ?';
-    pool.query(query, [activityId], (err, result) => {
-        if (err) {
-            return res.status(500).send('เกิดข้อผิดพลาดในการลบกิจกรรม');
+    try {
+        const [result] = await pool.query(query, [activityId]);
+        if (result.affectedRows === 0) {
+            return res.status(404).send('ไม่พบกิจกรรมที่ต้องการลบ');
         }
         res.sendStatus(200);
-    });
+    } catch (err) {
+        return res.status(500).send('เกิดข้อผิดพลาดในการลบกิจกรรม');
+    }
 });
+
 
 
 app.post('/activity-recommendations', (req, res) => {

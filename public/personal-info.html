@@ -3,25 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Personal Information Management</title>
+    <title>การจัดการข้อมูลส่วนตัว</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #1a2b49, #243b63);
-            color: #fff;
+            background-color: #1a2b49;
+            color: white;
             margin: 0;
-            padding: 20px;
+            padding: 0;
         }
 
         .container {
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #1a2b49;
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+            background-color: #243b63;
             border-radius: 10px;
-            padding: 30px;
-            border: 1px solid #ffd700;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
 
         h2 {
@@ -30,156 +29,76 @@
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin: 15px 0;
         }
 
-        .form-group label {
+        label {
             display: block;
             margin-bottom: 5px;
         }
 
-        .form-group input {
-            width: 100%;
+        input[type="text"] {
+            width: calc(100% - 20px);
             padding: 10px;
+            border: 1px solid #d1d1e9;
             border-radius: 5px;
-            border: 1px solid #ffd700;
-            background-color: #243b63;
-            color: #fff;
-        }
-
-        .form-group button {
-            width: 100%;
-            padding: 12px;
-            border: none;
-            border-radius: 10px;
-            background-color: #ffd700;
-            color: #1a2b49;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .form-group button:hover {
-            background-color: #e6c300;
+            background-color: #d1d1e9;
+            color: #000;
         }
 
         .action-buttons {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
+            text-align: center;
+            margin-top: 20px;
         }
 
-        .action-buttons button {
-            flex: 1;
+        button {
+            background-color: #ffd700;
+            color: #243b63;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
         }
 
-        /* Styles for activity history */
-        .activity-history {
-            margin-top: 30px;
-        }
-
-        .activity-history h3 {
-            color: #ffd700;
-        }
-
-        .activity-history table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        .activity-history table th,
-        .activity-history table td {
-            padding: 12px;
-            border: 1px solid #ffd700;
-            text-align: left;
-        }
-
-        .activity-history table th {
-            background-color: #243b63;
-        }
-
-        .activity-history table td {
-            background-color: #1a2b49;
+        button:hover {
+            background-color: #ffcc00;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Manage Personal Information</h2>
+        <h2>จัดการข้อมูลส่วนตัว</h2>
         <form id="personalInfoForm">
             <div class="form-group">
-                <label for="studentId">Student ID:</label>
+                <label for="studentId">รหัสนักศึกษา:</label>
                 <input type="text" id="studentId" name="studentId" required>
             </div>
             <div class="form-group">
-                <label for="fullName">Full Name:</label>
+                <label for="fullName">ชื่อเต็ม:</label>
                 <input type="text" id="fullName" name="fullName" required>
             </div>
             <div class="form-group">
-                <label for="year">Year:</label>
+                <label for="year">ปีการศึกษา:</label>
                 <input type="text" id="year" name="year" required>
             </div>
             <div class="form-group">
-                <label for="department">Department:</label>
+                <label for="department">ภาควิชา:</label>
                 <input type="text" id="department" name="department" required>
             </div>
             <div class="form-group">
-                <label for="program">Program:</label>
+                <label for="program">โปรแกรม:</label>
                 <input type="text" id="program" name="program" required>
             </div>
             <div class="action-buttons">
-                <button type="button" onclick="addParticipant()">Add</button>
-                <button type="button" onclick="updateParticipant(document.getElementById('studentId').value)">Update</button>
-                <button type="button" onclick="deleteParticipant(document.getElementById('studentId').value)">Delete</button>
+                <button type="button" onclick="addParticipant()">เพิ่ม</button>
+                <button type="button" onclick="updateParticipant()">แก้ไข</button>
+                <button type="button" onclick="deleteParticipant()">ลบ</button>
             </div>
         </form>
-
-        <!-- Section for displaying activity history -->
-        <div class="activity-history">
-            <h3>Activity History</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Activity Name</th>
-                        <th>Date</th>
-                        <th>Type</th>
-                        <th>Duration (hours)</th>
-                    </tr>
-                </thead>
-                <tbody id="activityHistoryBody">
-                    <!-- Activity data will be inserted here -->
-                </tbody>
-            </table>
-        </div>
     </div>
 
     <script>
-        // Fetch and display activity history for a specific user
-        function fetchActivityHistory(userId) {
-            fetch(`/get-activity-history/${userId}`)
-                .then(response => response.json())
-                .then(data => {
-                    const activityHistoryBody = document.getElementById('activityHistoryBody');
-                    activityHistoryBody.innerHTML = ''; // Clear previous entries
-
-                    data.forEach(activity => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${activity.activity_name}</td>
-                            <td>${new Date(activity.activity_date).toLocaleDateString()}</td>
-                            <td>${activity.activity_type}</td>
-                            <td>${activity.activity_duration}</td>
-                        `;
-                        activityHistoryBody.appendChild(row);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching activity history:', error);
-                });
-        }
-
-        // Add participant function
         function addParticipant() {
             const data = {
                 studentId: document.getElementById('studentId').value,
@@ -198,16 +117,15 @@
             }).then(response => {
                 if (response.ok) {
                     alert('เพิ่มข้อมูลสำเร็จ');
+                    document.getElementById('personalInfoForm').reset(); // ล้างฟอร์ม
                 } else {
                     alert('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
                 }
-            }).catch(error => {
-                console.error('เกิดข้อผิดพลาด:', error);
-            });
+            }).catch(error => console.error('เกิดข้อผิดพลาด:', error));
         }
 
-        // Update participant function
-        function updateParticipant(studentId) {
+        function updateParticipant() {
+            const studentId = document.getElementById('studentId').value;
             const data = {
                 full_name: document.getElementById('fullName').value,
                 year: document.getElementById('year').value,
@@ -227,22 +145,21 @@
                 } else {
                     alert('เกิดข้อผิดพลาดในการแก้ไขข้อมูล');
                 }
-            }).catch(error => {
-                console.error('เกิดข้อผิดพลาด:', error);
-            });
+            }).catch(error => console.error('เกิดข้อผิดพลาด:', error));
         }
 
-        // Delete participant function
-        function deleteParticipant(studentId) {
+        function deleteParticipant() {
+            const studentId = document.getElementById('studentId').value;
             fetch(`/delete-participant/${studentId}`, {
                 method: 'DELETE'
             }).then(response => {
                 if (response.ok) {
                     alert('ลบข้อมูลสำเร็จ');
+                    document.getElementById('personalInfoForm').reset(); // ล้างฟอร์ม
                 } else {
                     alert('เกิดข้อผิดพลาดในการลบข้อมูล');
                 }
-            });
+            }).catch(error => console.error('เกิดข้อผิดพลาด:', error));
         }
     </script>
 </body>

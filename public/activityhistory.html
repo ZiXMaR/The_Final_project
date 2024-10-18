@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>บันทึกประวัติกิจกรรม</title>
-    <link rel="stylesheet" href="styles.css"> <!-- ลิงก์ไปยังไฟล์ CSS -->
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <div class="container">
@@ -15,8 +15,8 @@
             <input type="hidden" id="activityId"> <!-- เก็บ activity_id -->
 
             <div class="form-group">
-                <label for="studentId">รหัสนักศึกษา:</label> <!-- เปลี่ยนจาก userId เป็น studentId -->
-                <input type="text" id="studentId" required> <!-- เปลี่ยนจาก userId เป็น studentId -->
+                <label for="studentId">รหัสนักศึกษา:</label>
+                <input type="text" id="studentId" required>
             </div>
 
             <div class="form-group">
@@ -38,13 +38,16 @@
             </div>
 
             <div class="form-group">
-                <label for="competencyHours">จำนวนชั่วโมงกิจกรรมเสริมสร้างสมรรถนะ:</label>
-                <input type="number" id="competencyHours" required min="0">
+                <label for="activityCategory">หมวดหมู่กิจกรรม:</label>
+                <select id="activityCategory" required>
+                    <option value="">--เลือกหมวดหมู่--</option> <!-- Default option -->
+                    <!-- ตัวเลือกหมวดหมู่จะถูกเพิ่มที่นี่ -->
+                </select>
             </div>
 
             <div class="form-group">
-                <label for="interestHours">จำนวนชั่วโมงกิจกรรมตามความสนใจ:</label>
-                <input type="number" id="interestHours" required min="0">
+                <label for="activityHours">จำนวนชั่วโมงกิจกรรม:</label>
+                <input type="number" id="activityHours" required min="0">
             </div>
 
             <!-- ปุ่มสำหรับบันทึกและแก้ไขกิจกรรม -->
@@ -59,8 +62,8 @@
                     <th>ชื่อกิจกรรม</th>
                     <th>วันที่เข้าร่วม</th>
                     <th>กิจกรรมที่โปรโมต</th>
-                    <th>ชั่วโมงกิจกรรมเสริมสร้างสมรรถนะ</th>
-                    <th>ชั่วโมงกิจกรรมตามความสนใจ</th>
+                    <th>หมวดหมู่กิจกรรม</th>
+                    <th>จำนวนชั่วโมงกิจกรรม</th>
                     <th>แก้ไข</th>
                     <th>ลบ</th>
                 </tr>
@@ -72,6 +75,25 @@
     </div>
 
     <script>
+        // ฟังก์ชันดึงข้อมูลหมวดหมู่กิจกรรม
+        function loadActivityCategories() {
+            fetch('/get-activity-categories')
+                .then(response => response.json())
+                .then(data => {
+                    const categorySelect = document.getElementById('activityCategory');
+                    categorySelect.innerHTML = '<option value="">--เลือกหมวดหมู่--</option>'; // Default option
+
+                    // เพิ่มหมวดหมู่ที่ดึงมาเป็นตัวเลือกใน select
+                    data.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category.ActivityCategoryID;
+                        option.textContent = category.ActivityCategoryName;
+                        categorySelect.appendChild(option);
+                    });
+                })
+                .catch(error => alert('เกิดข้อผิดพลาดในการโหลดหมวดหมู่กิจกรรม'));
+        }
+
         // ฟังก์ชันบันทึกกิจกรรมใหม่
         document.getElementById('saveButton').addEventListener('click', function(event) {
             event.preventDefault(); 
@@ -80,133 +102,167 @@
 
         function saveActivity() {
             const activityData = {
-                student_id: document.getElementById('studentId').value, // เปลี่ยนจาก user_id เป็น student_id
-                activity_name: document.getElementById('activityName').value,
-                activity_date: document.getElementById('activityDate').value,
-                is_promoted: document.getElementById('isPromoted').value,
-                competency_hours: document.getElementById('competencyHours').value,
-                interest_hours: document.getElementById('interestHours').value
+                student_id: document.getElementById('studentId').value, // Corrected ID
+                ActivityName: document.getElementById('activityName').value, // Corrected ID
+                activity_date: document.getElementById('activityDate').value, // Corrected ID
+                is_promoted: document.getElementById('isPromoted').value, // Corrected ID
+                ActivityHours: document.getElementById('activityHours').value, // Corrected ID
+                ActivityCategoryID: document.getElementById('activityCategory').value // Corrected ID
             };
+
+            console.log('Sending activity data:', activityData); // Log ข้อมูลที่ส่ง
 
             fetch('/record-activityhistory', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(activityData)
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(activityData),
             })
             .then(response => {
-                if (response.ok) {
-                    alert('บันทึกกิจกรรมสำเร็จ');
-                    loadActivities();
-                    clearForm();
-                } else {
-                    return response.text().then(text => alert(`เกิดข้อผิดพลาด: ${text}`));
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                return response.text();
             })
-            .catch(error => alert('เกิดข้อผิดพลาดในการบันทึกกิจกรรม'));
-        }
-
-        // ฟังก์ชันแก้ไขกิจกรรม
-        document.getElementById('editButton').addEventListener('click', function(event) {
-            event.preventDefault();
-            editActivity();
-        });
-
-        function editActivity() {
-            const updatedActivityData = {
-                student_id: document.getElementById('studentId').value, // เปลี่ยนจาก user_id เป็น student_id
-                activity_name: document.getElementById('activityName').value,
-                activity_date: document.getElementById('activityDate').value,
-                is_promoted: document.getElementById('isPromoted').value,
-                competency_hours: document.getElementById('competencyHours').value,
-                interest_hours: document.getElementById('interestHours').value,
-                activity_id: document.getElementById('activityId').value
-            };
-
-            fetch('/update-activityhistory', {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(updatedActivityData)
+            .then(result => {
+                console.log('Success:', result);
+                // Logic to update UI or notify user
+                clearForm(); // Clear the form after saving
+                loadActivities(); // Reload the activity list
             })
-            .then(response => {
-                if (response.ok) {
-                    alert('แก้ไขกิจกรรมสำเร็จ');
-                    loadActivities();
-                    clearForm();
-                } else {
-                    alert('เกิดข้อผิดพลาดในการแก้ไขกิจกรรม');
-                }
-            })
-            .catch(error => alert('เกิดข้อผิดพลาดในการแก้ไขกิจกรรม'));
+            .catch(error => {
+                console.error('Error:', error);
+                alert('เกิดข้อผิดพลาดในการบันทึกกิจกรรม');
+            });
         }
 
         // ฟังก์ชันโหลดรายการกิจกรรม
         function loadActivities() {
-    fetch('/get-activityhistory')
-        .then(response => response.json())
-        .then(data => {
-            const tableBody = document.getElementById('activityTable').getElementsByTagName('tbody')[0];
-            tableBody.innerHTML = ''; 
+            fetch('/get-activityhistory')
+                .then(response => response.json())
+                .then(data => {
+                    const tableBody = document.getElementById('activityTable').getElementsByTagName('tbody')[0];
+                    tableBody.innerHTML = '';
 
-            data.forEach(activity => {
-                const row = tableBody.insertRow();
-                row.insertCell(0).innerText = activity.activity_name;
-                row.insertCell(1).innerText = new Date(activity.activity_date).toLocaleString();
-                row.insertCell(2).innerText = activity.is_promoted ? 'ใช่' : 'ไม่';
-                row.insertCell(3).innerText = activity.competency_hours || 0;
-                row.insertCell(4).innerText = activity.interest_hours || 0;
-                row.insertCell(5).innerText = activity.student_id; // แสดง student_id ถ้าจำเป็น
+                    data.forEach(activity => {
+                        const row = tableBody.insertRow();
+                        row.insertCell(0).innerText = activity.ActivityName;
+                        row.insertCell(1).innerText = new Date(activity.activity_date).toLocaleString();
+                        row.insertCell(2).innerText = activity.is_promoted ? 'ใช่' : 'ไม่';
+                        row.insertCell(3).innerText = activity.ActivityCategoryID;
+                        row.insertCell(4).innerText = activity.ActivityHours;
 
-                const editButton = document.createElement('button');
-                editButton.innerText = 'แก้ไข';
-                editButton.onclick = () => editActivityForm(activity);
-                row.insertCell(6).appendChild(editButton);
+                        const editButton = document.createElement('button');
+                        editButton.innerText = 'แก้ไข';
+                        editButton.onclick = () => editActivityForm(activity);
+                        row.insertCell(5).appendChild(editButton);
 
-                const deleteButton = document.createElement('button');
-                deleteButton.innerText = 'ลบ';
-                deleteButton.onclick = () => deleteActivity(activity.activity_id);
-                row.insertCell(7).appendChild(deleteButton);
-            });
-        })
-        .catch(error => alert('เกิดข้อผิดพลาดในการโหลดกิจกรรม'));
-}
-
-
-        function editActivityForm(activity) {
-            document.getElementById('studentId').value = activity.student_id; // เปลี่ยนจาก user_id เป็น student_id
-            document.getElementById('activityName').value = activity.activity_name;
-            document.getElementById('activityDate').value = new Date(activity.activity_date).toISOString().slice(0, 16);
-            document.getElementById('isPromoted').value = activity.is_promoted;
-            document.getElementById('competencyHours').value = activity.competency_hours;
-            document.getElementById('interestHours').value = activity.interest_hours;
-            document.getElementById('activityId').value = activity.activity_id;
-
-            document.getElementById('saveButton').style.display = 'none';
-            document.getElementById('editButton').style.display = 'inline';
-        }
-
-        function clearForm() {
-            document.getElementById('activityForm').reset();
-            document.getElementById('saveButton').style.display = 'inline';
-            document.getElementById('editButton').style.display = 'none';
-        }
-
-        function deleteActivity(activityId) {
-            if (confirm('คุณแน่ใจหรือไม่ว่าต้องการลบกิจกรรมนี้?')) {
-                fetch(`/delete-activityhistory/${activityId}`, { method: 'DELETE' })
-                .then(response => {
-                    if (response.ok) {
-                        alert('ลบกิจกรรมสำเร็จ');
-                        loadActivities();
-                    } else {
-                        alert('เกิดข้อผิดพลาดในการลบกิจกรรม');
-                    }
+                        const deleteButton = document.createElement('button');
+                        deleteButton.innerText = 'ลบ';
+                        deleteButton.onclick = () => deleteActivity(activity.activity_id);
+                        row.insertCell(6).appendChild(deleteButton);
+                    });
                 })
-                .catch(error => alert('เกิดข้อผิดพลาดในการลบกิจกรรม'));
+                .catch(error => alert('เกิดข้อผิดพลาดในการโหลดกิจกรรม'));
+        }
+
+        // ฟังก์ชันแก้ไขกิจกรรม
+        function editActivityForm(activity) {
+            document.getElementById('activityId').value = activity.activity_id; // Save the activity ID
+            document.getElementById('studentId').value = activity.student_id;
+            document.getElementById('activityName').value = activity.ActivityName;
+
+            // Check if activity.activity_date is valid before using slice
+            const activityDate = activity.activity_date ? activity.activity_date.slice(0, 16) : ''; // Format to datetime-local
+            document.getElementById('activityDate').value = activityDate;
+
+            document.getElementById('isPromoted').value = activity.is_promoted;
+            document.getElementById('activityCategory').value = activity.ActivityCategoryID;
+            document.getElementById('activityHours').value = activity.ActivityHours;
+
+            // Hide the save button and show the edit button
+            document.getElementById('saveButton').style.display = 'none';
+            document.getElementById('editButton').style.display = 'block';
+        }
+
+        // ฟังก์ชันบันทึกกิจกรรม (อัปเดต)
+        document.getElementById('editButton').addEventListener('click', function(event) {
+            event.preventDefault();
+            updateActivity();
+        });
+
+        function updateActivity() {
+            const activityId = document.getElementById('activityId').value; // Get activity ID
+            const updatedData = {
+                student_id: document.getElementById('studentId').value,
+                ActivityName: document.getElementById('activityName').value,
+                activity_date: document.getElementById('activityDate').value,
+                is_promoted: document.getElementById('isPromoted').value,
+                ActivityCategoryID: document.getElementById('activityCategory').value,
+                ActivityHours: document.getElementById('activityHours').value
+            };
+
+            fetch(`/update-activityhistory/${activityId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedData),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(result => {
+                console.log('Updated successfully:', result);
+                clearForm(); // Clear the form after updating
+                loadActivities(); // Reload the activity list
+                document.getElementById('editButton').style.display = 'none'; // Hide edit button
+                document.getElementById('saveButton').style.display = 'block'; // Show save button
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('เกิดข้อผิดพลาดในการอัปเดตกิจกรรม');
+            });
+        }
+
+        // ฟังก์ชันลบกิจกรรม
+        function deleteActivity(activityId) {
+            if (confirm('คุณแน่ใจหรือไม่ว่าจะลบกิจกรรมนี้?')) {
+                fetch(`/delete-activityhistory/${activityId}`, {
+                    method: 'DELETE',
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(result => {
+                    console.log('Deleted successfully:', result);
+                    loadActivities(); // Reload the activity list
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('เกิดข้อผิดพลาดในการลบกิจกรรม');
+                });
             }
         }
 
-        // โหลดกิจกรรมทันทีที่เปิดหน้าเว็บ
-        window.onload = loadActivities;
+        // ฟังก์ชันเคลียร์ฟอร์ม
+        function clearForm() {
+            document.getElementById('activityForm').reset(); // Reset the form
+            document.getElementById('activityId').value = ''; // Clear activity ID
+        }
+
+        // เรียกใช้งานเมื่อโหลดหน้า
+        document.addEventListener('DOMContentLoaded', () => {
+            loadActivityCategories(); // Load activity categories
+            loadActivities(); // Load activities
+        });
     </script>
 </body>
 </html>

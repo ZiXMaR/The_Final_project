@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommended Activities</title>
+    <style>
+        body {
+            background-color: #1a2b49;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background-color: #243b63;
+        }
+        table, th, td {
+            border: 1px solid #ffd700;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #ffd700;
+            color: #1a2b49;
+        }
+        #form-section {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ffd700;
+            border-radius: 5px;
+            background-color: #243b63;
+            color: white;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #ffd700;
+            border: none;
+            border-radius: 5px;
+            color: #1a2b49;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #d1d1e9;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Recommended Activities</h1>
+
+    <div id="form-section">
+        <label for="student-id">Enter Your Student ID:</label>
+        <input type="text" id="student-id" placeholder="Student ID" />
+        <button id="submit-btn">Get Recommended Activities</button>
+    </div>
+
+    <div id="activity-section">
+        <!-- กิจกรรมที่แนะนำจะแสดงในส่วนนี้ -->
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.getElementById('submit-btn').addEventListener('click', function() {
+                const studentId = document.getElementById('student-id').value.trim();
+
+                if (studentId) {
+                    // ส่งคำขอไปยัง server เพื่อดึงกิจกรรมที่ขาด
+                    fetch(`/recommend-missing-activities?student_id=${studentId}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // แสดงกิจกรรมที่แนะนำ
+                                console.log('Recommended Activities:', data.recommendedActivities);
+                                displayActivities(data.recommendedActivities); // แสดงกิจกรรมที่แนะนำ
+                            } else {
+                                document.getElementById('activity-section').innerHTML = `<p>${data.message}</p>`;
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            document.getElementById('activity-section').innerHTML = `<p>Error fetching activities.</p>`;
+                        });
+                } else {
+                    alert('Please enter a valid student ID.');
+                }
+            });
+        });
+
+        // ฟังก์ชันสำหรับแสดงกิจกรรมที่แนะนำ
+        function displayActivities(activities) {
+            let html = `<table>
+                            <thead>
+                                <tr>
+                                    <th>Activity Name</th>
+                                    <th>Activity Date</th>
+                                    <th>Activity Hours</th>
+                                    <th>Category</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+            activities.forEach(activity => {
+                html += `<tr>
+                            <td>${activity.ActivityName}</td>
+                            <td>${new Date(activity.ActivityDate).toLocaleDateString()}</td>
+                            <td>${activity.ActivityHours}</td>
+                            <td>${activity.ActivityCategoryID}</td>
+                         </tr>`;
+            });
+
+            html += `   </tbody>
+                    </table>`;
+
+            document.getElementById('activity-section').innerHTML = html;
+        }
+    </script>
+
+</body>
+</html>
