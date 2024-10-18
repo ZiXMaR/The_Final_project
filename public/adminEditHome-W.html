@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ผู้ดูแลระบบ แก้ไขกิจกรรม</title>
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            background-color: #F2F4F7;
+            text-align: center;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #ffffff;
+            padding: 15px 0 10px 0;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .navbar a {
+            text-decoration: none;
+            margin-right: 15px;
+        }
+
+        .home-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-left: 20px;
+        }
+
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+
+        .app-button {
+            background-color: #00ccff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .app-button:hover {
+            background-color: #00b8e6;
+        }
+
+        .editP-button {
+            background-color: #ffc107;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .editP-button:hover {
+            background-color: #e0a800;
+        }
+
+        .deleteP-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+
+        .deleteP-button:hover {
+            background-color: #c82333;
+        }
+
+
+        .logout-button {
+            position: absolute;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .logout-button:hover {
+            background-color: #0056b3;
+        }
+
+
+        h1 {
+            color: #007bff;
+            margin: 0;
+            padding: 20px 0;
+            margin-top: 55px;
+
+        }
+
+        .activity-card {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 95%;
+        }
+
+        .activity-details {
+            text-align: left;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .activity-details strong {
+            color: #007bff;
+        }
+
+        .container {
+
+            max-width: 620px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 95%;
+        }
+
+        .container-c {
+            width: 90vw;
+            max-width: 650px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .delete-button {
+            position: absolute;
+            top: 20px;
+            left: 280px;
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+
+        .edit-button {
+            background-color: #ffc107;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 10px;
+            cursor: pointer;
+            border: none;
+
+        }
+
+        .edit-button:hover {
+            background-color: #e0a800;
+        }
+
+        .split-button {
+            background-color: #F2F4F7;
+            color: rgb(0, 0, 0);
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .split-button:hover {
+            background-color: #007bff;
+        }
+
+        .split-c-button {
+            background-color: #007bff;
+            color: rgb(255, 255, 255);
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .split-c-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+    </style>
+</head>
+
+<body>
+
+    <div class="navbar">
+        <a href="/admin" class="home-button">หน้าหลัก</a>
+        <a href="/adminAdd" class="app-button">เพิ่มกิจกรรม</a>
+        <a href="/adminEditHome.html" class="editP-button">แก้ไขกิจกรรม</a>
+        <a href="/adminDelet" class="deleteP-button">ลบกิจกรรม</a>
+        <a class="logout-button" onclick="handleLogout()">ออกจากระบบ</a>
+    </div>
+
+    <h1>ผู้ดูแลระบบ</h1>
+
+    <div class="container">
+        <h3>เลือกกิจกรรมที่จะแก้ไข</h3>
+        <p>กิจกรรมทั้งหมด</p>
+        <a href="/adminEditHome.html" class="split-button">ทั้งหมด</a>
+        <a href="/adminEditHome-W.html" class="split-c-button">รอการอนุมัติ</a>
+        <a href="/adminEditHome-Y.html" class="split-button">ได้รับการอนุมัติ</a>
+        <a href="/adminEditHome-N.html" class="split-button">ไม่ได้รับการอนุมัติ</a>
+    </div>
+
+    <div class="container-c" id="activity-list"></div>
+
+    <script>
+        fetch('http://localhost:3000/api/activities-a-w')
+            .then(response => response.json())
+            .then(data => {
+                const activityList = document.getElementById('activity-list');
+                if (data.length > 0) {
+                    data.forEach(activity => {
+                        const activityElement = document.createElement('div');
+                        activityElement.classList.add('activity-card');
+                        activityElement.innerHTML = `
+                            <p><strong>ชื่อกิจกรรม:</strong> ${activity.ActivityName}</p>
+                            <div class="activity-details">
+                                <p><strong>หน่วยงาน:</strong> ${activity.OrganizationName}</p>
+                                <p><strong>วันที่จัด:</strong> ${new Date(activity.ActivityDate).toLocaleDateString()}</p>
+                                <p><strong>วันสิ้นสุด:</strong> ${new Date(activity.ActivityEndDate).toLocaleDateString()}</p>
+                                <p><strong>ภาค/ปีการศึกษา:</strong> ${activity.SemesterAcademicYear}</p>
+                                <p><strong>สถานที่:</strong> ${activity.EventLocation}</p>
+                                <p><strong>สถานะกิจกรรม:</strong> ${activity.ApproveActivity}</p>
+                            </div>
+                            <button class="edit-button" onclick="window.location.href='/adminEdit.html?Activityid=${activity.Activityid}'">
+                                แก้ไข
+                            </button>
+                        `;
+                        activityList.appendChild(activityElement);
+                    });
+                } else {
+                    activityList.innerHTML = '<p>No activities available.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching activities:', error);
+            });
+
+        function handleLogout() {
+            // เปลี่ยนเส้นทางหรือจัดการ logout ที่นี่
+            window.location.href = '/logout'; // ตัวอย่างการเปลี่ยนเส้นทางไปหน้า logout
+        }
+    </script>
+
+</body>
+
+</html>

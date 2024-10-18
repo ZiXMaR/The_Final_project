@@ -49,20 +49,22 @@ async function login() {
     // เก็บโทเค็นใน LocalStorage
     localStorage.setItem('token', token);
 
-    // ถอดรหัสโทเค็นเพื่อเช็ค role
-    const decodedToken = jwt_decode(token);
-    const role = decodedToken.role;
+    // ถอดรหัสโทเค็นเพื่อเช็ค role และ OrganizationName
+const decodedToken = jwt_decode(token);
+const role = decodedToken.role;
+const organizationName = decodedToken.organization;
 
-    // เปลี่ยนเส้นทางตาม role
-    if (role === 'admin') {
-      window.location.href = '/admin';
-    } else if (role === 'organizer') {
-      window.location.href = '/organizer';
-    } else if (role === 'participant') {
-      window.location.href = '/participant';
-    } else {
-      window.location.href = '/dashboard';
-    }
+// เปลี่ยนเส้นทางตาม role
+if (role === 'admin') {
+    window.location.href = '/admin';
+} else if (role === 'organizer') {
+    // เปลี่ยนเส้นทางไปยังหน้า Organizer พร้อม OrganizationName
+    window.location.href = `/organizerHome/${organizationName}`;
+} else if (role === 'participant') {
+    window.location.href = '/participant';
+} else {
+    window.location.href = '/dashboard';
+}
   } else {
     // ดึงข้อความ error จาก response
     const errorData = await response.json();

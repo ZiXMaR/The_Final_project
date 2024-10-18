@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ผู้จัดกิจกรรม เพิ่มกิจกรรม </title>
+    <title>ผู้ดูแลระบบ เพิ่มกิจกรรม</title>
     <style>
         body {
             margin: 0;
@@ -208,59 +208,54 @@
         .split-button:hover {
             background-color: #007bff;
         }
+
+        .split-c-button {
+            background-color: #007bff;
+            color: rgb(255, 255, 255);
+            padding: 5px 10px;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .split-c-button:hover {
+            background-color: #0056b3;
+        }
+
+    
     </style>
 </head>
 
 <body>
+
     <div class="navbar">
-        <a href="#" class="home-button" id="home-button">หน้าหลัก</a>
-        <a href="#" class="app-button" id="add-activity-button">เพิ่มกิจกรรม</a>
-        <a href="#" class="editP-button" id="edit-activity-button">แก้ไขกิจกรรม</a>
-        <a href="#" class="deleteP-button" id="delete-activity-button">ลบกิจกรรม</a>
+        <a href="/admin" class="home-button">หน้าหลัก</a>
+        <a href="/adminAdd" class="app-button">เพิ่มกิจกรรม</a>
+        <a href="/adminEditHome.html" class="editP-button">แก้ไขกิจกรรม</a>
+        <a href="/adminDelet" class="deleteP-button">ลบกิจกรรม</a>
         <a class="logout-button" onclick="handleLogout()">ออกจากระบบ</a>
     </div>
 
-    <h1>ผู้จัดกิจกรรม</h1>
+
+
+    <h1>ผู้ดูแลระบบ</h1>
     <div class="container">
         <h3>บันทึกกิจกรรม</h3>
         <p class="details">รายละเอียดกิจกรรม</p>
-        
+
         <div class="form-group">
             <label>เลือกประเภทวันจัด</label>
-            <a href="#" class="split-button" id="SingleAdd-button">วันเดียว</a>
-            <a href="#" class="split-button" id="MultiAdd-button">หลายวัน</a>
+            <a href="/adminSingleAdd" class="split-button">วันเดียว</a>
+            <a href="/adminMultiAdd" class="split-button">หลายวัน</a>
         </div>
 
-        
+
     </div>
 
     <div id="resultMessage"></div> <!-- ส่วนแสดงข้อความผลลัพธ์ -->
 
     <script>
-        // ฟังก์ชันเพื่อดึง organizationName จาก path
-        function getOrganizationNameFromPath() {
-            const pathSegments = window.location.pathname.split('/');
-            // ตรวจสอบให้แน่ใจว่ามีการส่ง organizationName ใน path
-            if (pathSegments.length > 2) {
-                return pathSegments[pathSegments.length - 1]; // ดึง organizationName จาก path
-            }
-            return null;
-        }
-
-        // ดึงค่า organizationName จาก path
-        const organizationName = getOrganizationNameFromPath();
-        if (organizationName) {
-            // ตั้งค่าให้ปุ่มต่าง ๆ ส่ง organizationName ไปด้วย
-            document.getElementById('home-button').href = `/organizerHome/${organizationName}`;
-            document.getElementById('add-activity-button').href = `/organizer/${organizationName}`;
-            document.getElementById('edit-activity-button').href = `/organizerEditHome/${organizationName}`;
-            document.getElementById('delete-activity-button').href = `/organizerDelet/${organizationName}`;
-            document.getElementById('SingleAdd-button').href = `/organizerSingleAdd/${organizationName}`;
-            document.getElementById('MultiAdd-button').href = `/organizerMultiAdd/${organizationName}`;
-
-        } else {
-            console.error('Organization name not found in the URL path.');
-        }
 
         function handleLogout() {
             // เปลี่ยนเส้นทางหรือจัดการ logout ที่นี่

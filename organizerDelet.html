@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ผู้จัดกิจกรรม เพิ่มกิจกรรม </title>
+    <title>ผู้จัดกิจกรรม ลบกิจกรรม</title>
     <style>
         body {
             margin: 0;
@@ -111,12 +111,21 @@
 
         .container {
             width: 90vw;
-            max-width: 800px;
+            max-width: 620px;
             background-color: #ffffff;
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
             margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container-c {
+            width: 90vw;
+            max-width: 650px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -134,84 +143,45 @@
             /* ขยับ "รายละเอียดกิจกรรม" มาด้านหน้าเล็กน้อย */
         }
 
-        .container .applicant-qualities {
-            margin-right: 120px;
-            /* ขยับ "คุณสมบัติของผู้รับสมัคร" มาด้านหน้าเล็กน้อย */
-            margin-top: 10px;
-            /* เพิ่มระยะห่างด้านบน */
-        }
-
-        .form-group {
-            width: 100%;
-            max-width: 600px;
-            margin-top: 20px;
-            display: flex;
-            align-items: center;
-        }
-
-        .form-group label {
-            flex-basis: 200px;
-            text-align: right;
-            margin: 0;
-            padding: 10px;
-        }
-
-        .form-group input,
-        .form-group select {
-            flex: 1;
-            /* ทำให้กล่องข้อความขยายเต็มที่ */
-            padding: 10px;
+        .activity-card {
+            background-color: white;
             border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 95%;
+            /* กำหนดให้กล่องกิจกรรมกว้างเต็ม */
         }
 
-        .form-group select {
-            /* ปรับขนาดของ select ให้เหมาะสม */
-            max-width: 600px;
-            width: 100%;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        .activity-details {
+            text-align: left;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 10px;
         }
 
-        .save-button-container {
-            width: 100%;
-            display: flex;
-            justify-content: flex-end;
-            margin-top: 20px;
+        .activity-details strong {
+            color: #007bff;
         }
 
-        button[type="submit"] {
-            padding: 10px 20px;
-            font-size: 16px;
-            color: #fff;
-            background-color: #007bff;
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
             border: none;
+            padding: 10px 15px;
             border-radius: 5px;
             cursor: pointer;
         }
 
-        button[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-
-        .split-button {
-            background-color: #F2F4F7;
-            color: rgb(0, 0, 0);
-            padding: 5px 10px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 14px;
-            margin-right: 10px;
-        }
-
-        .split-button:hover {
-            background-color: #007bff;
+        .delete-button:hover {
+            background-color: #c82333;
         }
     </style>
 </head>
 
 <body>
+
     <div class="navbar">
         <a href="#" class="home-button" id="home-button">หน้าหลัก</a>
         <a href="#" class="app-button" id="add-activity-button">เพิ่มกิจกรรม</a>
@@ -220,23 +190,70 @@
         <a class="logout-button" onclick="handleLogout()">ออกจากระบบ</a>
     </div>
 
+
     <h1>ผู้จัดกิจกรรม</h1>
     <div class="container">
-        <h3>บันทึกกิจกรรม</h3>
-        <p class="details">รายละเอียดกิจกรรม</p>
-        
-        <div class="form-group">
-            <label>เลือกประเภทวันจัด</label>
-            <a href="#" class="split-button" id="SingleAdd-button">วันเดียว</a>
-            <a href="#" class="split-button" id="MultiAdd-button">หลายวัน</a>
-        </div>
-
-        
+        <h3>ลบกิจกรรม</h3>
+        <p>กิจกรรมที่มีอยู่</p>
     </div>
-
-    <div id="resultMessage"></div> <!-- ส่วนแสดงข้อความผลลัพธ์ -->
+    <div class="container-c" id="activities-container"></div>
 
     <script>
+        // ฟังก์ชันเพื่อดึงค่า organizationName จาก URL
+        function getOrganizationNameFromUrl() {
+            const urlParams = new URLSearchParams(window.location.pathname);
+            const pathSegments = window.location.pathname.split('/');
+            return pathSegments[pathSegments.length - 1]; // ดึงค่า organizationName จาก URL
+        }
+    
+        // ฟังก์ชันเพื่อดึงข้อมูลกิจกรรม
+        async function fetchActivities() {
+            const organizationName = getOrganizationNameFromUrl(); // ดึง organizationName จาก URL
+            const response = await fetch(`/activities-d?organizationName=${organizationName}`);
+            const activities = await response.json();
+    
+            const container = document.getElementById('activities-container');
+            container.innerHTML = ''; // ล้างข้อมูลเก่า
+    
+            activities.forEach(activity => {
+                const activityCard = document.createElement('div');
+                activityCard.classList.add('activity-card');
+                activityCard.innerHTML = `
+                    <p><strong>ชื่อกิจกรรม:</strong> ${activity.ActivityName}</p>
+                    <div class="activity-details">
+                        <p><strong>หน่วยงาน:</strong> ${activity.OrganizationName}</p>
+                        <p><strong>วันที่จัด:</strong> ${new Date(activity.ActivityDate).toLocaleDateString()}</p>
+                        <p><strong>วันสิ้นสุด:</strong> ${new Date(activity.ActivityEndDate).toLocaleDateString()}</p>
+                        <p><strong>ภาค/ปีการศึกษา:</strong> ${activity.SemesterAcademicYear}</p>
+                        <p><strong>สถานที่:</strong> ${activity.EventLocation}</p>
+                        <p><strong>สถานะกิจกรรม:</strong> ${activity.ApproveActivity}</p>
+                    </div>
+                    <button class="delete-button" onclick="deleteActivity('${activity.Activityid}')">ลบกิจกรรม</button>
+                `;
+                container.appendChild(activityCard);
+            });
+        }
+    
+        // ฟังก์ชันสำหรับลบกิจกรรม
+        async function deleteActivity(activityId) {
+            if (confirm('คุณแน่ใจว่าต้องการลบกิจกรรมนี้?')) {
+                const response = await fetch('/delete-activity', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ Activityid: activityId })
+                });
+    
+                if (response.ok) {
+                    alert('ลบกิจกรรมสำเร็จ');
+                    fetchActivities(); // เรียกดูข้อมูลกิจกรรมใหม่
+                } else {
+                    alert('เกิดข้อผิดพลาดในการลบกิจกรรม');
+                }
+            }
+        }
+
         // ฟังก์ชันเพื่อดึง organizationName จาก path
         function getOrganizationNameFromPath() {
             const pathSegments = window.location.pathname.split('/');
@@ -255,23 +272,19 @@
             document.getElementById('add-activity-button').href = `/organizer/${organizationName}`;
             document.getElementById('edit-activity-button').href = `/organizerEditHome/${organizationName}`;
             document.getElementById('delete-activity-button').href = `/organizerDelet/${organizationName}`;
-            document.getElementById('SingleAdd-button').href = `/organizerSingleAdd/${organizationName}`;
-            document.getElementById('MultiAdd-button').href = `/organizerMultiAdd/${organizationName}`;
-
         } else {
             console.error('Organization name not found in the URL path.');
         }
+    
+        // เรียกใช้งานฟังก์ชันเพื่อดึงกิจกรรม
+        fetchActivities();
 
         function handleLogout() {
             // เปลี่ยนเส้นทางหรือจัดการ logout ที่นี่
             window.location.href = '/logout'; // ตัวอย่างการเปลี่ยนเส้นทางไปหน้า logout
         }
-
-
     </script>
-
-
-
+    
 </body>
 
 </html>
