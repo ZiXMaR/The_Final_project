@@ -27,24 +27,24 @@ app.use(session({
     cookie: { secure: false } // Set to true when using HTTPS
 }));
 
-// Set up database connection
-const pool = mysql.createPool({
-    connectionLimit: 10,
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'project_3',
-    port: 8889
-});
-
 // // Set up database connection
 // const pool = mysql.createPool({
 //     connectionLimit: 10,
 //     host: 'localhost',
 //     user: 'root',
-//     password: '',
-//     database: 'demo_project1',
+//     password: 'root',
+//     database: 'project_3',
+//     port: 8889
 // });
+
+// Set up database connection
+const pool = mysql.createPool({
+    connectionLimit: 10,
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'demo_project1',
+});
 
 pool.getConnection((err, connection) => {
     if (err) {
@@ -741,13 +741,40 @@ app.get('/recommend-missing-activities', async (req, res) => {
         if (missingCategories.length > 0) {
             // ใช้การ query ที่ถูกต้อง
             const [recommendedActivities] = await pool.query(`
-                SELECT ActivityName, ActivityDate, ActivityHours, ActivityCategoryID
-                FROM activity
-                WHERE ActivityCategoryID IN (?) AND (ApproveActivity = 'Y' OR ApproveActivity IS NULL)
+                SELECT 
+                    a.ActivityName, 
+                    a.ActivityDate, 
+                    a.StartTime,  
+                    a.EndTime,  
+                    a.ActivityHours, 
+                    ac.ActivityCategoryName,  -- ดึง ActivityCategoryName จาก activitycategory
+                    at.ActivityTypeName,  -- ดึง ActivityTypeName จาก activitytype
+                    a.EventLocation,  
+                    a.ApplicationChannel  
+                FROM activity a
+                LEFT JOIN activitytype at ON a.ActivityTypeID = at.ActivityTypeID  -- join ตาราง activitytype
+                LEFT JOIN activitycategory ac ON a.ActivityCategoryID = ac.ActivityCategoryID  -- join ตาราง activitycategory
+                WHERE a.ActivityCategoryID IN (?) AND (a.ApproveActivity = 'Y' OR a.ApproveActivity IS NULL)
             `, [missingCategories]);
-            ;
+            
 
             console.log('recommendedActivities:', recommendedActivities);
+
+            // ดึงข้อมูลประเภทกิจกรรมจาก activitytype
+            const [activityTypes] = await pool.query(`
+                SELECT ActivityTypeID, ActivityTypeName 
+                FROM activitytype
+            `);
+
+            const activityTypeMap = {};
+            activityTypes.forEach(type => {
+                activityTypeMap[type.ActivityTypeID] = type.ActivityTypeName;
+            });
+
+            // เพิ่มประเภทกิจกรรมใน recommendedActivities
+            recommendedActivities.forEach(activity => {
+                activity.ActivityTypeName = activityTypeMap[activity.ActivityTypeID] || 'ไม่ระบุ';
+            });
 
             res.json({
                 success: true,
@@ -1052,35 +1079,83 @@ app.get('/get-types', async (req, res) => {
 app.post('/recommend-activities', async (req, res) => {
     const { days, types, categories } = req.body;
 
-    let sql = 'SELECT * FROM activity WHERE ApproveActivity = "Y"';
+    // Start building the SQL query
+    let sql = `
+        SELECT 
+            a.ActivityName, 
+            a.ActivityDate, 
+            a.ActivityEndDate,  
+            a.StartTime, 
+            a.EndTime, 
+            a.ActivityHours, 
+            a.EventLocation, 
+            ac.ActivityCategoryName, 
+            at.ActivityTypeName, 
+            a.ApplicationChannel
+        FROM activity a
+        JOIN activitycategory ac ON a.ActivityCategoryID = ac.ActivityCategoryID
+        JOIN activitytype at ON a.ActivityTypeID = at.ActivityTypeID
+        WHERE a.ApproveActivity = 'Y'
+    `;
+    
     let params = [];
-
+    
+    // Add filtering by day
     if (days && days.length > 0) {
         const placeholders = days.map(() => '?').join(', ');
-        sql += ` AND DailyID IN (SELECT DailyID FROM dailyid WHERE \`Daily Name\` IN (${placeholders}))`;
+        sql += ` AND a.DailyID IN (SELECT d.DailyID FROM dailyid d WHERE d.DailyName IN (${placeholders}))`;
         params.push(...days);
     }
     
+    // Add filtering by type
     if (types && types.length > 0) {
         const placeholders = types.map(() => '?').join(', ');
-        sql += ` AND ActivityTypeID IN (${placeholders})`;
+        sql += ` AND a.ActivityTypeID IN (${placeholders})`;
         params.push(...types);
     }
     
+    // Add filtering by category
     if (categories && categories.length > 0) {
         const placeholders = categories.map(() => '?').join(', ');
-        sql += ` AND ActivityCategoryID IN (${placeholders})`;
+        sql += ` AND a.ActivityCategoryID IN (${placeholders})`;
         params.push(...categories);
     }
 
     try {
+        // Execute the query
         const [results] = await pool.query(sql, params);
-        res.json(results);
+
+        // Prepare the response to handle multi-day activities
+        const activities = results.map(activity => {
+            const startDate = new Date(activity.ActivityDate);
+            const endDate = activity.ActivityEndDate 
+                ? new Date(activity.ActivityEndDate) 
+                : new Date(activity.ActivityDate);  // ถ้าไม่มี ActivityEndDate ให้ใช้ ActivityDate เป็น endDate
+        
+            return {
+                ActivityName: activity.ActivityName,
+                ActivityDate: activity.ActivityDate,
+                StartTime: activity.StartTime,
+                EndTime: activity.EndTime,
+                ActivityHours: activity.ActivityHours,
+                EventLocation: activity.EventLocation,
+                ActivityCategoryName: activity.ActivityCategoryName,
+                ActivityTypeName: activity.ActivityTypeName,
+                ApplicationChannel: activity.ApplicationChannel,
+                start: startDate.toISOString().split('T')[0], // Format to YYYY-MM-DD
+                end: endDate.toISOString().split('T')[0] // ใช้ endDate เพื่อแสดงถึงวันสิ้นสุด
+            };
+        });
+        
+        // Send back the detailed results
+        res.json(activities);
     } catch (error) {
         console.error('Error fetching recommendations:', error);
         res.status(500).send('Server error');
     }
 });
+
+
 
 // Route สำหรับดึงวันของกิจกรรมที่มีอยู่
 app.get('/get-activity-days', async (req, res) => {
@@ -1098,12 +1173,12 @@ app.get('/get-activity-days', async (req, res) => {
 // Route สำหรับดึงกิจกรรมที่ได้รับการอนุมัติ
 app.get('/get-events', async (req, res) => {
     try {
-        const sqlQuery = 'SELECT ActivityName, ActivityDate, EndTime FROM activity WHERE ApproveActivity = "Y"';
+        const sqlQuery = 'SELECT ActivityName, ActivityDate, ActivityEndDate FROM activity WHERE ApproveActivity = "Y"';
         const [results] = await pool.query(sqlQuery);
         const events = results.map(activity => ({
             title: activity.ActivityName,
             start: activity.ActivityDate,
-            end: activity.EndTime || activity.ActivityDate // ถ้าไม่มี EndTime ให้ใช้ ActivityDate แทน
+            end: activity.ActivityEndDate || activity.ActivityDate // ถ้ามี ActivityEndDate ให้ใช้ ไม่งั้นใช้ ActivityDate
         }));
         res.json(events);
     } catch (error) {
@@ -1111,6 +1186,7 @@ app.get('/get-events', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
 
 
 //     console.log(`App running on port ${port}`);
