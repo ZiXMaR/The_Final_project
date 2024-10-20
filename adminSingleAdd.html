@@ -468,6 +468,7 @@
 
                 if (addActivityResponse.ok) {
                     alert('บันทึกข้อมูลเสร็จสิ้น!');
+                    window.location.reload();
                 } else {
                     alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + await addActivityResponse.text());
                 }
