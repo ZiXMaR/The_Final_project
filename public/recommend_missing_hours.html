@@ -186,17 +186,22 @@
 
         // ฟังก์ชันสำหรับแสดงกิจกรรมที่แนะนำ
         function displayActivities(activities) {
-            let html = '';
-            activities.forEach(activity => {
-                html += `<div>
-                            <h3>${activity.ActivityName}</h3>
-                            <p>Date: ${new Date(activity.ActivityDate).toLocaleDateString()}</p>
-                            <p>Hours: ${activity.ActivityHours}</p>
-                            <p>Category: ${activity.ActivityCategoryID}</p>
-                         </div>`;
-            });
-            document.getElementById('activityRecommendations').innerHTML = html;
-        }
+    let html = '';
+    activities.forEach(activity => {
+        html += `<div>
+            <h3>${activity.ActivityName}</h3>
+            <p>วันเริ่มกิจกรรม: ${new Date(activity.ActivityDate).toLocaleDateString('th-TH')}</p>
+            <p>เวลาจัดกิจกรรม: ${activity.StartTime} - ${activity.EndTime || 'ไม่มีข้อมูล'}</p>
+            <p>ชั่วโมงกิจกรรม: ${activity.ActivityHours} ชั่วโมง</p>
+            <p>สถานที่จัด: ${activity.EventLocation}</p>
+            <p>หมวดหมู่กิจกรรม: ${activity.ActivityCategoryName || 'ไม่มีข้อมูล'}</p>
+            <p>ช่องทางสมัคร: ${activity.ApplicationChannel || 'ไม่มีข้อมูล'}</p>
+        </div>`;
+    });
+    document.getElementById('activityRecommendations').innerHTML = html;
+}
+
+
 
         // อัปเดตกิจกรรมลงใน FullCalendar
         function updateCalendarEvents(calendar, activities) {

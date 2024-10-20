@@ -311,68 +311,74 @@
             calendar.render();
         });
 
-        // Handle form submission for recommendations
-        document.getElementById('filterForm').addEventListener('submit', function (event) {
-            event.preventDefault();
+// Handle form submission for recommendations
+document.getElementById('filterForm').addEventListener('submit', function (event) {
+    event.preventDefault();
 
-            const selectedDays = Array.from(document.querySelectorAll('input[name="activityDay"]:checked')).map(input => input.value);
-            const selectedTypes = Array.from(document.querySelectorAll('input[name="activityType"]:checked')).map(input => input.value);
-            const selectedCategories = Array.from(document.querySelectorAll('input[name="activityCategory"]:checked')).map(input => input.value);
+    const selectedDays = Array.from(document.querySelectorAll('input[name="activityDay"]:checked')).map(input => input.value);
+    const selectedTypes = Array.from(document.querySelectorAll('input[name="activityType"]:checked')).map(input => input.value);
+    const selectedCategories = Array.from(document.querySelectorAll('input[name="activityCategory"]:checked')).map(input => input.value);
 
-            const requestData = {
-                days: selectedDays,
-                types: selectedTypes,
-                categories: selectedCategories
-            };
+    const requestData = {
+        days: selectedDays,
+        types: selectedTypes,
+        categories: selectedCategories
+    };
 
-            fetch('/recommend-activities', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestData),
-            })
-                .then(response => response.json())
-                .then(data => {
-                    const recommendationsDiv = document.getElementById('activityRecommendations');
-                    recommendationsDiv.innerHTML = ''; // Clear previous recommendations
+    fetch('/recommend-activities', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        const recommendationsDiv = document.getElementById('activityRecommendations');
+        recommendationsDiv.innerHTML = ''; // Clear previous recommendations
 
-                    if (data.length > 0) {
-                        data.forEach(activity => {
-                            const activityDiv = document.createElement('div');
-                            activityDiv.innerHTML = `
+        if (data.length > 0) {
+            data.forEach(activity => {
+                const activityDiv = document.createElement('div');
+                activityDiv.innerHTML = `
                     <h3>${activity.ActivityName}</h3>
                     <p>วันที่: ${new Date(activity.ActivityDate).toLocaleDateString('th-TH')}</p>
                     <p>เวลา: ${activity.StartTime} - ${activity.EndTime}</p>
+                    <p>ชั่วโมงกิจกรรม: ${activity.ActivityHours} ชั่วโมง</p>
                     <p>สถานที่: ${activity.EventLocation}</p>
-                    <p>ประเภทกิจกรรม: ${activity.ActivityTypeID}</p>
+                    <p>หมวดหมู่กิจกรรม: ${activity.ActivityCategoryName}</p>
+                    <p>ประเภทกิจกรรม: ${activity.ActivityTypeName}</p>
+                    <p>ช่องทางสมัคร: ${activity.ApplicationChannel || 'ไม่มีข้อมูล'}</p>
                 `;
-                            recommendationsDiv.appendChild(activityDiv);
-                        });
-                    } else {
-                        recommendationsDiv.innerHTML = '<p>ไม่มีกิจกรรมที่ตรงกับการค้นหา</p>';
-                    }
+                recommendationsDiv.appendChild(activityDiv);
+            });
+        } else {
+            recommendationsDiv.innerHTML = '<p>ไม่มีกิจกรรมที่ตรงกับการค้นหา</p>';
+        }
 
-                    // Update calendar events with filtered activities
-                    const calendarEl = document.getElementById('calendar');
-                    const calendar = new FullCalendar.Calendar(calendarEl, {
-                        initialView: 'dayGridMonth',
-                        events: data.map(activity => ({
-                            title: activity.ActivityName,
-                            start: activity.ActivityDate,
-                            end: activity.ActivityDate,  // Assuming it's a single-day event
-                            description: activity.EventLocation,  // You can add more details if needed
-                        })),
-                        eventDidMount: function (info) {
-                            info.el.style.backgroundColor = '#ffd700';
-                            info.el.style.color = '#1a2b49';
-                        }
-                    });
-                    calendar.render();
-
-
-                });
+        // Update calendar events with filtered activities
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: data.map(activity => ({
+                title: activity.ActivityName,
+                start: activity.ActivityDate,
+                end: activity.ActivityEndDate || activity.ActivityDate, // ใช้ ActivityEndDate หากมี หรือ ActivityDate ถ้าไม่มี
+                description: activity.EventLocation,  // You can add more details if needed
+            })),
+            eventDidMount: function (info) {
+                info.el.style.backgroundColor = '#ffd700';
+                info.el.style.color = '#1a2b49';
+            }
         });
+        calendar.render();
+    })
+    .catch(error => {
+        console.error('Error fetching activities:', error);
+    });
+});
+
+
 
         function handleLogout() {
             // เปลี่ยนเส้นทางหรือจัดการ logout ที่นี่
