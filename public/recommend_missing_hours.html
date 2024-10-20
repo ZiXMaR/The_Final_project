@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recommended Activities</title>
-    
+
     <!-- FullCalendar CSS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css" rel="stylesheet">
-    
+
     <!-- FullCalendar JS -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js"></script>
 
@@ -121,19 +122,20 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="navbar">
-        <h2>Recommended Activities</h2>
-        <button id="logout-btn">Logout</button>
+        <h2>แนะนำกิจกรรมตามที่ขาด</h2>
+        <button class="logout-btn" onclick="handleLogout()">ออกจากระบบ</button>
     </div>
 
-    <h1>Get Your Recommended Activities</h1>
+    <h1>แนะนำกิจกรรมตามที่ขาด</h1>
 
     <div class="form-container">
-        <label for="student-id">Enter Your Student ID:</label>
+        <label for="student-id">กรอกรหัสนักศึกษา:</label>
         <input type="text" id="student-id" placeholder="Student ID" />
-        <button type="submit" id="submit-btn">Get Recommended Activities</button>
+        <button type="submit" id="submit-btn">แนะนำกิจกรรมตามที่ขาด</button>
     </div>
 
     <div id="activityRecommendations">
@@ -143,7 +145,7 @@
     <div id="calendar"></div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function () {
             // Initialize FullCalendar
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -158,7 +160,7 @@
             });
             calendar.render();
 
-            document.getElementById('submit-btn').addEventListener('click', function() {
+            document.getElementById('submit-btn').addEventListener('click', function () {
                 const studentId = document.getElementById('student-id').value.trim();
 
                 if (studentId) {
@@ -206,7 +208,13 @@
             calendar.removeAllEvents(); // ลบกิจกรรมเก่าก่อน
             calendar.addEventSource(events); // เพิ่มกิจกรรมใหม่
         }
+
+        function handleLogout() {
+            // เปลี่ยนเส้นทางหรือจัดการ logout ที่นี่
+            window.location.href = '/logout'; // ตัวอย่างการเปลี่ยนเส้นทางไปหน้า logout
+        }
     </script>
 
 </body>
+
 </html>
