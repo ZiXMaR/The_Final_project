@@ -11,11 +11,12 @@
     <!-- FullCalendar JS -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js"></script>
 
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #1a2b49, #243b63);
             color: #fff;
             margin: 0;
@@ -38,7 +39,7 @@
             color: #ffd700;
         }
 
-        .navbar .logout-btn {
+        .navbar button {
             padding: 10px 20px;
             border: 2px solid #ffd700;
             border-radius: 8px;
@@ -47,9 +48,10 @@
             font-size: 16px;
             cursor: pointer;
             transition: background-color 0.3s, color 0.3s;
+            margin-left: 10px;
         }
 
-        .navbar .logout-btn:hover {
+        .navbar button:hover {
             background-color: #ffd700;
             color: #1a2b49;
         }
@@ -86,10 +88,6 @@
         .burger-menu:hover {
             background-color: #ffd700;
             color: #1a2b49;
-        }
-
-        .burger-menu.active:after {
-            content: '✕';
         }
 
         .checkbox-group {
@@ -179,7 +177,7 @@
     <div class="navbar">
         <h2>Participant Page</h2>
         <button onclick="window.location.href='personal-info.html'">จัดการข้อมูลส่วนตัว</button>
-        <button onclick="window.location.href='activityhistory.html'">บันทึกประวัติกิจกรรม</button> <!-- ปุ่มใหม่ที่เชื่อมไปยังหน้าประวัติกิจกรรม -->
+        <button onclick="window.location.href='activityhistory.html'">บันทึกประวัติกิจกรรม</button>
         <button onclick="window.location.href='recommend_missing_hours.html'">แนะนำกิจกรรมตามที่ขาด</button>
         <button class="logout-btn" onclick="handleLogout()">Logout</button>
     </div>
@@ -214,7 +212,6 @@
     </div>
 
     <script>
-        // Toggle the display of checkbox groups
         document.querySelectorAll('.burger-menu').forEach(menu => {
             menu.addEventListener('click', function() {
                 const targetId = this.getAttribute('data-target');
@@ -224,7 +221,6 @@
             });
         });
 
-        // Map from English day names to Thai DailyID
         const dayMap = {
             'Monday': 'วันจันทร์',
             'Tuesday': 'วันอังคาร',
@@ -235,7 +231,6 @@
             'Sunday': 'วันอาทิตย์'
         };
 
-        // Function to create day checkboxes
         function createDayCheckboxes() {
             const dateGroup = document.getElementById('dateGroup');
             Object.keys(dayMap).forEach(day => {
@@ -255,7 +250,6 @@
             });
         }
 
-        // Populate days and other checkboxes
         document.addEventListener('DOMContentLoaded', function() {
             createDayCheckboxes();
 
@@ -300,68 +294,81 @@
                         categoryGroup.appendChild(div);
                     });
                 });
-            
-            // Initialize FullCalendar
-            var calendarEl = document.getElementById('calendar');
-            if (calendarEl) {
-                var calendar = new FullCalendar.Calendar(calendarEl, {
-                    initialView: 'dayGridMonth',
-                    locale: 'th',
-                    events: []  // เริ่มต้นด้วยปฏิทินที่ว่างเปล่า
-                });
-                calendar.render();
+
+
+            // FullCalendar Initialization
+            const calendarEl = document.getElementById('calendar');
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                events: '/get-events',
+                eventDidMount: function(info) {
+                    info.el.style.backgroundColor = '#ffd700';
+                    info.el.style.color = '#1a2b49';
+                }
+            });
+            calendar.render();
+        });
+
+        // Handle form submission for recommendations
+        document.getElementById('filterForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+
+    const selectedDays = Array.from(document.querySelectorAll('input[name="activityDay"]:checked')).map(input => input.value);
+    const selectedTypes = Array.from(document.querySelectorAll('input[name="activityType"]:checked')).map(input => input.value);
+    const selectedCategories = Array.from(document.querySelectorAll('input[name="activityCategory"]:checked')).map(input => input.value);
+
+    const requestData = {
+        days: selectedDays,
+        types: selectedTypes,
+        categories: selectedCategories
+    };
+
+    fetch('/recommend-activities', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        const recommendationsDiv = document.getElementById('activityRecommendations');
+        recommendationsDiv.innerHTML = ''; // Clear previous recommendations
+
+        if (data.length > 0) {
+            data.forEach(activity => {
+                const activityDiv = document.createElement('div');
+                activityDiv.innerHTML = `
+                    <h3>${activity.ActivityName}</h3>
+                    <p>วันที่: ${new Date(activity.ActivityDate).toLocaleDateString('th-TH')}</p>
+                    <p>เวลา: ${activity.StartTime} - ${activity.EndTime}</p>
+                    <p>สถานที่: ${activity.EventLocation}</p>
+                    <p>ประเภทกิจกรรม: ${activity.ActivityTypeID}</p>
+                `;
+                recommendationsDiv.appendChild(activityDiv);
+            });
+        } else {
+            recommendationsDiv.innerHTML = '<p>ไม่มีกิจกรรมที่ตรงกับการค้นหา</p>';
+        }
+
+        // Update calendar events with filtered activities
+        const calendarEl = document.getElementById('calendar');
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: data.map(activity => ({
+                title: activity.ActivityName,
+                start: activity.ActivityDate,
+                end: activity.ActivityDate,  // Assuming it's a single-day event
+                description: activity.EventLocation,  // You can add more details if needed
+            })),
+            eventDidMount: function(info) {
+                info.el.style.backgroundColor = '#ffd700';
+                info.el.style.color = '#1a2b49';
             }
         });
-
-        // Handle form submission for activity recommendations
-        document.getElementById('filterForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const selectedDays = Array.from(document.querySelectorAll('input[name="activityDay"]:checked')).map(cb => cb.value);
-            const selectedTypes = Array.from(document.querySelectorAll('input[name="activityType"]:checked')).map(cb => cb.value);
-            const selectedCategories = Array.from(document.querySelectorAll('input[name="activityCategory"]:checked')).map(cb => cb.value);
-
-            const filterData = {
-                days: selectedDays,
-                types: selectedTypes,
-                categories: selectedCategories
-            };
-
-            // Fetch filtered activity recommendations
-            fetch('/activity-recommendations', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(filterData)
-            })
-            .then(response => response.json())
-            .then(data => {
-                const recommendationsDiv = document.getElementById('activityRecommendations');
-                recommendationsDiv.innerHTML = '';
-
-                if (data.length === 0) {
-                    recommendationsDiv.innerHTML = '<p>No activities found for the selected filters.</p>';
-                    return;
-                }
-
-                data.forEach(activity => {
-                    const div = document.createElement('div');
-                    div.innerHTML = `
-                        <h3>${activity.ActivityName}</h3>
-                        <p>Location: ${activity.EventLocation}</p>
-                        <p>Date: ${activity.ActivityDate} | Time: ${activity.StartTime} - ${activity.EndTime}</p>
-                        <p>Organizer: ${activity.OrganizationName}</p>
-                    `;
-                    recommendationsDiv.appendChild(div);
-                });
-            });
-        });
-        
-        function handleLogout() {
-        // เปลี่ยนเส้นทางหรือจัดการ logout ที่นี่
-        window.location.href = '/logout'; // ตัวอย่างการเปลี่ยนเส้นทางไปหน้า logout
-}
+        calendar.render();
+    });
+});
 
     </script>
 </body>

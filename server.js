@@ -87,8 +87,6 @@ app.post('/register', async (req, res) => {
 
 
 
-
-
 // สร้างโทเค็น JWT หลังจากล็อกอินสำเร็จ
 // const jwt = require('jsonwebtoken');  // ต้องติดตั้งด้วยคำสั่ง npm install jsonwebtoken
 
@@ -512,110 +510,199 @@ app.delete('/delete-activityhistory/:id', async (req, res) => {
 });
 
 
+// Example route that uses async/await
+app.get('/get-categories', async (req, res) => {
+    try {
+        const [rows] = await pool.query('SELECT * FROM activitycategory');
+        res.json(rows);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Server Error');
+    }
+});
 
-app.post('/activity-recommendations', (req, res) => {
+// Route สำหรับดึงวันที่ของกิจกรรมที่มีอยู่
+app.get('/get-dates', async (req, res) => {
+    try {
+        const [results] = await pool.query('SELECT DISTINCT ActivityDate FROM activity');
+        const dates = results.map(row => row.ActivityDate);
+        res.json(dates);
+    } catch (error) {
+        console.error('Error fetching dates:', error);
+        res.status(500).send('Server error');
+    }
+});
+
+// Route สำหรับดึงประเภทกิจกรรม
+app.get('/get-types', async (req, res) => {
+    try {
+        const [results] = await pool.query('SELECT * FROM activitytype');
+        res.json(results);
+    } catch (error) {
+        console.error('Error fetching types:', error);
+        res.status(500).send('Server error');
+    }
+});
+
+app.post('/recommend-activities', async (req, res) => {
     const { days, types, categories } = req.body;
 
     let sql = 'SELECT * FROM activity WHERE ApproveActivity = "Y"';
     let params = [];
 
     if (days && days.length > 0) {
-        sql += ' AND DailyID IN (SELECT DailyID FROM dailyid WHERE `Daily Name` IN (?))';
-        params.push(days);
+        const placeholders = days.map(() => '?').join(', ');
+        sql += ` AND DailyID IN (SELECT DailyID FROM dailyid WHERE \`Daily Name\` IN (${placeholders}))`;
+        params.push(...days);
     }
-
+    
     if (types && types.length > 0) {
-        sql += ' AND ActivityTypeID IN (?)';
-        params.push(types);
+        const placeholders = types.map(() => '?').join(', ');
+        sql += ` AND ActivityTypeID IN (${placeholders})`;
+        params.push(...types);
     }
-
+    
     if (categories && categories.length > 0) {
-        sql += ' AND ActivityCategoryID IN (?)';
-        params.push(categories);
+        const placeholders = categories.map(() => '?').join(', ');
+        sql += ` AND ActivityCategoryID IN (${placeholders})`;
+        params.push(...categories);
     }
 
-    pool.query(sql, params, (error, results) => {
-        if (error) {
-            console.error('Error fetching recommended activities:', error);
-            res.status(500).send('Server error');
-            return;
-        }
-
+    try {
+        const [results] = await pool.query(sql, params);
         res.json(results);
-    });
-});
-
-
-// Route สำหรับดึงวันที่ของกิจกรรมที่มีอยู่
-app.get('/get-dates', (req, res) => {
-    const sql = 'SELECT DISTINCT ActivityDate FROM activity';
-    pool.query(sql, (error, results) => {
-        if (error) {
-            console.error('Error fetching dates:', error);
-            res.status(500).send('Server error');
-            return;
-        }
-        const dates = results.map(row => row.ActivityDate);
-        res.json(dates);
-    });
-});
-
-// Route สำหรับดึงประเภทกิจกรรม
-app.get('/get-types', (req, res) => {
-    const sql = 'SELECT * FROM activitytype';
-    pool.query(sql, (error, results) => {
-        if (error) {
-            console.error('Error fetching types:', error);
-            res.status(500).send('Server error');
-            return;
-        }
-        res.json(results);
-    });
-});
-
-// Route สำหรับดึงหมวดหมู่กิจกรรม
-app.get('/get-categories', (req, res) => {
-    const sql = 'SELECT * FROM activitycategory';
-    pool.query(sql, (error, results) => {
-        if (error) {
-            console.error('Error fetching categories:', error);
-            res.status(500).send('Server error');
-            return;
-        }
-        res.json(results);
-    });
+    } catch (error) {
+        console.error('Error fetching recommendations:', error);
+        res.status(500).send('Server error');
+    }
 });
 
 // Route สำหรับดึงวันของกิจกรรมที่มีอยู่
-app.get('/get-activity-days', (req, res) => {
-    const sql = 'SELECT DISTINCT DAYNAME(ActivityDate) as dayName FROM activity WHERE ApproveActivity = "Y"';
-    pool.query(sql, (error, results) => {
-        if (error) {
-            console.error('Error fetching days:', error);
-            res.status(500).send('Server error');
-            return;
-        }
+app.get('/get-activity-days', async (req, res) => {
+    try {
+        const sql = 'SELECT DISTINCT DAYNAME(ActivityDate) as dayName FROM activity WHERE ApproveActivity = "Y"';
+        const [results] = await pool.query(sql);
         const days = results.map(row => row.dayName);
         res.json(days);
-    });
+    } catch (error) {
+        console.error('Error fetching activity days:', error);
+        res.status(500).send('Server error');
+    }
 });
 
 // Route สำหรับดึงกิจกรรมที่ได้รับการอนุมัติ
-app.get('/get-events', (req, res) => {
-    const sqlQuery = 'SELECT ActivityName, ActivityDate, EndTime FROM activity WHERE ApproveActivity = "Y"';
-    pool.query(sqlQuery, (err, results) => {
-        if (err) {
-            res.status(500).send(err);
-        } else {
-            const events = results.map(activity => ({
-                title: activity.ActivityName,
-                start: activity.ActivityDate,
-                end: activity.EndTime || activity.ActivityDate  // ถ้าไม่มี EndTime ให้ใช้ ActivityDate แทน
-            }));
-            res.json(events);
-        }
-    });
+app.get('/get-events', async (req, res) => {
+    try {
+        const sqlQuery = 'SELECT ActivityName, ActivityDate, EndTime FROM activity WHERE ApproveActivity = "Y"';
+        const [results] = await pool.query(sqlQuery);
+        const events = results.map(activity => ({
+            title: activity.ActivityName,
+            start: activity.ActivityDate,
+            end: activity.EndTime || activity.ActivityDate // ถ้าไม่มี EndTime ให้ใช้ ActivityDate แทน
+        }));
+        res.json(events);
+    } catch (error) {
+        console.error('Error fetching events:', error);
+        res.status(500).send('Server error');
+    }
 });
+
+// app.post('/recommendations', (req, res) => {
+//     const { days, types, categories } = req.body;
+
+//     let sql = 'SELECT * FROM activity WHERE ApproveActivity = "Y"';
+//     let params = [];
+
+//     if (days && days.length > 0) {
+//         const placeholders = days.map(() => '?').join(', ');
+//         sql += ` AND DailyID IN (SELECT DailyID FROM dailyid WHERE \`Daily Name\` IN (${placeholders}))`;
+//         params.push(...days); // เพิ่ม days เข้าไปเป็น individual parameters
+//     }
+    
+//     if (types && types.length > 0) {
+//         const placeholders = types.map(() => '?').join(', ');
+//         sql += ` AND ActivityTypeID IN (${placeholders})`;
+//         params.push(...types); // เพิ่ม types เข้าไปเป็น individual parameters
+//     }
+    
+//     if (categories && categories.length > 0) {
+//         const placeholders = categories.map(() => '?').join(', ');
+//         sql += ` AND ActivityCategoryID IN (${placeholders})`;
+//         params.push(...categories); // เพิ่ม categories เข้าไปเป็น individual parameters
+//     }
+    
+// });
+
+// // Route สำหรับดึงวันที่ของกิจกรรมที่มีอยู่
+// app.get('/get-dates', (req, res) => {
+//     const sql = 'SELECT DISTINCT ActivityDate FROM activity';
+//     pool.query(sql, (error, results) => {
+//         if (error) {
+//             console.error('Error fetching dates:', error);
+//             res.status(500).send('Server error');
+//             return;
+//         }
+//         const dates = results.map(row => row.ActivityDate);
+//         res.json(dates);
+//     });
+// });
+
+// // Route สำหรับดึงประเภทกิจกรรม
+// app.get('/get-types', (req, res) => {
+//     const sql = 'SELECT * FROM activitytype';
+//     pool.query(sql, (error, results) => {
+//         if (error) {
+//             console.error('Error fetching types:', error);
+//             res.status(500).send('Server error');
+//             return;
+//         }
+//         res.json(results);
+//     });
+// });
+
+// // Route สำหรับดึงหมวดหมู่กิจกรรม
+// app.get('/get-categories', (req, res) => {
+//     const sql = 'SELECT * FROM activitycategory';
+//     pool.query(sql, (error, results) => {
+//         if (error) {
+//             console.error('Error fetching categories:', error);
+//             res.status(500).send('Server error');
+//             return;
+//         }
+//         res.json(results);
+//     });
+// });
+
+// // Route สำหรับดึงวันของกิจกรรมที่มีอยู่
+// app.get('/get-activity-days', (req, res) => {
+//     const sql = 'SELECT DISTINCT DAYNAME(ActivityDate) as dayName FROM activity WHERE ApproveActivity = "Y"';
+//     pool.query(sql, (error, results) => {
+//         if (error) {
+//             console.error('Error fetching days:', error);
+//             res.status(500).send('Server error');
+//             return;
+//         }
+//         const days = results.map(row => row.dayName);
+//         res.json(days);
+//     });
+// });
+
+// // Route สำหรับดึงกิจกรรมที่ได้รับการอนุมัติ
+// app.get('/get-events', (req, res) => {
+//     const sqlQuery = 'SELECT ActivityName, ActivityDate, EndTime FROM activity WHERE ApproveActivity = "Y"';
+//     pool.query(sqlQuery, (err, results) => {
+//         if (err) {
+//             res.status(500).send(err);
+//         } else {
+//             const events = results.map(activity => ({
+//                 title: activity.ActivityName,
+//                 start: activity.ActivityDate,
+//                 end: activity.EndTime || activity.ActivityDate  // ถ้าไม่มี EndTime ให้ใช้ ActivityDate แทน
+//             }));
+//             res.json(events);
+//         }
+//     });
+// });
 
 //     console.log(`App running on port ${port}`);
 // });
