@@ -4,87 +4,177 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recommended Activities</title>
+    
+    <!-- FullCalendar CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css" rel="stylesheet">
+    
+    <!-- FullCalendar JS -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
     <style>
         body {
-            background-color: #1a2b49;
-            color: white;
-            font-family: Arial, sans-serif;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #1a2b49, #243b63);
+            color: #fff;
+            margin: 0;
+            padding: 20px;
         }
-        table {
-            width: 100%;
-            margin-top: 20px;
-            border-collapse: collapse;
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             background-color: #243b63;
+            padding: 15px 30px;
+            border-bottom: 2px solid #ffd700;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
-        table, th, td {
-            border: 1px solid #ffd700;
+
+        .navbar h2 {
+            margin: 0;
+            font-size: 24px;
+            color: #ffd700;
         }
-        th, td {
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #ffd700;
-            color: #1a2b49;
-        }
-        #form-section {
-            margin-bottom: 20px;
-        }
-        input[type="text"] {
-            padding: 10px;
-            border: 1px solid #ffd700;
-            border-radius: 5px;
-            background-color: #243b63;
-            color: white;
-        }
-        button {
-            padding: 10px 15px;
-            background-color: #ffd700;
-            border: none;
-            border-radius: 5px;
-            color: #1a2b49;
+
+        .navbar button {
+            padding: 10px 20px;
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            background-color: transparent;
+            color: #ffd700;
+            font-size: 16px;
             cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+            margin-left: 10px;
         }
-        button:hover {
-            background-color: #d1d1e9;
+
+        .navbar button:hover {
+            background-color: #ffd700;
+            color: #1a2b49;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffd700;
+        }
+
+        .form-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #1a2b49;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            border: 1px solid #ffd700;
+        }
+
+        button[type="submit"] {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background-color: #ffd700;
+            color: #1a2b49;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-top: 20px;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #e6c300;
+        }
+
+        #activityRecommendations {
+            margin-top: 30px;
+            color: #fff;
+        }
+
+        #activityRecommendations div {
+            padding: 20px;
+            border: 1px solid #ffd700;
+            border-radius: 10px;
+            background-color: #243b63;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        #activityRecommendations h3 {
+            margin: 0 0 10px;
+            color: #ffd700;
+        }
+
+        /* FullCalendar */
+        #calendar {
+            margin-top: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: #1a2b49;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            border: 1px solid #ffd700;
         }
     </style>
 </head>
 <body>
 
-    <h1>Recommended Activities</h1>
-
-    <div id="form-section">
-        <label for="student-id">Enter Your Student ID:</label>
-        <input type="text" id="student-id" placeholder="Student ID" />
-        <button id="submit-btn">Get Recommended Activities</button>
+    <div class="navbar">
+        <h2>Recommended Activities</h2>
+        <button id="logout-btn">Logout</button>
     </div>
 
-    <div id="activity-section">
+    <h1>Get Your Recommended Activities</h1>
+
+    <div class="form-container">
+        <label for="student-id">Enter Your Student ID:</label>
+        <input type="text" id="student-id" placeholder="Student ID" />
+        <button type="submit" id="submit-btn">Get Recommended Activities</button>
+    </div>
+
+    <div id="activityRecommendations">
         <!-- กิจกรรมที่แนะนำจะแสดงในส่วนนี้ -->
     </div>
 
+    <div id="calendar"></div>
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
+            // Initialize FullCalendar
+            var calendarEl = document.getElementById('calendar');
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                themeSystem: 'standard',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                events: [] // Events will be loaded here dynamically
+            });
+            calendar.render();
+
             document.getElementById('submit-btn').addEventListener('click', function() {
                 const studentId = document.getElementById('student-id').value.trim();
 
                 if (studentId) {
-                    // ส่งคำขอไปยัง server เพื่อดึงกิจกรรมที่ขาด
                     fetch(`/recommend-missing-activities?student_id=${studentId}`)
                         .then(response => response.json())
                         .then(data => {
                             if (data.success) {
-                                // แสดงกิจกรรมที่แนะนำ
-                                console.log('Recommended Activities:', data.recommendedActivities);
-                                displayActivities(data.recommendedActivities); // แสดงกิจกรรมที่แนะนำ
+                                displayActivities(data.recommendedActivities);
+                                updateCalendarEvents(calendar, data.recommendedActivities);
                             } else {
-                                document.getElementById('activity-section').innerHTML = `<p>${data.message}</p>`;
+                                document.getElementById('activityRecommendations').innerHTML = `<p>${data.message}</p>`;
                             }
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            document.getElementById('activity-section').innerHTML = `<p>Error fetching activities.</p>`;
+                            document.getElementById('activityRecommendations').innerHTML = `<p>Error fetching activities.</p>`;
                         });
                 } else {
                     alert('Please enter a valid student ID.');
@@ -94,30 +184,27 @@
 
         // ฟังก์ชันสำหรับแสดงกิจกรรมที่แนะนำ
         function displayActivities(activities) {
-            let html = `<table>
-                            <thead>
-                                <tr>
-                                    <th>Activity Name</th>
-                                    <th>Activity Date</th>
-                                    <th>Activity Hours</th>
-                                    <th>Category</th>
-                                </tr>
-                            </thead>
-                            <tbody>`;
-
+            let html = '';
             activities.forEach(activity => {
-                html += `<tr>
-                            <td>${activity.ActivityName}</td>
-                            <td>${new Date(activity.ActivityDate).toLocaleDateString()}</td>
-                            <td>${activity.ActivityHours}</td>
-                            <td>${activity.ActivityCategoryID}</td>
-                         </tr>`;
+                html += `<div>
+                            <h3>${activity.ActivityName}</h3>
+                            <p>Date: ${new Date(activity.ActivityDate).toLocaleDateString()}</p>
+                            <p>Hours: ${activity.ActivityHours}</p>
+                            <p>Category: ${activity.ActivityCategoryID}</p>
+                         </div>`;
             });
+            document.getElementById('activityRecommendations').innerHTML = html;
+        }
 
-            html += `   </tbody>
-                    </table>`;
-
-            document.getElementById('activity-section').innerHTML = html;
+        // อัปเดตกิจกรรมลงใน FullCalendar
+        function updateCalendarEvents(calendar, activities) {
+            const events = activities.map(activity => ({
+                title: activity.ActivityName,
+                start: activity.ActivityDate,
+                allDay: true
+            }));
+            calendar.removeAllEvents(); // ลบกิจกรรมเก่าก่อน
+            calendar.addEventSource(events); // เพิ่มกิจกรรมใหม่
         }
     </script>
 
