@@ -601,7 +601,7 @@ app.get('/', (req, res) => {
 });
 
 app.post('/register', async (req, res) => {
-    const { username, password, role } = req.body;
+    const { username, password, role,OrganizationName } = req.body;
 
     try {
         // ตรวจสอบว่าผู้ใช้ที่มี username นี้มีอยู่แล้วหรือไม่
@@ -612,8 +612,8 @@ app.post('/register', async (req, res) => {
 
         // ถ้าผู้ใช้ไม่มีอยู่ ทำการแฮชรหัสผ่าน
         const hashedPassword = await bcrypt.hash(password, 10);
-        const query = 'INSERT INTO users (username, password, role) VALUES (?, ?, ?)';
-        await pool.query(query, [username, hashedPassword, role]);
+        const query = 'INSERT INTO users (username, password, role, OrganizationName) VALUES (?, ?, ?, ?)';
+        await pool.query(query, [username, hashedPassword, role,OrganizationName]);
 
         // สร้าง session ใหม่หลังการสมัครสำเร็จ
         req.session.user = username; // หรือข้อมูลที่คุณต้องการเก็บใน session
@@ -689,6 +689,16 @@ app.get('/check-login', (req, res) => {
 // Route สำหรับแสดงหน้า signup
 app.get('/signup', (req, res) => {
     res.sendFile(path.join(__dirname, 'signup.html')); // เส้นทางไปยังไฟล์ signup.html
+});
+
+// Route สำหรับแสดงหน้า signup
+app.get('/signup-o', (req, res) => {
+    res.sendFile(path.join(__dirname, 'signup-o.html')); // เส้นทางไปยังไฟล์ signup.html
+});
+
+// Route สำหรับแสดงหน้า signup
+app.get('/signup-p', (req, res) => {
+    res.sendFile(path.join(__dirname, 'signup-p.html')); // เส้นทางไปยังไฟล์ signup.html
 });
 
 app.use(bodyParser.json());
