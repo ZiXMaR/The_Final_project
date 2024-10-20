@@ -27,16 +27,24 @@ app.use(session({
     cookie: { secure: false } // Set to true when using HTTPS
 }));
 
+// // Set up database connection
+// const pool = mysql.createPool({
+//     connectionLimit: 10,
+//     host: 'localhost',
+//     user: 'root',
+//     password: 'root',
+//     database: 'project_3',
+//     port: 8889
+// });
+
 // Set up database connection
 const pool = mysql.createPool({
     connectionLimit: 10,
     host: 'localhost',
     user: 'root',
-    password: 'root',
-    database: 'project_3',
-    port: 8889
+    password: '',
+    database: 'demo_project1',
 });
-
 pool.getConnection((err, connection) => {
     if (err) {
         console.error('Error connecting to the database:', err);
@@ -902,17 +910,51 @@ app.get('/get-activityhistory', async (req, res) => {
     }
 });
 
-// บันทึกกิจกรรมใหม่ใน Activity History
+// // บันทึกกิจกรรมใหม่ใน Activity History
+// app.post('/record-activityhistory', async (req, res) => {
+//     const { student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID } = req.body;
+
+//     const query = `
+//         INSERT INTO activityhistory (student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID)
+//         VALUES (?, ?, ?, ?, ?, ?)
+//     `;
+
+//     try {
+//         const [result] = await pool.query(query, [student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID]);
+//         console.log('ผลลัพธ์จากการเพิ่มข้อมูล:', result);
+//         res.status(200).send('เพิ่มข้อมูลสำเร็จ');
+//     } catch (err) {
+//         console.error('ไม่สามารถเพิ่มข้อมูลได้:', err);
+//         if (err.code === 'ER_DUP_ENTRY') {
+//             return res.status(409).send('ข้อมูลกิจกรรมซ้ำสำหรับนักศึกษา');
+//         }
+//         res.status(500).send('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
+//     }
+// });
+
+
+
+// บันทึกกิจกรรมใหม่ใน Activity History พร้อมตรวจสอบรหัสนักศึกษา
 app.post('/record-activityhistory', async (req, res) => {
     const { student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID } = req.body;
 
-    const query = `
+    // ตรวจสอบว่ารหัสนักศึกษาอยู่ในตาราง personalinfo หรือไม่
+    const checkStudentQuery = 'SELECT * FROM personalinfo WHERE student_id = ?';
+    const insertActivityQuery = `
         INSERT INTO activityhistory (student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID)
         VALUES (?, ?, ?, ?, ?, ?)
     `;
 
     try {
-        const [result] = await pool.query(query, [student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID]);
+        // ตรวจสอบว่ามีรหัสนักศึกษาอยู่ในตาราง personalinfo หรือไม่
+        const [studentResult] = await pool.query(checkStudentQuery, [student_id]);
+
+        if (studentResult.length === 0) {
+            return res.status(400).send('รหัสนักศึกษาไม่ถูกต้อง หรือไม่มีในระบบ');
+        }
+
+        // ถ้ามีรหัสนักศึกษาอยู่ในระบบแล้ว ให้ทำการบันทึกกิจกรรม
+        const [result] = await pool.query(insertActivityQuery, [student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID]);
         console.log('ผลลัพธ์จากการเพิ่มข้อมูล:', result);
         res.status(200).send('เพิ่มข้อมูลสำเร็จ');
     } catch (err) {
@@ -920,31 +962,6 @@ app.post('/record-activityhistory', async (req, res) => {
         if (err.code === 'ER_DUP_ENTRY') {
             return res.status(409).send('ข้อมูลกิจกรรมซ้ำสำหรับนักศึกษา');
         }
-        res.status(500).send('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
-    }
-});
-
-
-
-// บันทึกกิจกรรมใหม่ใน Activity History
-app.post('/record-activityhistory', async (req, res) => {
-    const { student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID } = req.body;
-
-    const query = `
-        INSERT INTO activityhistory (student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID)
-        VALUES (?, ?, ?, ?, ?, ?)
-    `;
-
-    try {
-        const [result] = await pool.query(query, [student_id, ActivityName, activity_date, is_promoted, ActivityHours, ActivityCategoryID]);
-        console.log('ผลลัพธ์จากการเพิ่มข้อมูล:', result);
-        res.status(200).send('เพิ่มข้อมูลสำเร็จ');
-    } catch (err) {
-        // เพิ่มข้อความแจ้งเตือนเกี่ยวกับข้อมูลซ้ำ
-        if (err.code === 'ER_DUP_ENTRY') {
-            return res.status(409).send('ข้อมูลกิจกรรมซ้ำสำหรับนักศึกษา');
-        }
-        console.error('ไม่สามารถเพิ่มข้อมูลได้:', err);
         res.status(500).send('เกิดข้อผิดพลาดในการเพิ่มข้อมูล');
     }
 });

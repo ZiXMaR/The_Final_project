@@ -127,13 +127,14 @@
             })
             .then(result => {
                 console.log('Success:', result);
+                alert('บันทึกกิจกรรมสำเร็จ!'); // Show success notification
                 // Logic to update UI or notify user
                 clearForm(); // Clear the form after saving
                 loadActivities(); // Reload the activity list
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('เกิดข้อผิดพลาดในการบันทึกกิจกรรม');
+                alert('ไม่มีรหัสนักศึกษานี้ในระบบ');
             });
         }
 
@@ -218,6 +219,7 @@
             })
             .then(result => {
                 console.log('Updated successfully:', result);
+                alert('แก้ไขกิจกรรมสำเร็จ!'); // Show success notification
                 clearForm(); // Clear the form after updating
                 loadActivities(); // Reload the activity list
                 document.getElementById('editButton').style.display = 'none'; // Hide edit button
@@ -243,6 +245,7 @@
                 })
                 .then(result => {
                     console.log('Deleted successfully:', result);
+                    alert('ลบกิจกรรมสำเร็จ!'); // Show success notification
                     loadActivities(); // Reload the activity list
                 })
                 .catch(error => {
