@@ -30,8 +30,9 @@ const pool = mysql.createPool({
     connectionLimit: 10,
     host: 'localhost',
     user: 'root',
-    password: '',
-    database: 'demo_project'
+    password: 'root',
+    database: 'project_3',
+    port: 8889
 });
 
 pool.getConnection((err, connection) => {
