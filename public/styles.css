@@ -304,31 +304,31 @@ table tbody tr:nth-child(odd) {
 }
 
 .split-button {
-  background-color: #F2F4F7;
-  color: rgb(0, 0, 0);
+  background-color: #ffffff;
+  color: #000000;
   padding: 5px 10px;
-  border-radius: 5px;
+  border-radius: 25px;
   text-decoration: none;
   font-size: 14px;
   margin-right: 10px;
 }
 
 .split-button:hover {
-  background-color: #007bff;
+  background: #ff1493;
 }
 
 .split-c-button {
-  background-color: #007bff;
-  color: rgb(255, 255, 255);
+  background: #ff1493;
+  color: #ffffff;
   padding: 5px 10px;
-  border-radius: 5px;
+  border-radius: 25px;
   text-decoration: none;
   font-size: 14px;
   margin-right: 10px;
 }
 
 .split-c-button:hover {
-  background-color: #0056b3;
+  background: #e01189;
 }
 
 
