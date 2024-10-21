@@ -188,7 +188,7 @@ body {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  background-color: #243b63;
+  background-color: #e8e8e8;
   border-radius: 10px;
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
 }
@@ -212,14 +212,14 @@ form {
 }
 
 form label {
-  color: #ffd700;
+  color: #007bff;
   font-size: 1.1em;
 }
 
 form input, form select {
   padding: 10px;
   font-size: 1em;
-  border: none;
+  border: 1px solid #ccc;
   border-radius: 5px;
   background-color: #ffffff;
   color: #1a2b49;
@@ -227,8 +227,8 @@ form input, form select {
 
 form button {
   padding: 10px;
-  background-color: #ffd700;
-  color: #1a2b49;
+  background-color: #007bff;
+  color: #ffffff;
   border: none;
   border-radius: 5px;
   font-size: 1.1em;
@@ -237,7 +237,7 @@ form button {
 }
 
 form button:hover {
-  background-color: #e5c100;
+  background-color: #0056b3;
 }
 
 /* ตาราง */
@@ -251,19 +251,20 @@ table th, table td {
   padding: 12px;
   text-align: center;
   border: 1px solid #ddd;
+  color: #1a2b49;
 }
 
 table thead {
-  background-color: #ffd700;
+  background-color: #007bff;
   color: #1a2b49;
 }
 
 table tbody tr:nth-child(even) {
-  background-color: #1a2b49;
+  background-color: #e4e4e4;
 }
 
 table tbody tr:nth-child(odd) {
-  background-color: #243b63;
+  background-color: #bfbfbf;
 }
 
 .split-button {
