@@ -27,24 +27,24 @@ app.use(session({
     cookie: { secure: false } // Set to true when using HTTPS
 }));
 
-// // Set up database connection
-// const pool = mysql.createPool({
-//     connectionLimit: 10,
-//     host: 'localhost',
-//     user: 'root',
-//     password: 'root',
-//     database: 'project_3',
-//     port: 8889
-// });
-
 // Set up database connection
 const pool = mysql.createPool({
     connectionLimit: 10,
     host: 'localhost',
     user: 'root',
-    password: '',
-    database: 'demo_project1',
+    password: 'root',
+    database: 'project_3',
+    port: 8889
 });
+
+// // Set up database connection
+// const pool = mysql.createPool({
+//     connectionLimit: 10,
+//     host: 'localhost',
+//     user: 'root',
+//     password: '',
+//     database: 'demo_project1',
+// });
 
 pool.getConnection((err, connection) => {
     if (err) {
