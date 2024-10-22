@@ -28,23 +28,23 @@ app.use(session({
 }));
 
 // Set up database connection
-const pool = mysql.createPool({
-    connectionLimit: 10,
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'project_3',
-    port: 8889
-});
-
-// // Set up database connection
 // const pool = mysql.createPool({
 //     connectionLimit: 10,
 //     host: 'localhost',
 //     user: 'root',
-//     password: '',
-//     database: 'demo_project1',
+//     password: 'root',
+//     database: 'project_3',
+//     port: 8889
 // });
+
+// Set up database connection
+const pool = mysql.createPool({
+    connectionLimit: 10,
+    host: 'localhost',
+    user: 'root',
+    password: '',
+    database: 'demo_project2',
+});
 
 pool.getConnection((err, connection) => {
     if (err) {
@@ -936,17 +936,35 @@ app.delete('/delete-participant/:id', async (req, res) => {
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // ดึงข้อมูลกิจกรรมทั้งหมดจาก Activity History
-app.get('/get-activityhistory', async (req, res) => {
-    const query = 'SELECT * FROM activityhistory'; // ดัดแปลงให้ตรงกับโครงสร้างของตาราง
+// app.get('/get-activityhistory', async (req, res) => {
+//     const query = 'SELECT * FROM activityhistory'; // ดัดแปลงให้ตรงกับโครงสร้างของตาราง
 
-    try {
-        const [results] = await pool.query(query);
-        res.json(results); // ส่งข้อมูลกลับในรูปแบบ JSON
-    } catch (error) {
-        console.error('เกิดข้อผิดพลาดในการดึงข้อมูล:', error);
-        res.status(500).send('เกิดข้อผิดพลาดในการดึงข้อมูล');
-    }
+//     try {
+//         const [results] = await pool.query(query);
+//         res.json(results); // ส่งข้อมูลกลับในรูปแบบ JSON
+//     } catch (error) {
+//         console.error('เกิดข้อผิดพลาดในการดึงข้อมูล:', error);
+//         res.status(500).send('เกิดข้อผิดพลาดในการดึงข้อมูล');
+//     }
+// });
+
+app.get('/get-activityhistory', async (req, res) => {
+    const studentId = req.query.student_id;
+    const query = `
+        SELECT activity_name, activity_date, is_promoted, activity_category_id, activity_hours
+        FROM activities
+        WHERE student_id = ?
+    `;
+    pool.query(query, [studentId], (err, results) => {
+        if (err) {
+            console.error(err);
+            res.status(500).send('Error retrieving activity history');
+        } else {
+            res.json(results);
+        }
+    });
 });
+
 
 // // บันทึกกิจกรรมใหม่ใน Activity History
 // app.post('/record-activityhistory', async (req, res) => {
